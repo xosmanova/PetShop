@@ -67,6 +67,60 @@ namespace PetShop.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PetShop.DataContext.Entites.Basket", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SessionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Baskets");
+                });
+
+            modelBuilder.Entity("PetShop.DataContext.Entites.BasketItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BasketId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BasketId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("BasketItems");
+                });
+
             modelBuilder.Entity("PetShop.DataContext.Entites.Brand", b =>
                 {
                     b.Property<int>("Id")
@@ -101,6 +155,21 @@ namespace PetShop.Migrations
                         {
                             Id = 3,
                             Name = "Pedigree"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Denim"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Puma"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Klaws"
                         });
                 });
 
@@ -194,6 +263,7 @@ namespace PetShop.Migrations
                         new
                         {
                             Id = 4,
+                            BrandId = 4,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Orta ölçülü itlər üçün qış ceketi",
                             IsActive = true,
@@ -454,6 +524,60 @@ namespace PetShop.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PetShop.DataContext.Entites.Wishlist", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AddedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SessionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SessionId", "ProductId")
+                        .IsUnique();
+
+                    b.ToTable("Wishlist");
+                });
+
+            modelBuilder.Entity("PetShop.DataContext.Entites.BasketItem", b =>
+                {
+                    b.HasOne("PetShop.DataContext.Entites.Basket", "Basket")
+                        .WithMany("BasketItems")
+                        .HasForeignKey("BasketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PetShop.DataContext.Entites.Product", "Product")
+                        .WithMany("BasketItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetShop.DataContext.Entites.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Basket");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
+                });
+
             modelBuilder.Entity("PetShop.DataContext.Entites.Product", b =>
                 {
                     b.HasOne("PetShop.DataContext.Entites.Brand", "Brand")
@@ -523,9 +647,25 @@ namespace PetShop.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("PetShop.DataContext.Entites.Wishlist", b =>
+                {
+                    b.HasOne("PetShop.DataContext.Entites.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("PetShop.DataContext.Entites.AnimalType", b =>
                 {
                     b.Navigation("ProductAnimalTypes");
+                });
+
+            modelBuilder.Entity("PetShop.DataContext.Entites.Basket", b =>
+                {
+                    b.Navigation("BasketItems");
                 });
 
             modelBuilder.Entity("PetShop.DataContext.Entites.Brand", b =>
@@ -535,6 +675,8 @@ namespace PetShop.Migrations
 
             modelBuilder.Entity("PetShop.DataContext.Entites.Product", b =>
                 {
+                    b.Navigation("BasketItems");
+
                     b.Navigation("Images");
 
                     b.Navigation("ProductAnimalTypes");

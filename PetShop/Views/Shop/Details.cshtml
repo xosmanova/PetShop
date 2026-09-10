@@ -1,0 +1,50 @@
+﻿@model PetShop.DataContext.Entites.Product
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">@Model.Name</h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                <a class="breadcrumb-item nav-link" asp-controller="Shop" asp-action="Index">Shop</a>
+                <span class="breadcrumb-item active" aria-current="page">@Model.Name</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-6">
+            @{
+                var mainImage = Model.Images.FirstOrDefault(i => i.IsMain)?.ImageUrl ?? "/images/no-image.png";
+            }
+            <img src="@mainImage" class="img-fluid rounded-4" alt="@Model.Name">
+        </div>
+        <div class="col-md-6">
+            <h2>@Model.Name</h2>
+            <p class="text-muted">@Model.Description</p>
+            <h3 class="text-primary">@(Model.DiscountPrice ?? Model.Price) ₼</h3>
+
+            @if (Model.Variants.Any())
+            {
+                <div class="my-3">
+                    <label>Variant seçin:</label>
+                    <select class="form-select">
+                        @foreach (var variant in Model.Variants)
+                        {
+                            var label = string.Join(" / ", new[] { variant.Size, variant.Weight, variant.Color }.Where(x => !string.IsNullOrEmpty(x)));
+                            <option value="@variant.Id">@label</option>
+                        }
+                    </select>
+                </div>
+            }
+
+            <form asp-controller="Basket" asp-action="AddToCart" method="post" class="mt-4">
+                <input type="hidden" name="productId" value="@Model.Id" />
+                <input type="hidden" name="quantity" value="1" />
+                <button type="submit" class="btn btn-dark btn-lg">Add to Cart</button>
+            </form>
+        </div>
+    </div>
+</div>

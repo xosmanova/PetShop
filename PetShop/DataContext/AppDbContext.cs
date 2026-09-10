@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PetShop.DataContext.Entites;
 
@@ -19,7 +19,9 @@ namespace PetShop.DataContext
         public DbSet<ProductAnimalType> ProductAnimalTypes { get; set; }
         public DbSet<ProductVariant> ProductVariants { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
-
+        public DbSet<Basket> Baskets { get; set; }
+        public DbSet<BasketItem> BasketItems { get; set; }
+        public DbSet<Wishlist> Wishlist { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -50,6 +52,23 @@ namespace PetShop.DataContext
             modelBuilder.Entity<ProductCategory>()
                 .HasIndex(c => c.Slug)
                 .IsUnique();
+            modelBuilder.Entity<Basket>()
+                .HasMany(b => b.BasketItems)
+                .WithOne(bi => bi.Basket)
+                .HasForeignKey(bi => bi.BasketId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<BasketItem>()
+                .HasOne(bi => bi.Product)
+                .WithMany(p => p.BasketItems)
+                .HasForeignKey(bi => bi.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BasketItem>()
+                .HasOne(bi => bi.ProductVariant)
+                .WithMany()
+                .HasForeignKey(bi => bi.ProductVariantId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Product - ProductCategory (One-to-Many)
             modelBuilder.Entity<Product>()
@@ -78,6 +97,15 @@ namespace PetShop.DataContext
                 .WithMany(p => p.Images)
                 .HasForeignKey(pi => pi.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Wishlist>()
+                .HasOne(w => w.Product)
+                .WithMany()
+                .HasForeignKey(w => w.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Wishlist>()
+                .HasIndex(w => new { w.SessionId, w.ProductId })
+                .IsUnique();
 
             // Decimal precision
             modelBuilder.Entity<Product>()
@@ -117,7 +145,10 @@ namespace PetShop.DataContext
             modelBuilder.Entity<Brand>().HasData(
                 new Brand { Id = 1, Name = "Royal Canin" },
                 new Brand { Id = 2, Name = "Whiskas" },
-                new Brand { Id = 3, Name = "Pedigree" }
+                new Brand { Id = 3, Name = "Pedigree" },
+                new Brand { Id = 4, Name = "Denim" },
+                new Brand { Id = 5, Name = "Puma" },
+                new Brand { Id = 6, Name = "Klaws" }
             );
 
             // 4) Product
@@ -172,7 +203,7 @@ namespace PetShop.DataContext
                     IsActive = true,
                     CreatedAt = new DateTime(2025, 1, 1),
                     ProductCategoryId = 6,
-                    BrandId = null
+                    BrandId = 4
                 }
             );
 

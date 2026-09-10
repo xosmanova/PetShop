@@ -24,6 +24,7 @@ namespace PetShop.DataContext.Entites
         public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
         public ICollection<ProductAnimalType> ProductAnimalTypes { get; set; } = new List<ProductAnimalType>();
+        public ICollection<BasketItem> BasketItems { get; set; } = new List<BasketItem>();
     }
     
 }

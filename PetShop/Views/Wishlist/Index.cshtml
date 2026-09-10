@@ -1,0 +1,104 @@
+@model List<PetShop.DataContext.Entites.Wishlist>
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Wishlist</h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                <span class="breadcrumb-item active" aria-current="page">Wishlist</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<section id="Wishlist" class="py-5 my-5">
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <iconify-icon icon="mdi:heart-outline" class="text-muted mb-3" style="font-size: 4rem;"></iconify-icon>
+                <h4 class="mb-2">İstək siyahınız boşdur.</h4>
+                <p class="text-muted">Bəyəndiyiniz məhsulları əlavə etmək üçün məhsulların altındakı ürək ikonuna klikləyin.</p>
+                <a asp-controller="Shop" asp-action="Index" class="btn btn-dark mt-3 px-4 py-3 text-uppercase">Məhsullara bax</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr class="border-bottom">
+                            <th scope="col" class="card-title text-uppercase py-3">Product</th>
+                            <th scope="col" class="card-title text-uppercase py-3">Unit Price</th>
+                            <th scope="col" class="card-title text-uppercase py-3">Stock Status</th>
+                            <th scope="col" class="card-title text-uppercase py-3 text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var mainImage = item.Product.Images.FirstOrDefault(i => i.IsMain)?.ImageUrl
+                                ?? item.Product.Images.FirstOrDefault()?.ImageUrl
+                                ?? "/images/no-image.png";
+                            var price = item.Product.DiscountPrice ?? item.Product.Price;
+                            var inStock = item.Product.StockQuantity > 0;
+
+                            <tr class="border-bottom">
+                                <td class="py-4">
+                                    <div class="cart-info d-flex flex-wrap align-items-center">
+                                        <div style="width: 100px; height: 100px; overflow: hidden;" class="rounded-3 me-3 d-flex align-items-center justify-content-center bg-light">
+                                            <img src="@mainImage" alt="@item.Product.Name" class="img-fluid rounded-3" style="max-height: 100px; object-fit: cover;">
+                                        </div>
+                                        <div>
+                                            <h5 class="card-title mb-1">
+                                                <a asp-controller="Shop" asp-action="Index" class="text-decoration-none text-dark">@item.Product.Name</a>
+                                            </h5>
+                                            @if (item.Product.Brand != null)
+                                            {
+                                                <small class="text-muted">Brand: @item.Product.Brand.Name</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4">
+                                    <span class="secondary-font fw-medium fs-5 text-primary">@price ₼</span>
+                                </td>
+                                <td class="py-4">
+                                    @if (inStock)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">Mövcuddur</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill">Bitib</span>
+                                    }
+                                </td>
+                                <td class="py-4 text-end pe-4">
+                                    <div class="d-inline-flex align-items-center">
+                                        <form asp-controller="Basket" asp-action="AddToCart" method="post" class="me-3">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <input type="hidden" name="quantity" value="1" />
+                                            <button type="submit" class="btn btn-dark p-3 text-uppercase fs-6 rounded-1 @(!inStock ? "disabled" : "")">
+                                                Add to cart
+                                            </button>
+                                        </form>
+
+                                        <form asp-controller="Wishlist" asp-action="Remove" method="post">
+                                            <input type="hidden" name="wishlistItemId" value="@item.Id" />
+                                            <button type="submit" class="btn btn-sm border-0 bg-transparent p-2" title="Sil">
+                                                <svg width="24" height="24" fill="#dc3545">
+                                                    <use xlink:href="#trash"></use>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>

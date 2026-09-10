@@ -1,0 +1,41 @@
+﻿@model PetShop.DataContext.Entites.Basket
+
+<div class="offcanvas-header justify-content-center">
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+</div>
+<div class="offcanvas-body">
+    <div class="order-md-last">
+        <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-primary">Your cart</span>
+            <span class="badge bg-primary rounded-circle pt-2">@Model.BasketItems.Sum(i => i.Quantity)</span>
+        </h4>
+
+        @if (!Model.BasketItems.Any())
+        {
+            <p>Səbətiniz boşdur.</p>
+        }
+        else
+        {
+            <ul class="list-group mb-3">
+                @foreach (var item in Model.BasketItems)
+                {
+                    <li class="list-group-item d-flex justify-content-between lh-sm">
+                        <div>
+                            <h6 class="my-0">@item.Product.Name</h6>
+                            <small class="text-body-secondary">Miqdar: @item.Quantity</small>
+                        </div>
+                        <span class="text-body-secondary">@(item.UnitPrice* item.Quantity) ₼</span>
+                    </li>
+                }
+                <li class="list-group-item d-flex justify-content-between">
+                    <span class="fw-bold">Total</span>
+                    <strong>@Model.BasketItems.Sum(i => i.UnitPrice * i.Quantity) ₼</strong>
+                </li>
+            </ul>
+
+            <a asp-controller="Checkout" asp-action="Index" class="w-100 btn btn-primary btn-lg">
+                Continue to checkout
+            </a>
+        }
+    </div>
+</div>

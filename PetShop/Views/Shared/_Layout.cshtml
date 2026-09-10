@@ -1,4 +1,16 @@
-﻿<!DOCTYPE html>
+@inject PetShop.DataContext.AppDbContext _context
+@{
+    var sessionId = Context.Session.GetString("BasketSessionId");
+    var wishlistCount = !string.IsNullOrEmpty(sessionId)
+        ? _context.Wishlist.Count(w => w.SessionId == sessionId)
+        : 0;
+    var basketCount = !string.IsNullOrEmpty(sessionId)
+        ? _context.BasketItems
+            .Where(bi => bi.Basket.SessionId == sessionId)
+            .Sum(bi => (int?)bi.Quantity) ?? 0
+        : 0;
+}
+<!DOCTYPE html>
 <html lang="en">
 
 
@@ -101,46 +113,7 @@
     </div>
 
     <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasCart" aria-labelledby="My Cart">
-        <div class="offcanvas-header justify-content-center">
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <div class="order-md-last">
-                <h4 class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-primary">Your cart</span>
-                    <span class="badge bg-primary rounded-circle pt-2">3</span>
-                </h4>
-                <ul class="list-group mb-3">
-                    <li class="list-group-item d-flex justify-content-between lh-sm">
-                        <div>
-                            <h6 class="my-0">Grey Hoodie</h6>
-                            <small class="text-body-secondary">Brief description</small>
-                        </div>
-                        <span class="text-body-secondary">$12</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between lh-sm">
-                        <div>
-                            <h6 class="my-0">Dog Food</h6>
-                            <small class="text-body-secondary">Brief description</small>
-                        </div>
-                        <span class="text-body-secondary">$8</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between lh-sm">
-                        <div>
-                            <h6 class="my-0">Soft Toy</h6>
-                            <small class="text-body-secondary">Brief description</small>
-                        </div>
-                        <span class="text-body-secondary">$5</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span class="fw-bold">Total (USD)</span>
-                        <strong>$20</strong>
-                    </li>
-                </ul>
-
-                <button class="w-100 btn btn-primary btn-lg" type="submit">Continue to checkout</button>
-            </div>
-        </div>
+        @await Component.InvokeAsync("BasketSummary")
     </div>
 
     <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasSearch"
@@ -155,9 +128,11 @@
                     Search
                 </h4>
                 <div class="search-bar border rounded-2 border-dark-subtle">
-                    <form id="search-form" class="text-center d-flex align-items-center" action="#" method="">
-                        <input type="text" class="form-control border-0 bg-transparent" placeholder="Search Here" />
-                        <iconify-icon icon="tabler:search" class="fs-4 me-3"></iconify-icon>
+                    <form asp-controller="Shop" asp-action="Search" method="get" class="text-center d-flex align-items-center">
+                        <input type="text" name="query" class="form-control border-0 bg-transparent" placeholder="Search Here" />
+                        <button type="submit" class="border-0 bg-transparent me-3">
+                            <iconify-icon icon="tabler:search" class="fs-4"></iconify-icon>
+                        </button>
                     </form>
                 </div>
             </div>
@@ -170,7 +145,7 @@
 
                 <div class="col-sm-4 col-lg-3 text-center text-sm-start">
                     <div class="main-logo">
-                        <a href="index.html">
+                        <a asp-controller="Home" asp-action="Index">
                             <img src="~/images/logo.png" alt="logo" class="img-fluid">
                         </a>
                     </div>
@@ -178,13 +153,14 @@
 
                 <div class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
                     <div class="search-bar border rounded-2 px-3 border-dark-subtle">
-                        <form id="search-form" class="text-center d-flex align-items-center" action="#" method="">
-                            <input type="text" class="form-control border-0 bg-transparent"
+                        <form asp-controller="Shop" asp-action="Search" method="get" class="text-center d-flex align-items-center">
+                            <input type="text" name="query" class="form-control border-0 bg-transparent"
                                    placeholder="Search for more than 10,000 products" />
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                <path fill="currentColor"
-                                      d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
-                            </svg>
+                            <button type="submit" class="border-0 bg-transparent p-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
+                                </svg>
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -220,8 +196,11 @@
                             </a>
                         </li>
                         <li>
-                            <a href="wishlist.html" class="mx-3">
+                            <a asp-controller="Wishlist" asp-action="Index" class="mx-3 position-relative text-dark" title="Wishlist">
                                 <iconify-icon icon="mdi:heart" class="fs-4"></iconify-icon>
+                                <span class="position-absolute translate-middle badge rounded-circle bg-primary pt-2 wishlist-count" style="@(wishlistCount > 0 ? "" : "display:none;")">
+                                    @wishlistCount
+                                </span>
                             </a>
                         </li>
 
@@ -230,7 +209,7 @@
                                aria-controls="offcanvasCart">
                                 <iconify-icon icon="mdi:cart" class="fs-4 position-relative"></iconify-icon>
                                 <span class="position-absolute translate-middle badge rounded-circle bg-primary pt-2">
-                                    03
+                                    @basketCount
                                 </span>
                             </a>
                         </li>
@@ -262,15 +241,15 @@
                             <option>Shop by Category</option>
                             <option>Clothes</option>
                             <option>Food</option>
-                            <option>Food</option>
+                            
                             <option>Toy</option>
                         </select>
 
                         <ul class="navbar-nav menu-list list-unstyled d-flex gap-md-3 mb-0">
                             <li class="nav-item">
-                                <a href="index.html" class="nav-link active">Home</a>
+                                <a asp-controller="Home" asp-action="Index" class="nav-link active">Home</a>
                             </li>
-                            <li class="nav-item dropdown">
+                            @* <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown"
                                    aria-expanded="false">Pages</a>
                                 <ul class="dropdown-menu" aria-labelledby="pages">
@@ -345,9 +324,12 @@
                                         </a>
                                     </li>
                                 </ul>
+                            </li> *@
+                            <li class="nav-item">
+                                <a asp-controller="Shop" asp-action="Index" class="nav-link">Shop</a>
                             </li>
                             <li class="nav-item">
-                                <a href="shop.html" class="nav-link">Shop</a>
+                                <a asp-controller="Basket" asp-action="Index" class="nav-link">Basket</a>
                             </li>
                             <li class="nav-item">
                                 <a href="blog.html" class="nav-link">Blog</a>
@@ -368,8 +350,11 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="wishlist.html" class="mx-3">
+                                    <a asp-controller="Wishlist" asp-action="Index" class="mx-3 position-relative text-dark" title="Wishlist">
                                         <iconify-icon icon="mdi:heart" class="fs-4"></iconify-icon>
+                                        <span class="position-absolute translate-middle badge rounded-circle bg-primary pt-2 wishlist-count" style="@(wishlistCount > 0 ? "" : "display:none;")">
+                                            @wishlistCount
+                                        </span>
                                     </a>
                                 </li>
 
@@ -378,7 +363,7 @@
                                        aria-controls="offcanvasCart">
                                         <iconify-icon icon="mdi:cart" class="fs-4 position-relative"></iconify-icon>
                                         <span class="position-absolute translate-middle badge rounded-circle bg-primary pt-2">
-                                            03
+                                            @basketCount
                                         </span>
                                     </a>
                                 </li>
@@ -672,7 +657,7 @@
                         <h3>Quick Links</h3>
                         <ul class="menu-list list-unstyled">
                             <li class="menu-item">
-                                <a href="#" class="nav-link">Home</a>
+                                <a asp-controller="Home" asp-action="Index" class="nav-link active">Home</a>
                             </li>
                             <li class="menu-item">
                                 <a href="#" class="nav-link">About us</a>
@@ -752,6 +737,49 @@
     <script src="~/js/plugins.js"></script>
     <script src="~/js/script.js"></script>
     <script src="~/js/iconify-icon.min.js"></script>
+
+    <script>
+        function updateWishlistBadge(count) {
+            $('.wishlist-count').each(function () {
+                $(this).text(count);
+                if (count > 0) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+
+        $(document).on('click', '.btn-wishlist', function (e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var productId = $btn.data('product-id');
+            if (!productId) return;
+
+            $.ajax({
+                url: '/Wishlist/Toggle',
+                type: 'POST',
+                data: { productId: productId },
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (res) {
+                    if (res && res.success) {
+                        updateWishlistBadge(res.count);
+                        var $icon = $btn.find('iconify-icon');
+                        if (res.inWishlist) {
+                            $btn.addClass('active-wishlist');
+                            $icon.css('color', '#dc3545');
+                        } else {
+                            $btn.removeClass('active-wishlist');
+                            $icon.css('color', '');
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Wishlist error:', xhr);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

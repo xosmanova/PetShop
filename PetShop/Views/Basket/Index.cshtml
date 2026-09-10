@@ -1,0 +1,116 @@
+﻿@model PetShop.DataContext.Entites.Basket
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Basket</h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                <span class="breadcrumb-item active" aria-current="page">Basket</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<section id="cart" class="my-5 py-5">
+    <div class="container">
+        @if (!Model.BasketItems.Any())
+        {
+            <div class="text-center py-5">
+                <h4>Səbətiniz boşdur.</h4>
+                <a asp-controller="Shop" asp-action="Index" class="btn btn-dark mt-3">Shop Now</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-md-5">
+                <div class="col-md-8 pe-md-5">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="card-title text-uppercase">Product</th>
+                                <th class="card-title text-uppercase">Quantity</th>
+                                <th class="card-title text-uppercase">Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.BasketItems)
+                            {
+                                var mainImage = item.Product.Images.FirstOrDefault(i => i.IsMain)?.ImageUrl ?? "/images/no-image.png";
+                                var variantLabel = item.ProductVariant != null
+                                ? string.Join(" / ", new[] { item.ProductVariant.Size, item.ProductVariant.Weight, item.ProductVariant.Color }.Where(x => !string.IsNullOrEmpty(x)))
+                                : null;
+
+                                <tr>
+                                    <td class="py-4">
+                                        <div class="cart-info d-flex flex-wrap align-items-center">
+                                            <div class="col-lg-3">
+                                                <img src="@mainImage" alt="@item.Product.Name" class="img-fluid">
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="card-detail ps-3">
+                                                    <h5 class="card-title">@item.Product.Name</h5>
+                                                    @if (!string.IsNullOrEmpty(variantLabel))
+                                                    {
+                                                        <small class="text-muted">@variantLabel</small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 align-middle">
+                                        <form asp-controller="Basket" asp-action="UpdateQuantity" method="post" class="d-flex align-items-center">
+                                            <input type="hidden" name="basketItemId" value="@item.Id" />
+                                            <input type="number" name="quantity" value="@item.Quantity" min="1"
+                                                   class="form-control input-number text-center p-2 mx-1" style="width:70px;" />
+                                            <button type="submit" class="btn btn-sm btn-outline-dark ms-2">Yenilə</button>
+                                        </form>
+                                    </td>
+                                    <td class="py-4 align-middle">
+                                        <span class="secondary-font fw-medium">@(item.UnitPrice* item.Quantity) ₼</span>
+                                    </td>
+                                    <td class="py-4 align-middle">
+                                        <form asp-controller="Basket" asp-action="Remove" method="post">
+                                            <input type="hidden" name="basketItemId" value="@item.Id" />
+                                            <button type="submit" class="btn btn-sm border-0 bg-transparent">
+                                                <svg width="24" height="24" fill="#dc3545">
+                                                    <use xlink:href="#trash"></use>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="cart-totals">
+                        <h2 class="pb-4">Cart Total</h2>
+                        <table class="table text-uppercase">
+                            <tbody>
+                                <tr class="order-total pt-2 pb-2 border-bottom">
+                                    <th>Total</th>
+                                    <td>
+                                        <span class="price-amount text-dark ps-5">
+                                            @Model.BasketItems.Sum(i => i.UnitPrice * i.Quantity) ₼
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="button-wrap row g-2">
+                            <div class="col-md-12">
+                                <a asp-controller="Checkout" asp-action="Index" class="btn btn-primary p-3 text-uppercase rounded-1 w-100">
+                                    Proceed to checkout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

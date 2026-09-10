@@ -1,0 +1,40 @@
+﻿@model List<PetShop.DataContext.Entites.Product>
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Axtarış nəticələri</h2>
+            <p class="fs-5">"@ViewBag.SearchQuery" üçün @Model.Count nəticə tapıldı</p>
+        </div>
+    </div>
+</section>
+
+<div class="container my-5">
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <h4>Heç bir məhsul tapılmadı.</h4>
+            <a asp-controller="Shop" asp-action="Index" class="btn btn-dark mt-3">Bütün məhsullara baxın</a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var product in Model)
+            {
+                var mainImage = product.Images.FirstOrDefault(i => i.IsMain)?.ImageUrl ?? "/images/no-image.png";
+                <div class="col-md-3 my-3">
+                    <div class="card">
+                        <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id">
+                            <img src="@mainImage" class="img-fluid rounded-4" alt="@product.Name">
+                        </a>
+                        <div class="card-body">
+                            <h5>@product.Name</h5>
+                            <p>@(product.DiscountPrice ?? product.Price) ₼</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -19,7 +19,14 @@ namespace PetShop
 
 
             });
-
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromDays(7);
+                options.Cookie.IsEssential = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.Cookie.HttpOnly = true;
+                options.Cookie.MaxAge = TimeSpan.FromDays(7);   // ? bunu ?lav? edin
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -34,7 +41,7 @@ namespace PetShop
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseSession();
             app.UseAuthorization();
 
             app.MapControllerRoute(
