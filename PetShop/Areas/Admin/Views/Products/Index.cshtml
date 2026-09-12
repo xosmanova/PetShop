@@ -1,0 +1,343 @@
+@model PetShop.Areas.Admin.Models.ProductListViewModel
+@{
+    ViewData["Title"] = "Məhsullar | Admin";
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+        
+        <!-- Səhifə Başlığı və Düymələr -->
+        <div class="page-heading d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+                <div>
+                    <p class="eyebrow mb-1">Kataloq İdarəetməsi</p>
+                    <h1 class="h3 mb-1">Məhsullar</h1>
+                    <p class="text-secondary mb-0">Bütün məhsulların siyahısı, axtarışı, variantları və idarəetmə paneli.</p>
+                </div>
+            </div>
+            <div class="heading-actions">
+                <a asp-action="Create" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Yeni Məhsul Əlavə Et</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bildiriş Mesajları (Alerts) -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <div>@TempData["Success"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <div>@TempData["Warning"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-x-circle-fill fs-5"></i>
+                <div>@TempData["Error"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+
+        <!-- Filter və Axtarış Paneli -->
+        <div class="panel mb-4">
+            <div class="p-3">
+                <form method="get" asp-action="Index" class="row g-2 align-items-center">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="search" value="@Model.SearchQuery" 
+                                   class="form-control border-start-0 ps-0" 
+                                   placeholder="Məhsul adı, SKU, kateqoriya və ya brend axtar...">
+                            @if (!string.IsNullOrWhiteSpace(Model.SearchQuery))
+                            {
+                                <a asp-action="Index" class="btn btn-outline-secondary" title="Axtarışı təmizlə">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            }
+                            <button class="btn btn-primary" type="submit">Axtar</button>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-6 text-md-end text-secondary small fw-medium">
+                        Cəmi <strong class="text-primary">@Model.TotalCount</strong> məhsul tapıldı (Səhifə @Model.CurrentPage / @Model.TotalPages)
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Məhsul Cədvəli Paneli -->
+        <section class="panel">
+            <div class="panel-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h5 mb-0 section-title">
+                        <i class="bi bi-list-check"></i>
+                        <span>Məhsul Siyahısı</span>
+                    </h2>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 70px;" class="fw-semibold">Şəkil</th>
+                            <th class="fw-semibold">Məhsul Adı & SKU</th>
+                            <th class="fw-semibold">Kateqoriya</th>
+                            <th class="fw-semibold">Brend</th>
+                            <th class="fw-semibold">Qiymət</th>
+                            <th class="fw-semibold">Stok</th>
+                            <th class="fw-semibold">Variantlar</th>
+                            <th class="fw-semibold">Status</th>
+                            <th class="text-end fw-semibold" style="width: 140px;">Əməliyyatlar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Products != null && Model.Products.Count > 0)
+                        {
+                            @foreach (var item in Model.Products)
+                            {
+                                var mainImg = item.Images.FirstOrDefault(i => i.IsMain) ?? item.Images.FirstOrDefault();
+                                <tr>
+                                    <td>
+                                        @if (mainImg != null && !string.IsNullOrEmpty(mainImg.ImageUrl))
+                                        {
+                                            <img src="@mainImg.ImageUrl" alt="@item.Name" 
+                                                 class="rounded object-fit-cover shadow-sm" 
+                                                 style="width: 52px; height: 52px; border: 1px solid #e9ecef;" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center text-muted" 
+                                                 style="width: 52px; height: 52px; border: 1px dashed #ced4da;">
+                                                <i class="bi bi-image"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">@item.Name</div>
+                                        <div class="text-secondary small fw-medium">
+                                            @if (!string.IsNullOrEmpty(item.Sku))
+                                            {
+                                                <span>SKU: <code class="fw-bold">@item.Sku</code></span>
+                                            }
+                                            else
+                                            {
+                                                <span class="fst-italic text-secondary">SKU qeyd edilməyib</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-light border">
+                                            <i class="bi bi-folder2 me-1"></i>@(item.ProductCategory?.Name ?? "-")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (item.Brand != null)
+                                        {
+                                            <span class="badge text-bg-secondary">@item.Brand.Name</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-secondary small fw-semibold">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.DiscountPrice.HasValue)
+                                        {
+                                            <div>
+                                                <span class="fw-bold text-success">@item.DiscountPrice.Value.ToString("0.00") ₼</span>
+                                            </div>
+                                            <div class="text-secondary small text-decoration-line-through">
+                                                @item.Price.ToString("0.00") ₼
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="fw-bold">@item.Price.ToString("0.00") ₼</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.StockQuantity > 10)
+                                        {
+                                            <span class="badge text-bg-success">@item.StockQuantity ədəd</span>
+                                        }
+                                        else if (item.StockQuantity > 0)
+                                        {
+                                            <span class="badge text-bg-warning">@item.StockQuantity ədəd (az)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-danger">Bitib</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Variants != null && item.Variants.Any())
+                                        {
+                                            <span class="badge text-bg-info text-dark" title="@string.Join(", ", item.Variants.Select(v => $"{v.Size ?? ""} {v.Color ?? ""} {v.Weight ?? ""}".Trim()))">
+                                                <i class="bi bi-layers me-1"></i>@item.Variants.Count variant
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Yoxdur</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="badge text-bg-success"><i class="bi bi-check-circle me-1"></i>Aktiv</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-danger"><i class="bi bi-x-circle me-1"></i>Qeyri-aktiv</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" 
+                                               class="btn btn-outline-primary" title="Redaktə et">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-delete" 
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                    data-product-id="@item.Id" 
+                                                    data-product-name="@item.Name" 
+                                                    title="Sil">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        <p class="mb-1">Heç bir məhsul tapılmadı.</p>
+                                        @if (!string.IsNullOrWhiteSpace(Model.SearchQuery))
+                                        {
+                                            <a asp-action="Index" class="btn btn-sm btn-outline-primary mt-2">Bütün məhsulları göstər</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Səhifələmə (Pagination) -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span class="text-secondary small fw-medium">
+                        Göstərilir: @(((Model.CurrentPage - 1) * Model.PageSize) + 1) - @Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount) / @Model.TotalCount
+                    </span>
+                    <nav aria-label="Məhsul səhifələməsi">
+                        <ul class="pagination pagination-sm mb-0">
+                            <!-- Əvvəlki düyməsi -->
+                            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" 
+                                   asp-route-page="@(Model.CurrentPage - 1)" 
+                                   asp-route-search="@Model.SearchQuery">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+
+                            <!-- Səhifə nömrələri -->
+                            @for (int p = 1; p <= Model.TotalPages; p++)
+                            {
+                                if (p == 1 || p == Model.TotalPages || (p >= Model.CurrentPage - 2 && p <= Model.CurrentPage + 2))
+                                {
+                                    <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" 
+                                           asp-route-page="@p" 
+                                           asp-route-search="@Model.SearchQuery">@p</a>
+                                    </li>
+                                }
+                                else if (p == Model.CurrentPage - 3 || p == Model.CurrentPage + 3)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                }
+                            }
+
+                            <!-- Növbəti düyməsi -->
+                            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" 
+                                   asp-route-page="@(Model.CurrentPage + 1)" 
+                                   asp-route-search="@Model.SearchQuery">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            }
+        </section>
+    </div>
+</main>
+
+<!-- Silmə Təsdiq Modalı (Delete Confirmation Modal) -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" asp-action="Delete" id="deleteForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="deleteProductId" value="" />
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="deleteModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Məhsulun Silinməsi
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Həqiqətən <strong id="deleteProductName" class="text-dark"></strong> məhsulunu silmək istəyirsiniz?</p>
+                    <div class="alert alert-warning py-2 px-3 small mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-exclamation fs-5"></i>
+                        <span>Əgər bu məhsul hər hansı sifarişdə və ya səbətdə istifadə olunubsa, silinməyəcək, avtomatik <strong>Soft Delete (Qeyri-aktiv)</strong> ediləcək.</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash me-1"></i>Bəli, Sil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var deleteButtons = document.querySelectorAll('.btn-delete');
+            var deleteProductIdInput = document.getElementById('deleteProductId');
+            var deleteProductNameSpan = document.getElementById('deleteProductName');
+
+            deleteButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var productId = this.getAttribute('data-product-id');
+                    var productName = this.getAttribute('data-product-name');
+
+                    if (deleteProductIdInput) deleteProductIdInput.value = productId;
+                    if (deleteProductNameSpan) deleteProductNameSpan.textContent = productName;
+                });
+            });
+        });
+    </script>
+}

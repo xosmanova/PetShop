@@ -1,0 +1,127 @@
+@model PetShop.Models.BlogDetailsViewModel
+@{
+    ViewData["Title"] = Model.Post.Title + " - Waggy Blog";
+    var post = Model.Post;
+    var imageUrl = !string.IsNullOrEmpty(post.ImageUrl) ? post.ImageUrl : "/images/blog-large.jpg";
+}
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-3 mt-3 mb-0">@post.Title</h2>
+            <nav class="breadcrumb mt-3">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                <a class="breadcrumb-item nav-link" asp-controller="Blog" asp-action="Index">Blog</a>
+                <span class="breadcrumb-item active text-truncate" style="max-width: 300px;" aria-current="page">@post.Title</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<div class="my-5 py-4">
+    <div class="container">
+        <div class="row">
+            <!-- Əsas Məqalə Hissəsi -->
+            <main class="col-lg-8 pe-lg-5">
+                <article class="blog-single">
+                    <div class="mb-4 overflow-hidden rounded-4 shadow-sm">
+                        <img src="@imageUrl" class="img-fluid w-100" style="max-height: 480px; object-fit: cover;" alt="@post.Title" loading="lazy">
+                    </div>
+
+                    <div class="blog-meta d-flex flex-wrap gap-4 text-muted mb-4 pb-3 border-bottom">
+                        <span class="d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="mdi:account" class="text-primary fs-5"></iconify-icon>
+                            <strong>@post.AuthorName</strong>
+                        </span>
+                        <span class="d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="mdi:calendar-outline" class="text-primary fs-5"></iconify-icon>
+                            @post.CreatedDate.ToString("dd MMMM yyyy")
+                        </span>
+                        <span class="d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="mdi:clock-outline" class="text-primary fs-5"></iconify-icon>
+                            Oxunma: ~3 dəq
+                        </span>
+                    </div>
+
+                    <div class="lead text-primary-emphasis bg-light p-4 rounded-3 border-start border-4 border-primary mb-4 fw-normal">
+                        @post.Summary
+                    </div>
+
+                    <div class="blog-content fs-5 text-secondary" style="line-height: 1.8;">
+                        @{
+                            var paragraphs = post.Content.Split(new[] { "\r\n\r\n", "\n\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        }
+                        @foreach (var p in paragraphs)
+                        {
+                            <p class="mb-4">@Html.Raw(p.Replace("\n", "<br />"))</p>
+                        }
+                    </div>
+
+                    <div class="mt-5 pt-4 border-top d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <a asp-controller="Blog" asp-action="Index" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
+                            <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1 me-1" style="transform: rotate(180deg);">
+                                <use xlink:href="#arrow-right"></use>
+                            </svg>
+                            Bütün Məqalələr
+                        </a>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted small">Paylaş:</span>
+                            <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle" title="Facebook"><iconify-icon icon="ri:facebook-fill"></iconify-icon></a>
+                            <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle" title="Twitter"><iconify-icon icon="ri:twitter-fill"></iconify-icon></a>
+                            <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle" title="WhatsApp"><iconify-icon icon="ri:whatsapp-fill"></iconify-icon></a>
+                        </div>
+                    </div>
+                </article>
+            </main>
+
+            <!-- Yan Panel (Sidebar) -->
+            <aside class="col-lg-4 mt-5 mt-lg-0">
+                <div class="sidebar p-4 bg-light rounded-4 border">
+                    <h4 class="widget-title mb-4 pb-2 border-bottom">Son Məqalələr</h4>
+
+                    @if (!Model.RecentPosts.Any())
+                    {
+                        <p class="text-muted">Digər məqalə tapılmadı.</p>
+                    }
+                    else
+                    {
+                        <div class="recent-posts-list">
+                            @foreach (var recent in Model.RecentPosts)
+                            {
+                                var rImage = !string.IsNullOrEmpty(recent.ImageUrl) ? recent.ImageUrl : "/images/blog1.jpg";
+
+                                <div class="recent-post-item d-flex gap-3 mb-4 align-items-center">
+                                    <a asp-controller="Blog" asp-action="Details" asp-route-slug="@recent.Slug" class="flex-shrink-0">
+                                        <img src="@rImage" class="rounded-3" style="width: 80px; height: 70px; object-fit: cover;" alt="@recent.Title" loading="lazy">
+                                    </a>
+                                    <div class="recent-post-info">
+                                        <span class="text-muted small d-block mb-1">
+                                            <iconify-icon icon="mdi:calendar-outline" class="me-1"></iconify-icon>
+                                            @recent.CreatedDate.ToString("dd.MM.yyyy")
+                                        </span>
+                                        <a asp-controller="Blog" asp-action="Details" asp-route-slug="@recent.Slug" class="text-dark text-decoration-none fw-semibold line-clamp-2 fs-6">
+                                            @recent.Title
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <hr class="my-4">
+
+                    <!-- Waggy Promo Box -->
+                    <div class="promo-widget p-4 rounded-3 text-center" style="background: #F9F3EC;">
+                        <iconify-icon icon="ph:paw-print-fill" class="display-4 text-primary mb-2"></iconify-icon>
+                        <h5 class="fw-bold mb-2">PetShop - Waggy</h5>
+                        <p class="small text-muted mb-3">Dörd pəncəli dostlarınız üçün ən keyfiyyətli yemlər, geyimlər və aksesuarlar bir arada!</p>
+                        <a asp-controller="Shop" asp-action="Index" class="btn btn-primary text-white btn-sm px-4 py-2 rounded-1">
+                            Alış-verişə başla
+                        </a>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>

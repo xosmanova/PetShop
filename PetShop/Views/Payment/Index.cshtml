@@ -1,0 +1,107 @@
+@{
+    ViewData["Title"] = "Ödəniş Üsulları və Təhlükəsizlik";
+}
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Payment <span class="text-primary">Methods</span></h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                <span class="breadcrumb-item active" aria-current="page">Payment</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<div class="my-5 py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <div class="text-center mb-5">
+                    <span class="badge bg-secondary-subtle text-primary fs-6 px-3 py-2 rounded-pill fw-semibold mb-2">ÖDƏNİŞ ŞƏRTLƏRİ</span>
+                    <h2 class="display-5 fw-bold">Rahat və Təhlükəsiz Ödəniş Seçimləri</h2>
+                    <p class="text-muted fs-6">PetShop-da alış-veriş edərkən sizə ən uyğun olan ödəniş metodunu seçə bilərsiniz.</p>
+                </div>
+
+                <div class="row g-4 mb-5">
+                    <!-- Metod 1: Stripe Bank Kartı -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 p-4 p-md-5 d-flex flex-column justify-content-between" style="background: #fafafa;">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <div class="p-3 bg-white rounded-3 shadow-sm text-primary">
+                                        <iconify-icon icon="solar:card-2-bold-duotone" style="font-size: 36px;"></iconify-icon>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge bg-dark px-3 py-2">Visa</span>
+                                        <span class="badge bg-danger px-3 py-2">Mastercard</span>
+                                    </div>
+                                </div>
+                                <h3 class="fw-bold mb-3">Onlayn Bank Kartı ilə Ödəniş</h3>
+                                <p class="text-secondary lh-lg mb-3">
+                                    Dünyanın aparıcı ödəniş infrastrukturu olan <strong>Stripe</strong> vasitəsilə istənilən yerli və ya beynəlxalq bankın Visa və Mastercard kartları ilə dərhal və komissiyasız ödəniş edə bilərsiniz.
+                                </p>
+                                <ul class="list-unstyled text-secondary">
+                                    <li class="mb-2"><iconify-icon icon="mdi:check-circle" class="text-success me-2"></iconify-icon> 0% komissiya, ani təsdiq</li>
+                                    <li class="mb-2"><iconify-icon icon="mdi:check-circle" class="text-success me-2"></iconify-icon> 3D Secure SMS təsdiqi</li>
+                                    <li class="mb-2"><iconify-icon icon="mdi:check-circle" class="text-success me-2"></iconify-icon> Kart məlumatlarınız saytımızda saxlanılmır</li>
+                                </ul>
+                            </div>
+                            <div class="pt-3 border-top mt-3">
+                                <span class="badge bg-success-subtle text-success py-2 px-3 rounded-pill fw-semibold">
+                                    <iconify-icon icon="mdi:shield-check" class="align-middle me-1"></iconify-icon> Tövsiyə olunan üsul
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metod 2: Qapıda Nağd Ödəniş -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 p-4 p-md-5 d-flex flex-column justify-content-between" style="background: #fafafa;">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <div class="p-3 bg-white rounded-3 shadow-sm text-primary">
+                                        <iconify-icon icon="solar:hand-money-bold-duotone" style="font-size: 36px;"></iconify-icon>
+                                    </div>
+                                    <span class="badge bg-secondary px-3 py-2">Cash on Delivery</span>
+                                </div>
+                                <h3 class="fw-bold mb-3">Qapıda Nağd Ödəniş</h3>
+                                <p class="text-secondary lh-lg mb-3">
+                                    Sifarişinizi qapınızda kuryerdən təhvil aldıqdan sonra nağd şəkildə ödəmək imkanı. Məhsulları fiziki olaraq yoxlayıb əmin olduqdan sonra ödənişinizi həyata keçirirsiniz.
+                                </p>
+                                <ul class="list-unstyled text-secondary">
+                                    <li class="mb-2"><iconify-icon icon="mdi:check-circle" class="text-success me-2"></iconify-icon> Əvvəlcədən heç bir ödəniş tələb olunmur</li>
+                                    <li class="mb-2"><iconify-icon icon="mdi:check-circle" class="text-success me-2"></iconify-icon> Məhsulu yerində yoxlamaq imkanı</li>
+                                    <li class="mb-2"><iconify-icon icon="mdi:check-circle" class="text-success me-2"></iconify-icon> Kuryer tərəfindən rəsmi qəbz təqdimatı</li>
+                                </ul>
+                            </div>
+                            <div class="pt-3 border-top mt-3">
+                                <span class="badge bg-info-subtle text-info py-2 px-3 rounded-pill fw-semibold">
+                                    <iconify-icon icon="mdi:truck-fast" class="align-middle me-1"></iconify-icon> Təhvil anında ödəniş
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Təhlükəsizlik Təminatı -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white border border-light-subtle">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center text-md-start mb-3 mb-md-0">
+                            <iconify-icon icon="solar:shield-check-bold-duotone" class="text-primary" style="font-size: 64px;"></iconify-icon>
+                        </div>
+                        <div class="col-md-10">
+                            <h4 class="fw-bold mb-2">100% Təhlükəsiz və Qorunan Ödəniş Zəmanəti</h4>
+                            <p class="text-secondary lh-base mb-0">
+                                Bütün onlayn tranzaksiyalar beynəlxalq <strong>256-bit SSL</strong> şifrələmə protokolu ilə qorunur. Bank kartı məlumatlarınız beynəlxalq <strong>PCI-DSS Level 1</strong> təhlükəsizlik sertifikatına malik Stripe serverlərinə birbaşa şifrələnmiş şəkildə ötürülür və saytımızın verilənlər bazasında heç bir kart məlumatı saxlanılmır. Sizin maliyyə məxfiliyiniz bizim ən ali prioritetimizdir.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

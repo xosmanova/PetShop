@@ -148,12 +148,42 @@ body {
   --bs-primary-bg-subtle: #FFF9EB;
   --bs-border-color: #F7F7F7;
 
-  --bs-secondary-rgb: 230, 243, 251;
+  --bs-secondary: #5a6268;
+  --bs-secondary-rgb: 90, 98, 104;
+  --bs-secondary-color: #5a6268;
 
-  --bs-success-rgb: 238, 245, 228;
-  --bs-danger-rgb: 249, 235, 231;
-  --bs-warning-rgb: 255, 249, 235;
-  --bs-info-rgb: 230, 243, 250;
+  --bs-success: #198754;
+  --bs-success-rgb: 25, 135, 84;
+  --bs-danger: #dc3545;
+  --bs-danger-rgb: 220, 53, 69;
+  --bs-warning: #d97706;
+  --bs-warning-rgb: 217, 119, 6;
+  --bs-info: #087990;
+  --bs-info-rgb: 8, 121, 144;
+}
+
+.text-secondary {
+  color: #5a6268 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.text-success {
+  color: #198754 !important;
+}
+
+.text-warning {
+  color: #d97706 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-info {
+  color: #087990 !important;
 }
 
 .btn-primary {
@@ -434,11 +464,29 @@ button.filter-button {
   text-transform: uppercase;
   font-size: 1.0625rem;
   transition: all 0.3s ease-in;
+  cursor: pointer;
 }
 
 button.filter-button.active,
 button.filter-button:hover {
   border-bottom: 2px solid #DEAD6F;
+}
+
+.isotope-container {
+  position: static !important;
+  height: auto !important;
+}
+
+.isotope-container .item {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+.isotope-container .item.is-hidden,
+.isotope-container .item.d-none {
+  display: none !important;
 }
 
 /* testimonial style  */
@@ -509,6 +557,33 @@ a.blog-read:hover {
 
 
 /* insta style  */
+.instagram-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.instagram-item a {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.instagram-item img {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+  transition: transform 0.4s ease;
+}
+
+.instagram-item:hover img {
+  transform: scale(1.06);
+}
+
 .instagram-item:hover:before,
 .instagram-item:hover .icon-overlay {
   opacity: 1;
@@ -673,4 +748,106 @@ Single Product section style start
 .nav-pills .show>.nav-link {
   color: var(--light-color);
   background-color: var(--accent-color);
+}
+
+/*--------------------------------------------------------------
+Uniform Product Card & Image Aspect Ratio
+--------------------------------------------------------------*/
+.product-card {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+.product-image-container {
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  height: 260px !important;
+  max-height: 260px !important;
+  aspect-ratio: 1 / 1 !important;
+  overflow: hidden !important;
+  border-radius: 1rem !important;
+  background-color: #f8f9fa !important;
+}
+
+.product-image-container img,
+.product-image-container .product-img {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 260px !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+  transition: transform 0.3s ease !important;
+}
+
+.product-image-container:hover img,
+.product-image-container:hover .product-img {
+  transform: scale(1.05) !important;
+}
+
+.product-card .card-body {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+.product-card .product-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 2.8em;
+  line-height: 1.4;
+}
+
+button.btn-cart {
+  border-radius: 0.25rem;
+  border: 1px solid rgba(65, 64, 62, 0.20);
+  transition: all 0.2s ease;
+}
+
+button.btn-cart:hover {
+  background-color: #212529 !important;
+  color: #fff !important;
+}
+
+button.btn-cart:hover h5 {
+  color: #fff !important;
+}
+
+/* Fallback for general product grid cards */
+.product-grid .card,
+.isotope-container .card,
+.products-carousel .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product-grid .card-body,
+.isotope-container .card-body,
+.products-carousel .card-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Fix Pet Foodies Grid - Prevent Overlapping */
+.isotope-container {
+  position: static !important;
+  height: auto !important;
+}
+
+.isotope-container .item {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
 }

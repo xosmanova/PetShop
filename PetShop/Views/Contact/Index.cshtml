@@ -1,0 +1,149 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    ViewData["Title"] = "Əlaqə";
+    var phone = Configuration["CompanyInfo:Phone"] ?? "+994 50 123 45 67";
+    var email = Configuration["CompanyInfo:Email"] ?? "info@petshop.az";
+    var address = Configuration["CompanyInfo:Address"] ?? "Bakı, Azərbaycan";
+}
+
+<div class="container my-5 py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Ana Səhifə</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Əlaqə</li>
+        </ol>
+    </nav>
+
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-dark mb-2">Bizimlə Əlaqə</h1>
+        <p class="text-muted fs-5">Hər hansı sualınız, təklifiniz və ya sifarişlə bağlı müraciətiniz varsa, bizimlə əlaqə saxlayın.</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 mb-4 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Contact Info Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center bg-light">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                    <iconify-icon icon="solar:phone-calling-bold" class="fs-2"></iconify-icon>
+                </div>
+                <h5 class="fw-bold mb-2">Telefon</h5>
+                <p class="text-muted small mb-3">Həftə içi 09:00 - 20:00</p>
+                <a href="tel:@phone.Replace(" ", "")" class="text-dark fw-semibold fs-5 text-decoration-none">@Html.Raw(phone)</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center bg-light">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                    <iconify-icon icon="solar:letter-bold" class="fs-2"></iconify-icon>
+                </div>
+                <h5 class="fw-bold mb-2">Email</h5>
+                <p class="text-muted small mb-3">24 saat ərzində cavablandırılır</p>
+                <a href="mailto:@email" class="text-dark fw-semibold fs-5 text-decoration-none">@Html.Raw(email)</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center bg-light">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                    <iconify-icon icon="solar:map-point-bold" class="fs-2"></iconify-icon>
+                </div>
+                <h5 class="fw-bold mb-2">Ünvan</h5>
+                <p class="text-muted small mb-3">Baş ofis və mağaza</p>
+                <span class="text-dark fw-semibold fs-5">@Html.Raw(address)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Form & Info -->
+    <div class="row g-5 align-items-stretch">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 h-100">
+                <h3 class="fw-bold mb-3">Bizə Mesaj Göndərin</h3>
+                <p class="text-muted mb-4">Aşağıdakı formu dolduraraq bizə birbaşa mesaj göndərə bilərsiniz.</p>
+
+                <form asp-controller="Contact" asp-action="SendMessage" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Adınız və Soyadınız *</label>
+                            <input type="text" name="name" class="form-control rounded-3 py-2" placeholder="Adınız" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Ünvanınız *</label>
+                            <input type="email" name="email" class="form-control rounded-3 py-2" placeholder="email@example.com" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Mövzu *</label>
+                            <input type="text" name="subject" class="form-control rounded-3 py-2" placeholder="Müraciətinizin mövzusu" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Mesajınız *</label>
+                            <textarea name="message" rows="5" class="form-control rounded-3 py-2" placeholder="Mesajınızı bura yazın..." required></textarea>
+                        </div>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 py-3 fw-bold">
+                                <iconify-icon icon="solar:plain-bold" class="me-2 align-middle"></iconify-icon> Mesajı Göndər
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 h-100 bg-light d-flex flex-column justify-content-between">
+                <div>
+                    <h4 class="fw-bold mb-3">İş Saatlarımız</h4>
+                    <ul class="list-unstyled mb-4">
+                        <li class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Bazar ertəsi - Cümə:</span>
+                            <span class="fw-semibold">09:00 - 20:00</span>
+                        </li>
+                        <li class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Şənbə:</span>
+                            <span class="fw-semibold">10:00 - 18:00</span>
+                        </li>
+                        <li class="d-flex justify-content-between py-2">
+                            <span class="text-muted">Bazar:</span>
+                            <span class="text-danger fw-semibold">İstirahət günü</span>
+                        </li>
+                    </ul>
+
+                    <h4 class="fw-bold mb-3">Sürətli Dəstək</h4>
+                    <p class="text-muted mb-4">Təcili suallarınız və ya sifarişləriniz üçün birbaşa telefon nömrəmizlə və ya WhatsApp vasitəsilə əlaqə saxlaya bilərsiniz.</p>
+
+                    <div class="d-flex gap-2">
+                        <a href="tel:@phone.Replace(" ", "")" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-semibold">
+                            <iconify-icon icon="solar:phone-bold" class="me-1 align-middle"></iconify-icon> Zəng et
+                        </a>
+                        <a href="mailto:@email" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold">
+                            <iconify-icon icon="solar:letter-bold" class="me-1 align-middle"></iconify-icon> Email yaz
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-top">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-white p-2 shadow-sm me-3">
+                            <iconify-icon icon="solar:shield-check-bold" class="fs-3 text-success"></iconify-icon>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">100% Müştəri Məmnuniyyəti</h6>
+                            <small class="text-muted">Bütün suallarınız mütəxəssislərimiz tərəfindən cavablandırılır.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

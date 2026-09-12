@@ -1,4 +1,4 @@
-﻿@model PetShop.DataContext.Entites.Basket
+@model PetShop.DataContext.Entites.Basket
 
 <section id="banner" class="py-3" style="background: #F9F3EC;">
     <div class="container">
@@ -46,14 +46,14 @@
                                     <td class="py-4">
                                         <div class="cart-info d-flex flex-wrap align-items-center">
                                             <div class="col-lg-3">
-                                                <img src="@mainImage" alt="@item.Product.Name" class="img-fluid">
+                                                <img src="@mainImage" alt="@item.Product.Name" class="img-fluid" loading="lazy">
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="card-detail ps-3">
                                                     <h5 class="card-title">@item.Product.Name</h5>
                                                     @if (!string.IsNullOrEmpty(variantLabel))
                                                     {
-                                                        <small class="text-muted">@variantLabel</small>
+                                                        <small class="text-secondary fw-medium">@variantLabel</small>
                                                     }
                                                 </div>
                                             </div>
@@ -68,7 +68,31 @@
                                         </form>
                                     </td>
                                     <td class="py-4 align-middle">
-                                        <span class="secondary-font fw-medium">@(item.UnitPrice* item.Quantity) ₼</span>
+                                        @{
+                                            var isDiscounted = item.Product.DiscountPrice.HasValue && item.Product.DiscountPrice.Value < item.Product.Price;
+                                            var originalUnitPrice = item.Product.Price + (item.ProductVariant?.PriceModifier ?? 0m);
+                                            var originalLineTotal = originalUnitPrice * item.Quantity;
+                                            var lineTotal = item.UnitPrice * item.Quantity;
+                                        }
+                                        <div>
+                                            @if (isDiscounted)
+                                            {
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <del class="text-muted text-decoration-line-through small">@originalLineTotal.ToString("0.00") ₼</del>
+                                                    <span class="secondary-font fw-bold text-danger fs-5">@lineTotal.ToString("0.00") ₼</span>
+                                                </div>
+                                                <small class="text-muted d-block" style="font-size: 0.8rem;">
+                                                    (@item.UnitPrice.ToString("0.00") ₼ / ədəd)
+                                                </small>
+                                            }
+                                            else
+                                            {
+                                                <span class="secondary-font fw-bold text-dark fs-5">@lineTotal.ToString("0.00") ₼</span>
+                                                <small class="text-muted d-block" style="font-size: 0.8rem;">
+                                                    (@item.UnitPrice.ToString("0.00") ₼ / ədəd)
+                                                </small>
+                                            }
+                                        </div>
                                     </td>
                                     <td class="py-4 align-middle">
                                         <form asp-controller="Basket" asp-action="Remove" method="post">
@@ -87,15 +111,84 @@
                 </div>
 
                 <div class="col-md-4">
-                    <div class="cart-totals">
-                        <h2 class="pb-4">Cart Total</h2>
-                        <table class="table text-uppercase">
+                    <!-- Kupon Bölməsi -->
+                    <div class="card border-0 shadow-sm rounded-3 p-4 mb-4 bg-light">
+                        <h5 class="fw-bold mb-3">
+                            <iconify-icon icon="mdi:ticket-percent-outline" class="me-1 align-middle text-primary"></iconify-icon> Kupon Kodu
+                        </h5>
+
+                        @if (TempData["CouponSuccess"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show small py-2 px-3 mb-3" role="alert">
+                                @TempData["CouponSuccess"]
+                                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+                        @if (TempData["CouponError"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show small py-2 px-3 mb-3" role="alert">
+                                @TempData["CouponError"]
+                                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        @if (ViewBag.AppliedCoupon != null)
+                        {
+                            var coupon = (PetShop.DataContext.Entites.Coupon)ViewBag.AppliedCoupon;
+                            <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded-2 border border-success mb-2">
+                                <div>
+                                    <span class="badge bg-success px-2 py-1 fs-6">@coupon.Code</span>
+                                    <small class="text-muted d-block mt-1">
+                                        @(coupon.DiscountType == PetShop.DataContext.Entites.DiscountType.Percentage ? $"{coupon.DiscountValue}% endirim" : $"{coupon.DiscountValue} ₼ endirim")
+                                    </small>
+                                </div>
+                                <form asp-controller="Basket" asp-action="RemoveCoupon" method="post" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Kuponu sil">
+                                        <iconify-icon icon="mdi:close" class="align-middle"></iconify-icon> Sil
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                        else
+                        {
+                            <form asp-controller="Basket" asp-action="ApplyCoupon" method="post" class="d-flex gap-2">
+                                @Html.AntiForgeryToken()
+                                <input type="text" name="couponCode" class="form-control text-uppercase" placeholder="Kupon kodunuz" required />
+                                <button type="submit" class="btn btn-dark text-nowrap px-3">Tətbiq et</button>
+                            </form>
+                            <small class="text-secondary fw-medium mt-2 d-block" style="font-size: 12px;">Sınaq üçün: <code class="text-dark fw-bold">PET10</code> və ya <code class="text-dark fw-bold">SAVE20</code></small>
+                        }
+                    </div>
+
+                    <!-- Səbət Xülasəsi -->
+                    <div class="cart-totals card border-0 shadow-sm rounded-3 p-4">
+                        <h3 class="pb-3 fw-bold border-bottom">Səbət Xülasəsi</h3>
+                        <table class="table mb-4">
                             <tbody>
-                                <tr class="order-total pt-2 pb-2 border-bottom">
-                                    <th>Total</th>
-                                    <td>
-                                        <span class="price-amount text-dark ps-5">
-                                            @Model.BasketItems.Sum(i => i.UnitPrice * i.Quantity) ₼
+                                <tr class="py-2">
+                                    <th class="border-0 text-dark fw-semibold">Ara Cəm</th>
+                                    <td class="border-0 text-end fw-semibold">
+                                        @(((decimal)(ViewBag.Subtotal ?? Model.BasketItems.Sum(i => i.UnitPrice * i.Quantity))).ToString("0.00")) ₼
+                                    </td>
+                                </tr>
+                                @if (ViewBag.DiscountAmount != null && (decimal)ViewBag.DiscountAmount > 0)
+                                {
+                                    var couponCode = ViewBag.AppliedCoupon != null ? ((PetShop.DataContext.Entites.Coupon)ViewBag.AppliedCoupon).Code : "";
+                                    <tr class="py-2 text-danger">
+                                        <th class="border-0">
+                                            Kupon Endirimi @(!string.IsNullOrEmpty(couponCode) ? $"({couponCode})" : "")
+                                        </th>
+                                        <td class="border-0 text-end fw-bold">
+                                            -@(((decimal)ViewBag.DiscountAmount).ToString("0.00")) ₼
+                                        </td>
+                                    </tr>
+                                }
+                                <tr class="order-total border-top border-bottom py-3">
+                                    <th class="fs-5 fw-bold text-dark">Yekun Məbləğ</th>
+                                    <td class="text-end">
+                                        <span class="price-amount text-primary fs-4 fw-bold">
+                                            @(((decimal)(ViewBag.Total ?? Model.BasketItems.Sum(i => i.UnitPrice * i.Quantity))).ToString("0.00")) ₼
                                         </span>
                                     </td>
                                 </tr>
@@ -103,8 +196,8 @@
                         </table>
                         <div class="button-wrap row g-2">
                             <div class="col-md-12">
-                                <a asp-controller="Checkout" asp-action="Index" class="btn btn-primary p-3 text-uppercase rounded-1 w-100">
-                                    Proceed to checkout
+                                <a asp-controller="Checkout" asp-action="Index" class="btn btn-primary p-3 text-uppercase rounded-2 w-100 fw-bold">
+                                    Sifarişi Rəsmiləşdir <iconify-icon icon="mdi:arrow-right" class="ms-1 align-middle"></iconify-icon>
                                 </a>
                             </div>
                         </div>

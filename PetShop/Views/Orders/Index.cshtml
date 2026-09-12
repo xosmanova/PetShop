@@ -1,0 +1,160 @@
+@model List<PetShop.DataContext.Entites.Order>
+@using PetShop.DataContext.Entites
+@{
+    ViewData["Title"] = "Mənim Sifarişlərim";
+}
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Mənim Sifarişlərim</h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Ana Səhifə</a>
+                <a class="breadcrumb-item nav-link" asp-controller="Account" asp-action="Profile">Hesabım</a>
+                <span class="breadcrumb-item active" aria-current="page">Sifarişlərim</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<section class="orders-section py-5 my-4">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h3 class="fw-bold mb-1">Sifariş Tarixçəsi</h3>
+                <p class="text-secondary mb-0">Bütün etdiyiniz sifarişlərin cari statusunu və detallarını buradan izləyə bilərsiniz</p>
+            </div>
+            <div class="mt-3 mt-md-0">
+                <a asp-controller="Shop" asp-action="Index" class="btn btn-outline-primary rounded-3 px-4 py-2">
+                    <iconify-icon icon="mdi:shopping-outline" class="me-1 align-middle"></iconify-icon> Alış-verişə Davam Et
+                </a>
+            </div>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="card border-0 shadow-sm rounded-4 p-5 text-center my-4">
+                <div class="py-5">
+                    <iconify-icon icon="solar:box-minimalistic-broken" class="display-1 text-muted mb-3"></iconify-icon>
+                    <h4 class="fw-bold text-dark mb-2">Hələ heç bir sifarişiniz yoxdur</h4>
+                    <p class="text-secondary mb-4 fs-6">Siz hələ layihəmizdən heç bir sifariş yerləşdirməmisiniz. Məhsullarımıza göz gəzdirin və bəyəndiklərinizi əldə edin!</p>
+                    <a asp-controller="Shop" asp-action="Index" class="btn btn-primary btn-lg rounded-3 px-5 py-3 fw-bold shadow-sm">
+                        Məhsulları Kəşf Et
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var order in Model)
+                {
+                    var badgeClass = order.Status switch
+                    {
+                        OrderStatus.Paid => "bg-success text-white",
+                        OrderStatus.Delivered => "bg-success text-white",
+                        OrderStatus.Shipped => "bg-info text-dark",
+                        OrderStatus.Processing => "bg-primary text-white",
+                        OrderStatus.Cancelled => "bg-danger text-white",
+                        _ => "bg-warning text-dark"
+                    };
+
+                    var statusText = order.Status switch
+                    {
+                        OrderStatus.Paid => "Ödənildi",
+                        OrderStatus.Delivered => "Çatdırıldı",
+                        OrderStatus.Shipped => "Yoldadır",
+                        OrderStatus.Processing => "Hazırlanır",
+                        OrderStatus.Cancelled => "Ləğv edildi",
+                        _ => "Gözləmədə"
+                    };
+
+                    var statusIcon = order.Status switch
+                    {
+                        OrderStatus.Paid => "mdi:credit-card-check-outline",
+                        OrderStatus.Delivered => "mdi:check-circle-outline",
+                        OrderStatus.Shipped => "mdi:truck-delivery-outline",
+                        OrderStatus.Processing => "mdi:progress-clock",
+                        OrderStatus.Cancelled => "mdi:close-circle-outline",
+                        _ => "mdi:clock-outline"
+                    };
+
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                            <!-- Sifariş Başlığı -->
+                            <div class="card-header bg-light border-0 py-3 px-4">
+                                <div class="row align-items-center gy-2">
+                                    <div class="col-sm-6 col-md-3">
+                                        <small class="text-dark-emphasis d-block text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Sifariş Nömrəsi</small>
+                                        <span class="fw-bold text-dark fs-6">#@order.OrderNumber</span>
+                                    </div>
+                                    <div class="col-sm-6 col-md-3">
+                                        <small class="text-dark-emphasis d-block text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Tarix</small>
+                                        <span class="text-dark fw-semibold">@order.CreatedDate.ToString("dd MMMM yyyy, HH:mm")</span>
+                                    </div>
+                                    <div class="col-sm-6 col-md-3">
+                                        <small class="text-dark-emphasis d-block text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Ümumi Məbləğ</small>
+                                        <span class="fw-bold text-primary fs-5">@order.TotalPrice.ToString("N2") ₼</span>
+                                    </div>
+                                    <div class="col-sm-6 col-md-3 text-sm-end">
+                                        <span class="badge @badgeClass px-3 py-2 rounded-pill fs-6 fw-semibold">
+                                            <iconify-icon icon="@statusIcon" class="me-1 align-middle"></iconify-icon> @statusText
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sifariş Gövdəsi -->
+                            <div class="card-body p-4">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8 mb-3 mb-lg-0">
+                                        <!-- Məhsulların miniatur şəkilləri və adları -->
+                                        <div class="d-flex flex-wrap gap-3 align-items-center">
+                                            @foreach (var item in order.OrderItems.Take(4))
+                                            {
+                                                var rawImg = item.Product?.Images?.FirstOrDefault(i => i.IsMain)?.ImageUrl
+                                                          ?? item.Product?.Images?.FirstOrDefault()?.ImageUrl
+                                                          ?? "/images/item1.jpg";
+                                                var imgSrc = rawImg.StartsWith("~")
+                                                    ? Url.Content(rawImg)
+                                                    : (rawImg.StartsWith("/") ? rawImg : "/" + rawImg);
+                                                <div class="d-flex align-items-center border rounded-3 p-2 bg-light" style="max-width: 260px;">
+                                                    <img src="@imgSrc" alt="@(item.Product?.Name ?? "Məhsul")" class="rounded-2 object-fit-cover me-2" style="width: 50px; height: 50px;" loading="lazy" />
+                                                    <div class="text-truncate">
+                                                        <span class="d-block fw-semibold text-dark text-truncate small" style="max-width: 170px;">@(item.Product?.Name ?? "Məhsul #" + item.ProductId)</span>
+                                                        <small class="text-dark-emphasis fw-medium">
+                                                            @item.Quantity ədəd × @item.UnitPrice.ToString("N2") ₼
+                                                            @if (item.ProductVariant != null)
+                                                            {
+                                                                <span class="text-primary">(@(item.ProductVariant.Size ?? item.ProductVariant.Color))</span>
+                                                            }
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (order.OrderItems.Count > 4)
+                                            {
+                                                <div class="d-flex align-items-center justify-content-center border rounded-3 bg-white p-3 text-dark-emphasis fw-bold">
+                                                    +@(order.OrderItems.Count - 4) digər məhsul
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 text-lg-end">
+                                        <div class="mb-2">
+                                            <small class="text-secondary d-block">Çatdırılma: <strong class="text-dark">@order.Address, @order.City</strong></small>
+                                        </div>
+                                        <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="btn btn-primary rounded-3 px-4 py-2 fw-semibold">
+                                            Detallı Baxış <iconify-icon icon="mdi:arrow-right" class="ms-1 align-middle"></iconify-icon>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

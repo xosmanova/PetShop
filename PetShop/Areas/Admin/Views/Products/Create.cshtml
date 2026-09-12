@@ -1,0 +1,409 @@
+@model PetShop.Areas.Admin.Models.ProductFormViewModel
+@{
+    ViewData["Title"] = "Yeni Məhsul | Admin";
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+        
+        <!-- Səhifə Başlığı -->
+        <div class="page-heading d-flex justify-content-between align-items-center mb-4">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-plus-circle-dotted" aria-hidden="true"></i></span>
+                <div>
+                    <p class="eyebrow mb-1">Kataloq İdarəetməsi</p>
+                    <h1 class="h3 mb-1">Yeni Məhsul Əlavə Et</h1>
+                    <p class="text-muted mb-0">Məhsulun əsas parametrlərini, şəklini və fərqli variantlarını təyin edin.</p>
+                </div>
+            </div>
+            <div class="heading-actions">
+                <a asp-action="Index" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Siyahıya Qayıt</span>
+                </a>
+            </div>
+        </div>
+
+        <form method="post" asp-action="Create" enctype="multipart/form-data" id="productForm">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+            <div class="row g-4">
+                <!-- Sol Sütun: Əsas Məlumatlar -->
+                <div class="col-12 col-lg-8">
+                    <!-- Əsas Parametrlər Kartı -->
+                    <div class="panel mb-4">
+                        <div class="panel-header">
+                            <h2 class="h5 mb-0 section-title">
+                                <i class="bi bi-info-circle"></i>
+                                <span>Əsas Məlumatlar</span>
+                            </h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="mb-3">
+                                <label asp-for="Name" class="form-label fw-semibold">Məhsul Adı <span class="text-danger">*</span></label>
+                                <input asp-for="Name" class="form-control" placeholder="Məs: Royal Canin Maxi Adult 15kg" />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label fw-semibold">Təsvir</label>
+                                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Məhsul haqqında ətraflı məlumat..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Price" class="form-label fw-semibold">Qiymət (₼) <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₼</span>
+                                        <input asp-for="Price" type="number" step="0.01" min="0" class="form-control" placeholder="0.00" />
+                                    </div>
+                                    <span asp-validation-for="Price" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="DiscountPrice" class="form-label fw-semibold">Endirimli Qiymət (₼)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₼</span>
+                                        <input asp-for="DiscountPrice" type="number" step="0.01" min="0" class="form-control" placeholder="İstəyə bağlı" />
+                                    </div>
+                                    <span asp-validation-for="DiscountPrice" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-6">
+                                    <label asp-for="StockQuantity" class="form-label fw-semibold">Əsas Stok Sayı <span class="text-danger">*</span></label>
+                                    <input asp-for="StockQuantity" type="number" min="0" class="form-control" placeholder="0" />
+                                    <span asp-validation-for="StockQuantity" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="Sku" class="form-label fw-semibold">SKU Kodu</label>
+                                    <input asp-for="Sku" class="form-control" placeholder="Məs: RC-MAXI-15" />
+                                    <span asp-validation-for="Sku" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dinamik Variantlar Kartı (ProductVariant) -->
+                    <div class="panel mb-4">
+                        <div class="panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h2 class="h5 mb-0 section-title">
+                                        <i class="bi bi-layers"></i>
+                                        <span>Məhsul Variantları</span>
+                                    </h2>
+                                    <span id="variantCategoryNotice" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+                                        <i class="bi bi-box-seam me-1"></i> Yem Çəkiləri (Weight)
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-0 mt-1">Seçilmiş kateqoriyaya görə çəki və ya ölçü, qiymət fərqi və fərdi stok təyin edin.</p>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" id="btnAddVariant">
+                                <i class="bi bi-plus-lg"></i>
+                                <span>Variant Əlavə Et</span>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle mb-0" id="variantsTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="col-variant-size" style="display: none;">Ölçü (Size)</th>
+                                            <th class="col-variant-weight">Çəki (Weight)</th>
+                                            <th>Rəng (Color)</th>
+                                            <th>Qiymət Fərqi (+/- ₼)</th>
+                                            <th>Stok Sayı</th>
+                                            <th style="width: 50px;" class="text-center">Sil</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="variantsContainer">
+                                        @if (Model.Variants != null && Model.Variants.Count > 0)
+                                        {
+                                            for (int i = 0; i < Model.Variants.Count; i++)
+                                            {
+                                                <tr class="variant-row" data-index="@i">
+                                                    <td class="col-variant-size" style="display: none;">
+                                                        <input type="hidden" name="Variants[@i].Id" value="@Model.Variants[i].Id" />
+                                                        <input type="hidden" name="Variants[@i].IsDeleted" class="is-deleted" value="false" />
+                                                        <input type="text" name="Variants[@i].Size" value="@Model.Variants[i].Size" class="form-control form-control-sm variant-size-input" placeholder="Məs: S, M, L, XL" />
+                                                    </td>
+                                                    <td class="col-variant-weight">
+                                                        <input type="text" name="Variants[@i].Weight" value="@Model.Variants[i].Weight" class="form-control form-control-sm variant-weight-input" placeholder="Məs: 500g, 1kg, 2kg" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="Variants[@i].Color" value="@Model.Variants[i].Color" class="form-control form-control-sm" placeholder="Məs: Qırmızı, Mavi" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" name="Variants[@i].PriceModifier" value="@Model.Variants[i].PriceModifier" class="form-control form-control-sm" placeholder="0.00" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" min="0" name="Variants[@i].StockQuantity" value="@Model.Variants[i].StockQuantity" class="form-control form-control-sm" placeholder="0" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-variant" title="Variantı sil">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="noVariantsAlert" class="text-center py-3 text-muted border rounded mt-2 @(Model.Variants != null && Model.Variants.Count > 0 ? "d-none" : "")">
+                                <i class="bi bi-info-circle me-1"></i> Hələ heç bir variant əlavə edilməyib. Əgər məhsulun fərqli ölçü və ya çəkiləri varsa, "Variant Əlavə Et" düyməsindən istifadə edin.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sağ Sütun: Kateqoriya, Brend, Şəkil, Status -->
+                <div class="col-12 col-lg-4">
+                    <!-- Kateqoriya və Brend Kartı -->
+                    <div class="panel mb-4">
+                        <div class="panel-header">
+                            <h2 class="h5 mb-0 section-title">
+                                <i class="bi bi-tags"></i>
+                                <span>Təsnifat</span>
+                            </h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="mb-3">
+                                <label asp-for="ProductCategoryId" class="form-label fw-semibold">Kateqoriya <span class="text-danger">*</span></label>
+                                <select asp-for="ProductCategoryId" asp-items="ViewBag.Categories" class="form-select">
+                                    <option value="">-- Kateqoriya Seçin --</option>
+                                </select>
+                                <span asp-validation-for="ProductCategoryId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="BrandId" class="form-label fw-semibold">Brend</label>
+                                <select asp-for="BrandId" asp-items="ViewBag.Brands" class="form-select">
+                                    <option value="">-- Brend Seçin (İstəyə bağlı) --</option>
+                                </select>
+                                <span asp-validation-for="BrandId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="form-check form-switch mt-3">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" id="isActiveSwitch" checked />
+                                <label class="form-check-label fw-semibold" for="isActiveSwitch">Məhsul Aktivdir</label>
+                                <div class="text-muted small">Qeyri-aktiv edilsə, saytda göstərilməyəcək.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Şəkil Yükləmə Kartı (ProductImage) -->
+                    <div class="panel mb-4">
+                        <div class="panel-header">
+                            <h2 class="h5 mb-0 section-title">
+                                <i class="bi bi-image"></i>
+                                <span>Əsas Şəkil</span>
+                            </h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="mb-3">
+                                <label asp-for="ImageFile" class="form-label fw-semibold">Şəkil Seçin</label>
+                                <input asp-for="ImageFile" type="file" class="form-control" id="imageInput" accept="image/*" />
+                                <div class="text-muted small mt-1">Dəstəklənən formatlar: JPG, PNG, WEBP. Şəkil <code>wwwroot/images/products</code> qovluğuna yüklənəcək.</div>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <div id="imagePreviewContainer" class="d-none">
+                                    <p class="small text-muted mb-1">Seçilmiş Şəkil:</p>
+                                    <img id="imagePreview" src="#" alt="Önbaxış" 
+                                         class="img-thumbnail shadow-sm rounded" 
+                                         style="max-height: 180px; max-width: 100%; object-fit: contain;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Əməliyyat Düymələri -->
+                    <div class="panel">
+                        <div class="p-3 d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2">
+                                <i class="bi bi-check-lg fs-5"></i>
+                                <span>Məhsulu Yadda Saxla</span>
+                            </button>
+                            <a asp-action="Index" class="btn btn-light text-muted">Ləğv Et</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // ================= 1. Şəkil Önbaxışı (Image Preview) =================
+            var imageInput = document.getElementById('imageInput');
+            var previewContainer = document.getElementById('imagePreviewContainer');
+            var previewImage = document.getElementById('imagePreview');
+
+            if (imageInput) {
+                imageInput.addEventListener('change', function () {
+                    var file = this.files[0];
+                    if (file) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            previewImage.src = e.target.result;
+                            previewContainer.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        previewImage.src = '#';
+                        previewContainer.classList.add('d-none');
+                    }
+                });
+            }
+
+            // ================= 2. Dinamik Variantlar (ProductVariant JS) =================
+            var btnAddVariant = document.getElementById('btnAddVariant');
+            var variantsContainer = document.getElementById('variantsContainer');
+            var noVariantsAlert = document.getElementById('noVariantsAlert');
+            var categorySelect = document.getElementById('ProductCategoryId');
+            var variantCategoryNotice = document.getElementById('variantCategoryNotice');
+            var categoryTypeMap = @Html.Raw(ViewBag.CategoryTypeMapJson ?? "{}");
+
+            function isClothingCategory() {
+                if (!categorySelect) return false;
+                var selectedCatId = categorySelect.value;
+                if (!selectedCatId) return false;
+                var type = categoryTypeMap[selectedCatId];
+                if (type === 'size') return true;
+                
+                // Fallback yoxlama
+                var selectedText = categorySelect.options[categorySelect.selectedIndex]?.text || '';
+                return selectedText.toLowerCase().includes('geyim');
+            }
+
+            function updateVariantInputsForCategory() {
+                var isClothing = isClothingCategory();
+
+                // Cədvəl başlıqları
+                document.querySelectorAll('#variantsTable .col-variant-size').forEach(function (el) {
+                    el.style.display = isClothing ? '' : 'none';
+                });
+                document.querySelectorAll('#variantsTable .col-variant-weight').forEach(function (el) {
+                    el.style.display = isClothing ? 'none' : '';
+                });
+
+                // Mövcud sətirlərdə hüceyrələr
+                document.querySelectorAll('#variantsTable td.col-variant-size').forEach(function (el) {
+                    el.style.display = isClothing ? '' : 'none';
+                });
+                document.querySelectorAll('#variantsTable td.col-variant-weight').forEach(function (el) {
+                    el.style.display = isClothing ? 'none' : '';
+                });
+
+                // Qarşılıqlı təmizləmə: aktiv olmayanın dəyərini sıfırla ki, backend-ə yalnız müvafiq sahə getsin
+                if (isClothing) {
+                    document.querySelectorAll('#variantsTable .variant-weight-input').forEach(function (input) {
+                        input.value = '';
+                    });
+                } else {
+                    document.querySelectorAll('#variantsTable .variant-size-input').forEach(function (input) {
+                        input.value = '';
+                    });
+                }
+
+                // Xəbərdarlıq nişanı
+                if (variantCategoryNotice) {
+                    if (isClothing) {
+                        variantCategoryNotice.className = 'badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 small';
+                        variantCategoryNotice.innerHTML = '<i class="bi bi-tag me-1"></i> Geyim Ölçüləri (Size: S, M, L, XL)';
+                    } else {
+                        variantCategoryNotice.className = 'badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small';
+                        variantCategoryNotice.innerHTML = '<i class="bi bi-box-seam me-1"></i> Yem Çəkiləri (Weight: 500g, 1kg, 2kg)';
+                    }
+                }
+            }
+
+            if (categorySelect) {
+                categorySelect.addEventListener('change', updateVariantInputsForCategory);
+                updateVariantInputsForCategory();
+            }
+
+            function getNextIndex() {
+                var rows = variantsContainer.querySelectorAll('.variant-row');
+                return rows.length;
+            }
+
+            function reindexVariants() {
+                var rows = variantsContainer.querySelectorAll('.variant-row');
+                rows.forEach(function (row, idx) {
+                    row.setAttribute('data-index', idx);
+                    var inputs = row.querySelectorAll('input');
+                    inputs.forEach(function (input) {
+                        var name = input.getAttribute('name');
+                        if (name) {
+                            input.setAttribute('name', name.replace(/Variants\[\d+\]/, 'Variants[' + idx + ']'));
+                        }
+                    });
+                });
+
+                if (rows.length === 0 && noVariantsAlert) {
+                    noVariantsAlert.classList.remove('d-none');
+                } else if (noVariantsAlert) {
+                    noVariantsAlert.classList.add('d-none');
+                }
+            }
+
+            if (btnAddVariant && variantsContainer) {
+                btnAddVariant.addEventListener('click', function () {
+                    var index = getNextIndex();
+                    var isClothing = isClothingCategory();
+
+                    var tr = document.createElement('tr');
+                    tr.className = 'variant-row';
+                    tr.setAttribute('data-index', index);
+                    tr.innerHTML = `
+                        <td class="col-variant-size" style="${isClothing ? '' : 'display: none;'}">
+                            <input type="hidden" name="Variants[${index}].Id" value="0" />
+                            <input type="hidden" name="Variants[${index}].IsDeleted" class="is-deleted" value="false" />
+                            <input type="text" name="Variants[${index}].Size" class="form-control form-control-sm variant-size-input" placeholder="Məs: S, M, L, XL" />
+                        </td>
+                        <td class="col-variant-weight" style="${isClothing ? 'display: none;' : ''}">
+                            <input type="text" name="Variants[${index}].Weight" class="form-control form-control-sm variant-weight-input" placeholder="Məs: 500g, 1kg, 2kg" />
+                        </td>
+                        <td>
+                            <input type="text" name="Variants[${index}].Color" class="form-control form-control-sm" placeholder="Məs: Qırmızı, Mavi" />
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="Variants[${index}].PriceModifier" value="0" class="form-control form-control-sm" placeholder="0.00" />
+                        </td>
+                        <td>
+                            <input type="number" min="0" name="Variants[${index}].StockQuantity" value="0" class="form-control form-control-sm" placeholder="0" />
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove-variant" title="Variantı sil">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    `;
+
+                    variantsContainer.appendChild(tr);
+                    reindexVariants();
+                });
+
+                // Variant silinməsi (Event delegation)
+                variantsContainer.addEventListener('click', function (e) {
+                    var btn = e.target.closest('.btn-remove-variant');
+                    if (btn) {
+                        var row = btn.closest('.variant-row');
+                        if (row) {
+                            row.remove();
+                            reindexVariants();
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -1,50 +1,749 @@
-﻿@model PetShop.DataContext.Entites.Product
+@model PetShop.Models.ProductDetailsViewModel
 
 <section id="banner" class="py-3" style="background: #F9F3EC;">
     <div class="container">
-        <div class="hero-content py-5 my-3">
-            <h2 class="display-1 mt-3 mb-0">@Model.Name</h2>
+        <div class="hero-content py-4 my-2">
+            <h2 class="display-3 mt-2 mb-0">@Model.Product.Name</h2>
             <nav class="breadcrumb">
-                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Home</a>
-                <a class="breadcrumb-item nav-link" asp-controller="Shop" asp-action="Index">Shop</a>
-                <span class="breadcrumb-item active" aria-current="page">@Model.Name</span>
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Ana Səhifə</a>
+                <a class="breadcrumb-item nav-link" asp-controller="Shop" asp-action="Index">Mağaza</a>
+                @if (Model.Product.ProductCategory != null)
+                {
+                    <a class="breadcrumb-item nav-link" asp-controller="Shop" asp-action="Index" asp-route-categoryId="@Model.Product.ProductCategoryId">@Model.Product.ProductCategory.Name</a>
+                }
+                <span class="breadcrumb-item active" aria-current="page">@Model.Product.Name</span>
             </nav>
         </div>
     </div>
 </section>
 
 <div class="container my-5">
-    <div class="row">
-        <div class="col-md-6">
-            @{
-                var mainImage = Model.Images.FirstOrDefault(i => i.IsMain)?.ImageUrl ?? "/images/no-image.png";
-            }
-            <img src="@mainImage" class="img-fluid rounded-4" alt="@Model.Name">
+    <!-- Bildiriş Mesajları -->
+    @if (TempData["ReviewSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <div>@TempData["ReviewSuccess"]</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
         </div>
-        <div class="col-md-6">
-            <h2>@Model.Name</h2>
-            <p class="text-muted">@Model.Description</p>
-            <h3 class="text-primary">@(Model.DiscountPrice ?? Model.Price) ₼</h3>
+    }
+    @if (TempData["ReviewError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>@TempData["ReviewError"]</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+        </div>
+    }
 
-            @if (Model.Variants.Any())
-            {
-                <div class="my-3">
-                    <label>Variant seçin:</label>
-                    <select class="form-select">
-                        @foreach (var variant in Model.Variants)
-                        {
-                            var label = string.Join(" / ", new[] { variant.Size, variant.Weight, variant.Color }.Where(x => !string.IsNullOrEmpty(x)));
-                            <option value="@variant.Id">@label</option>
-                        }
-                    </select>
-                </div>
+    <!-- Məhsul Məlumatları -->
+    <div class="row g-4 align-items-start">
+        <div class="col-12 col-md-6">
+            @{
+                var mainImage = Model.Product.Images.FirstOrDefault(i => i.IsMain)?.ImageUrl 
+                    ?? Model.Product.Images.FirstOrDefault()?.ImageUrl 
+                    ?? "/images/no-image.png";
             }
+            <div class="product-gallery p-3 bg-light rounded-4 text-center border">
+                <img src="@mainImage" class="img-fluid rounded-3" alt="@Model.Product.Name" style="max-height: 480px; object-fit: contain;" loading="lazy">
+                @if (Model.Product.Images.Count > 1)
+                {
+                    <div class="d-flex gap-2 mt-3 justify-content-center flex-wrap">
+                        @foreach (var img in Model.Product.Images)
+                        {
+                            <img src="@img.ImageUrl" class="rounded border p-1" style="width: 70px; height: 70px; object-fit: cover; cursor: pointer;" alt="thumbnail" loading="lazy" />
+                        }
+                    </div>
+                }
+            </div>
+        </div>
 
-            <form asp-controller="Basket" asp-action="AddToCart" method="post" class="mt-4">
-                <input type="hidden" name="productId" value="@Model.Id" />
-                <input type="hidden" name="quantity" value="1" />
-                <button type="submit" class="btn btn-dark btn-lg">Add to Cart</button>
-            </form>
+        <div class="col-12 col-md-6">
+            <div class="ps-lg-3">
+                <span class="badge bg-secondary-subtle text-secondary-emphasis mb-2">
+                    @(Model.Product.ProductCategory?.Name ?? "Məhsul")
+                </span>
+                @if (Model.Product.Brand != null)
+                {
+                    <span class="badge bg-light text-dark border ms-1 mb-2">Brend: @Model.Product.Brand.Name</span>
+                }
+
+                <h1 class="h2 fw-bold mb-2">@Model.Product.Name</h1>
+
+                <!-- Orta Reytinq Ulduzları və Rəy Sayı -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="rating-stars text-warning fs-5">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (Model.AverageRating >= i)
+                            {
+                                <i class="bi bi-star-fill text-warning"></i>
+                            }
+                            else if (Model.AverageRating >= i - 0.5)
+                            {
+                                <i class="bi bi-star-half text-warning"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star text-muted"></i>
+                            }
+                        }
+                    </div>
+                    <span class="fw-bold text-dark fs-6">@(Model.TotalReviews > 0 ? Model.AverageRating.ToString("0.0") : "Yeni")</span>
+                    <span class="text-secondary">•</span>
+                    <a href="#reviews" class="text-decoration-underline text-secondary small fw-medium">
+                        @(Model.TotalReviews == 0 ? "Hələ rəy yoxdur" : $"{Model.TotalReviews} rəy")
+                    </a>
+                </div>
+
+                <div class="d-flex align-items-baseline gap-3 mb-3">
+                    <h2 class="text-primary fw-bold mb-0" id="displayedPrice">@(Model.Product.DiscountPrice ?? Model.Product.Price) ₼</h2>
+                    @if (Model.Product.DiscountPrice.HasValue && Model.Product.DiscountPrice.Value < Model.Product.Price)
+                    {
+                        <span class="text-secondary text-decoration-line-through fs-5" id="displayedOriginalPrice">@Model.Product.Price ₼</span>
+                        <span class="badge text-bg-danger" id="discountBadge">Endirim</span>
+                    }
+                    else
+                    {
+                        <span class="text-secondary text-decoration-line-through fs-5 d-none" id="displayedOriginalPrice"></span>
+                        <span class="badge text-bg-danger d-none" id="discountBadge">Endirim</span>
+                    }
+                </div>
+
+                <p class="text-dark mb-4 lead fs-6" style="line-height: 1.7;">@Model.Product.Description</p>
+
+                @{
+                    var variants = Model.Product.Variants?.ToList() ?? new List<PetShop.DataContext.Entites.ProductVariant>();
+                    var hasVariants = variants.Any();
+                    var hasWeightVariants = variants.Any(v => !string.IsNullOrWhiteSpace(v.Weight));
+                    var hasSizeVariants = variants.Any(v => !string.IsNullOrWhiteSpace(v.Size));
+                    var isClothingCategory = (Model.Product.ProductCategory != null && 
+                        (Model.Product.ProductCategory.Slug.StartsWith("cloth") || Model.Product.ProductCategory.Name.Contains("Geyim"))) || hasSizeVariants;
+                }
+
+                @if (hasVariants && hasSizeVariants)
+                {
+                    <!-- GEYİM MƏHSULLARI ÜÇÜN (Size sahəsi doludursa) — DÜYMƏLƏR -->
+                    <div class="mb-4 p-3 bg-light rounded-3 border" id="sizeVariantContainer">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold mb-0 text-dark">
+                                <i class="bi bi-tag text-primary me-1"></i> Ölçü seçin:
+                            </label>
+                            <span class="badge bg-light text-dark border px-2 py-1" id="sizeStockBadge">
+                                Seçilmiş stok: <strong id="sizeStockCount">--</strong> ədəd
+                            </span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 pt-1" id="sizeButtonsGroup">
+                            @foreach (var v in variants.Where(x => !string.IsNullOrWhiteSpace(x.Size)))
+                            {
+                                var isOutOfStock = v.StockQuantity <= 0;
+                                var isLowStock = v.StockQuantity > 0 && v.StockQuantity <= 10;
+                                <button type="button" 
+                                        class="btn size-variant-btn p-2 text-center rounded-3 border position-relative @(isOutOfStock ? "disabled bg-light text-muted border-secondary-subtle" : "bg-white border-2")"
+                                        style="min-width: 82px; min-height: 72px; cursor: @(isOutOfStock ? "not-allowed" : "pointer");"
+                                        data-id="@v.Id"
+                                        data-size="@v.Size"
+                                        data-price-modifier="@v.PriceModifier.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-stock="@v.StockQuantity"
+                                        @(isOutOfStock ? "disabled" : "")>
+                                    <div class="fw-bold fs-5 size-title">@v.Size</div>
+                                    <div class="small stock-caption @(isOutOfStock ? "text-danger" : "text-secondary")" style="font-size: 0.8rem;">
+                                        @(isOutOfStock ? "0 ədəd" : $"{v.StockQuantity} ədəd")
+                                    </div>
+                                    @if (isLowStock)
+                                    {
+                                        <span class="badge bg-warning text-dark position-absolute top-0 start-100 translate-middle rounded-pill shadow-sm" 
+                                              style="font-size: 0.65rem; z-index: 2;" 
+                                              title="Son @v.StockQuantity ədəd!">
+                                            Son @v.StockQuantity!
+                                        </span>
+                                    }
+                                </button>
+                            }
+                        </div>
+                        <div id="sizeStockAlert" class="mt-2 text-warning-emphasis small fw-semibold d-none"></div>
+                    </div>
+                }
+                else if (hasVariants && hasWeightVariants)
+                {
+                    <!-- YEM MƏHSULLARI ÜÇÜN (Weight sahəsi doludursa) — DROPDOWN -->
+                    <div class="mb-4 p-3 bg-light rounded-3 border" id="weightVariantContainer">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="weightVariantSelector" class="form-label fw-bold mb-0 text-dark">
+                                <i class="bi bi-box-seam text-primary me-1"></i> Çəki seçin:
+                            </label>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" id="weightStockBadge">
+                                Stok: <strong id="weightStockCount">--</strong> ədəd
+                            </span>
+                        </div>
+                        <select class="form-select form-select-lg fw-semibold" id="weightVariantSelector">
+                            @foreach (var v in variants.Where(x => !string.IsNullOrWhiteSpace(x.Weight)))
+                            {
+                                var priceExtra = v.PriceModifier > 0 ? $" (+{v.PriceModifier} ₼)" : (v.PriceModifier < 0 ? $" ({v.PriceModifier} ₼)" : "");
+                                var stockNotice = v.StockQuantity <= 0 ? " (Bitib)" : "";
+                                <option value="@v.Id" 
+                                        data-price-modifier="@v.PriceModifier.ToString(System.Globalization.CultureInfo.InvariantCulture)" 
+                                        data-stock="@v.StockQuantity"
+                                        data-weight="@v.Weight">
+                                    @v.Weight @priceExtra @stockNotice
+                                </option>
+                            }
+                        </select>
+                        <div id="weightStockAlert" class="mt-2 text-warning-emphasis small fw-semibold d-none"></div>
+                    </div>
+                }
+                else if (hasVariants)
+                {
+                    <!-- Digər Ümumi Variantlar üçün açılan menyu -->
+                    <div class="mb-4 p-3 bg-light rounded-3 border">
+                        <label class="form-label fw-semibold mb-2">Mövcud Variantlar:</label>
+                        <select class="form-select" id="generalVariantSelector">
+                            @foreach (var variant in variants)
+                            {
+                                var label = string.Join(" / ", new[] { variant.Size, variant.Weight, variant.Color }.Where(x => !string.IsNullOrEmpty(x)));
+                                var priceExtra = variant.PriceModifier > 0 ? $" (+{variant.PriceModifier} ₼)" : (variant.PriceModifier < 0 ? $" ({variant.PriceModifier} ₼)" : "");
+                                <option value="@variant.Id"
+                                        data-price-modifier="@variant.PriceModifier.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-stock="@variant.StockQuantity">
+                                    @(string.IsNullOrEmpty(label) ? "Standart" : label) @priceExtra (Stok: @variant.StockQuantity ədəd)
+                                </option>
+                            }
+                        </select>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-3 text-secondary small">
+                        <i class="bi bi-box-seam me-1 text-primary"></i> Mövcud Stok: <strong>@Model.Product.StockQuantity</strong> ədəd
+                    </div>
+                }
+
+                <form asp-controller="Basket" asp-action="AddToCart" method="post" class="mt-4" id="addToCartForm">
+                    <input type="hidden" name="productId" value="@Model.Product.Id" />
+                    <input type="hidden" name="productVariantId" id="selectedVariantId" value="" />
+                    <div class="d-flex gap-2">
+                        <input type="number" name="quantity" id="cartQuantityInput" value="1" min="1" max="@Math.Max(1, Model.Product.StockQuantity)" class="form-control text-center" style="width: 80px;" />
+                        <button type="submit" id="btnAddToCart" class="btn btn-dark btn-lg flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi bi-cart-plus"></i>
+                            <span id="btnAddToCartText">Səbətə Əlavə Et</span>
+                        </button>
+                    </div>
+                    <div id="stockNoticeAlert" class="mt-2 small fw-semibold d-none"></div>
+                </form>
+
+                <div class="mt-4 pt-3 border-top d-flex gap-4 text-secondary small fw-medium">
+                    <div><i class="bi bi-shield-check text-success me-1"></i> Keyfiyyət zəmanəti</div>
+                    <div><i class="bi bi-truck text-primary me-1"></i> Sürətli çatdırılma</div>
+                    <div><i class="bi bi-arrow-counterclockwise text-warning me-1"></i> 14 gün qaytarılma</div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- RƏYLƏR VƏ QİYMƏTLƏNDİRMƏ BÖLMƏSİ -->
+    <section id="reviews" class="mt-5 pt-5 border-top">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h3 class="fw-bold mb-1">Müştəri Rəyləri</h3>
+                <p class="text-muted mb-0">Bu məhsulu alan müştərilərin təcrübəsi və qiymətləndirmələri.</p>
+            </div>
+            <span class="badge bg-light text-dark border fs-6 px-3 py-2">
+                Cəmi: <strong>@Model.TotalReviews</strong> rəy
+            </span>
+        </div>
+
+        <div class="row g-4">
+            <!-- Reytinq Xülasəsi Kartı -->
+            <div class="col-12 col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-light h-100">
+                    <h5 class="fw-bold mb-3">Ümumi Qiymətləndirmə</h5>
+                    
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="display-3 fw-bold text-dark mb-0">
+                            @(Model.TotalReviews > 0 ? Model.AverageRating.ToString("0.0") : "0.0")
+                        </div>
+                        <div>
+                            <div class="text-warning fs-4 mb-1">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (Model.AverageRating >= i)
+                                    {
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    }
+                                    else if (Model.AverageRating >= i - 0.5)
+                                    {
+                                        <i class="bi bi-star-half text-warning"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star text-muted"></i>
+                                    }
+                                }
+                            </div>
+                            <span class="text-secondary small fw-medium">@Model.TotalReviews müştəri rəyinə əsasən</span>
+                        </div>
+                    </div>
+
+                    <!-- Ulduz Paylanması Qrafiki (Breakdown Bars) -->
+                    <div class="rating-breakdown">
+                        @for (int star = 5; star >= 1; star--)
+                        {
+                            var count = Model.RatingDistribution.ContainsKey(star) ? Model.RatingDistribution[star] : 0;
+                            var percent = Model.TotalReviews > 0 ? (int)Math.Round((count / (double)Model.TotalReviews) * 100) : 0;
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="text-dark-emphasis small fw-medium" style="width: 50px;">@star ulduz</span>
+                                <div class="progress flex-grow-1" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <span class="text-dark-emphasis small fw-medium text-end" style="width: 45px;">@count (@percent%)</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top small text-secondary fw-medium">
+                        <i class="bi bi-info-circle me-1"></i> Rəylər yalnız məhsulu real sifariş etmiş təsdiqlənmiş müştərilər tərəfindən yazılır.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rəy Yazma Bloku -->
+            <div class="col-12 col-lg-7">
+                <div class="card border shadow-sm rounded-4 p-4 h-100">
+                    @if (!Model.IsUserAuthenticated)
+                    {
+                        <div class="text-center py-4 my-auto">
+                            <div class="text-primary mb-3">
+                                <i class="bi bi-shield-lock fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold">Rəy bildirmək istəyirsiniz?</h5>
+                            <p class="text-muted small mb-4">
+                                Rəy yazmaq və məhsulu qiymətləndirmək üçün zəhmət olmasa şəxsi kabinetinizə daxil olun.
+                            </p>
+                            <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Shop", new { id = Model.Product.Id })" class="btn btn-dark px-4">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Daxil Ol
+                            </a>
+                        </div>
+                    }
+                    else if (!Model.HasPurchased)
+                    {
+                        <div class="text-center py-4 my-auto">
+                            <div class="text-warning mb-3">
+                                <i class="bi bi-bag-x fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold">Yalnız Alıcılar Üçün</h5>
+                            <p class="text-muted small mb-3">
+                                Rəylərin şəffaflığını və etibarlılığını təmin etmək üçün yalnız bu məhsulu sifariş etmiş istifadəçilər rəy yaza bilər.
+                            </p>
+                            <div class="alert alert-warning py-2 px-3 small d-inline-block text-start mb-0">
+                                <i class="bi bi-exclamation-circle me-1"></i> Sizin bu məhsul üzrə tamamlanmış sifarişiniz aşkar edilmədi. Məhsulu sifariş etdikdən sonra rəy yaza bilərsiniz.
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h5 class="fw-bold mb-1">
+                                        @(Model.HasReviewed ? "Rəyinizi Yeniləyin" : "Məhsula Rəy Yazın")
+                                    </h5>
+                                    <p class="text-muted small mb-0">Məhsul haqqında təcrübənizi digər müştərilərlə bölüşün.</p>
+                                </div>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    <i class="bi bi-patch-check-fill me-1"></i>Təsdiqlənmiş Alıcı
+                                </span>
+                            </div>
+
+                            @if (Model.HasReviewed)
+                            {
+                                <div class="alert alert-info py-2 px-3 small mb-3">
+                                    <i class="bi bi-info-circle me-1"></i> Siz artıq bu məhsula rəy bildirmisiniz. Aşağıdakı formdan istifadə edərək rəyinizi istənilən vaxt yeniləyə bilərsiniz.
+                                </div>
+                            }
+
+                            <form asp-controller="Shop" asp-action="AddReview" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ProductId" value="@Model.Product.Id" />
+
+                                <!-- Ulduz Seçimi -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small text-muted mb-1">Qiymətləndirmə (1-5 Ulduz) <span class="text-danger">*</span></label>
+                                    <div class="rating-input d-flex align-items-center gap-2">
+                                        <div class="star-rating-group d-flex flex-row-reverse justify-content-start gap-1">
+                                            @for (int s = 5; s >= 1; s--)
+                                            {
+                                                var isChecked = Model.NewReview.Rating == s;
+                                                <input type="radio" name="Rating" value="@s" id="star-@s" class="star-radio d-none" @(isChecked ? "checked" : "") />
+                                                <label for="star-@s" class="star-label cursor-pointer fs-4 text-warning" title="@s ulduz">
+                                                    <i class="bi bi-star"></i>
+                                                </label>
+                                            }
+                                        </div>
+                                        <span id="selectedRatingText" class="fw-bold text-muted small ms-2">@Model.NewReview.Rating ulduz</span>
+                                    </div>
+                                </div>
+
+                                <!-- Rəy Mətni -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small text-muted mb-1">Rəyiniz <span class="text-danger">*</span></label>
+                                    <textarea name="Comment" rows="4" class="form-control" placeholder="Məhsulun keyfiyyəti, faydası və çatdırılma barədə fikirlərinizi qeyd edin..." required maxlength="1000">@Model.NewReview.Comment</textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                                    <i class="bi bi-send-fill"></i>
+                                    <span>@(Model.HasReviewed ? "Rəyi Yenilə" : "Rəyi Dərc Et")</span>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Mövcud Rəylər Siyahısı -->
+        <div class="mt-5">
+            <h4 class="fw-bold mb-4">Bütün Rəylər (@Model.TotalReviews)</h4>
+
+            @if (Model.Reviews.Count == 0)
+            {
+                <div class="text-center py-5 bg-light rounded-4 border">
+                    <i class="bi bi-chat-heart display-4 text-muted mb-2 d-block"></i>
+                    <h5 class="text-muted fw-semibold">Hələ heç bir rəy yazılmayıb</h5>
+                    <p class="text-muted small mb-0">Bu məhsulu alan ilk müştəri olun və təcrübənizi bölüşün!</p>
+                </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        var reviewerName = !string.IsNullOrWhiteSpace(review.User?.FirstName)
+                            ? $"{review.User.FirstName} {review.User.LastName}".Trim()
+                            : (review.User?.UserName ?? "Müştəri");
+                        var isCurrentUser = Model.CurrentUserReview != null && review.Id == Model.CurrentUserReview.Id;
+
+                        <div class="col-12">
+                            <div class="card border rounded-3 p-3 @(isCurrentUser ? "border-primary bg-primary-subtle bg-opacity-10" : "bg-white")">
+                                <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-circle bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                            @(reviewerName.Length > 0 ? reviewerName[0].ToString().ToUpper() : "U")
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                                                <span>@reviewerName</span>
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle small px-2 py-0" title="Sifarişi təsdiqlənmiş müştəri">
+                                                    <i class="bi bi-patch-check-fill me-1"></i>Təsdiqlənmiş Alıcı
+                                                </span>
+                                                @if (isCurrentUser)
+                                                {
+                                                    <span class="badge bg-primary-subtle text-primary small px-2 py-0">Sizin rəyiniz</span>
+                                                }
+                                            </div>
+                                            <div class="text-secondary small">@review.CreatedDate.ToString("dd.MM.yyyy HH:mm")</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-warning">
+                                        @for (int s = 1; s <= 5; s++)
+                                        {
+                                            if (review.Rating >= s)
+                                            {
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star text-muted"></i>
+                                            }
+                                        }
+                                        <span class="text-dark fw-semibold small ms-1">@review.Rating / 5</span>
+                                    </div>
+                                </div>
+
+                                <p class="text-dark mb-0 mt-2" style="white-space: pre-line;">@review.Comment</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </section>
 </div>
+
+<style>
+    .star-rating-group {
+        display: inline-flex;
+    }
+    .star-rating-group input.star-radio {
+        display: none;
+    }
+    .star-rating-group label.star-label {
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .star-rating-group label.star-label i::before {
+        content: "\f588"; /* bi-star */
+    }
+    .star-rating-group input.star-radio:checked ~ label.star-label i::before,
+    .star-rating-group label.star-label:hover i::before,
+    .star-rating-group label.star-label:hover ~ label.star-label i::before {
+        content: "\f586"; /* bi-star-fill */
+        color: #ffc107;
+    }
+    .star-rating-group input.star-radio:checked ~ label.star-label {
+        color: #ffc107;
+    }
+
+    /* Geyim Ölçü Düymələri (Size Buttons) */
+    .size-variant-btn {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid #dee2e6;
+        background-color: #ffffff;
+    }
+    .size-variant-btn:not(:disabled):hover {
+        border-color: #0d6efd !important;
+        background-color: #f8faff !important;
+        transform: translateY(-2px);
+    }
+    .size-variant-btn.active {
+        border-color: #0d6efd !important;
+        background-color: #0d6efd !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3) !important;
+    }
+    .size-variant-btn.active .size-title {
+        color: #ffffff !important;
+    }
+    .size-variant-btn.active .stock-caption {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    .size-variant-btn:disabled {
+        opacity: 0.55;
+        background-color: #f1f3f5 !important;
+        border-color: #e9ecef !important;
+        cursor: not-allowed !important;
+    }
+    .size-variant-btn:disabled .size-title {
+        text-decoration: line-through;
+        color: #adb5bd !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // ================= 1. Rəy Ulduzları =================
+            var radios = document.querySelectorAll('.star-radio');
+            var textSpan = document.getElementById('selectedRatingText');
+
+            radios.forEach(function (radio) {
+                radio.addEventListener('change', function () {
+                    if (textSpan) {
+                        textSpan.textContent = this.value + ' ulduz';
+                    }
+                });
+            });
+
+            // ================= 2. Variant Seçimi və Qiymət / Stok İnteqrasiyası =================
+            var basePrice = @Model.Product.Price.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var baseDiscount = @(Model.Product.DiscountPrice.HasValue ? Model.Product.DiscountPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null");
+            var hasDiscount = (baseDiscount !== null && baseDiscount < basePrice);
+
+            var displayedPrice = document.getElementById('displayedPrice');
+            var displayedOriginalPrice = document.getElementById('displayedOriginalPrice');
+            var discountBadge = document.getElementById('discountBadge');
+
+            var selectedVariantIdInput = document.getElementById('selectedVariantId');
+            var cartQuantityInput = document.getElementById('cartQuantityInput');
+            var btnAddToCart = document.getElementById('btnAddToCart');
+            var btnAddToCartText = document.getElementById('btnAddToCartText');
+            var stockNoticeAlert = document.getElementById('stockNoticeAlert');
+
+            function updateVariantState(variantId, priceModifier, stock) {
+                if (selectedVariantIdInput) {
+                    selectedVariantIdInput.value = variantId || '';
+                }
+
+                // 1. Qiymət Yenilənməsi
+                var activeBase = hasDiscount ? baseDiscount : basePrice;
+                var currentPrice = Math.max(0, activeBase + priceModifier);
+                if (displayedPrice) {
+                    displayedPrice.textContent = currentPrice.toFixed(2) + ' ₼';
+                }
+
+                if (hasDiscount && displayedOriginalPrice) {
+                    var currentOrig = Math.max(0, basePrice + priceModifier);
+                    displayedOriginalPrice.textContent = currentOrig.toFixed(2) + ' ₼';
+                    displayedOriginalPrice.classList.remove('d-none');
+                    if (discountBadge) discountBadge.classList.remove('d-none');
+                }
+
+                // 2. Stok və Səbət Düyməsi İdarəetməsi
+                if (stock <= 0) {
+                    if (btnAddToCart) {
+                        btnAddToCart.disabled = true;
+                        btnAddToCart.classList.remove('btn-dark');
+                        btnAddToCart.classList.add('btn-secondary');
+                    }
+                    if (btnAddToCartText) btnAddToCartText.textContent = 'Stokda yoxdur';
+                    if (cartQuantityInput) {
+                        cartQuantityInput.disabled = true;
+                        cartQuantityInput.value = 0;
+                    }
+                    if (stockNoticeAlert) {
+                        stockNoticeAlert.className = 'mt-2 alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mb-0';
+                        stockNoticeAlert.innerHTML = '<i class="bi bi-x-circle-fill fs-6 text-danger"></i> <span>Seçilmiş variant hazırda stokda tükənib.</span>';
+                        stockNoticeAlert.classList.remove('d-none');
+                    }
+                } else if (stock > 0 && stock <= 10) {
+                    if (btnAddToCart) {
+                        btnAddToCart.disabled = false;
+                        btnAddToCart.classList.remove('btn-secondary');
+                        btnAddToCart.classList.add('btn-dark');
+                    }
+                    if (btnAddToCartText) btnAddToCartText.textContent = 'Səbətə Əlavə Et';
+                    if (cartQuantityInput) {
+                        cartQuantityInput.disabled = false;
+                        cartQuantityInput.max = stock;
+                        var qVal = parseInt(cartQuantityInput.value) || 1;
+                        if (qVal > stock || qVal < 1) cartQuantityInput.value = 1;
+                    }
+                    if (stockNoticeAlert) {
+                        stockNoticeAlert.className = 'mt-2 alert alert-warning py-2 px-3 small d-flex align-items-center gap-2 mb-0';
+                        stockNoticeAlert.innerHTML = '<i class="bi bi-exclamation-triangle-fill fs-6 text-warning"></i> <span>Tələsin! Bu seçimdən <strong>Son ' + stock + ' ədəd</strong> qalıb!</span>';
+                        stockNoticeAlert.classList.remove('d-none');
+                    }
+                } else {
+                    if (btnAddToCart) {
+                        btnAddToCart.disabled = false;
+                        btnAddToCart.classList.remove('btn-secondary');
+                        btnAddToCart.classList.add('btn-dark');
+                    }
+                    if (btnAddToCartText) btnAddToCartText.textContent = 'Səbətə Əlavə Et';
+                    if (cartQuantityInput) {
+                        cartQuantityInput.disabled = false;
+                        cartQuantityInput.max = stock;
+                        var qVal2 = parseInt(cartQuantityInput.value) || 1;
+                        if (qVal2 > stock || qVal2 < 1) cartQuantityInput.value = 1;
+                    }
+                    if (stockNoticeAlert) {
+                        stockNoticeAlert.classList.add('d-none');
+                    }
+                }
+            }
+
+            // --- YEM MƏHSULLARI (Weight Dropdown) ---
+            var weightSelect = document.getElementById('weightVariantSelector');
+            var weightStockCount = document.getElementById('weightStockCount');
+            var weightStockBadge = document.getElementById('weightStockBadge');
+            var weightStockAlert = document.getElementById('weightStockAlert');
+
+            if (weightSelect) {
+                function handleWeightChange() {
+                    var opt = weightSelect.options[weightSelect.selectedIndex];
+                    if (!opt) return;
+                    var id = opt.value;
+                    var priceMod = parseFloat(opt.getAttribute('data-price-modifier') || '0');
+                    var stock = parseInt(opt.getAttribute('data-stock') || '0');
+
+                    if (weightStockCount) weightStockCount.textContent = stock;
+                    if (weightStockBadge) {
+                        if (stock <= 0) {
+                            weightStockBadge.className = 'badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1';
+                            weightStockBadge.innerHTML = 'Stok: <strong>0</strong> ədəd (Bitib)';
+                        } else if (stock <= 10) {
+                            weightStockBadge.className = 'badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1';
+                            weightStockBadge.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i> Son <strong>' + stock + '</strong> ədəd!';
+                        } else {
+                            weightStockBadge.className = 'badge bg-success-subtle text-success border border-success-subtle px-2 py-1';
+                            weightStockBadge.innerHTML = 'Stok: <strong>' + stock + '</strong> ədəd';
+                        }
+                    }
+
+                    if (weightStockAlert) {
+                        if (stock > 0 && stock <= 10) {
+                            weightStockAlert.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Son ' + stock + ' ədəd!';
+                            weightStockAlert.classList.remove('d-none');
+                        } else {
+                            weightStockAlert.classList.add('d-none');
+                        }
+                    }
+
+                    updateVariantState(id, priceMod, stock);
+                }
+                weightSelect.addEventListener('change', handleWeightChange);
+                handleWeightChange();
+            }
+
+            // --- GEYİM MƏHSULLARI (Size Düymələri) ---
+            var sizeButtons = document.querySelectorAll('.size-variant-btn');
+            var sizeStockCount = document.getElementById('sizeStockCount');
+            var sizeStockAlert = document.getElementById('sizeStockAlert');
+
+            if (sizeButtons.length > 0) {
+                sizeButtons.forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        if (this.disabled) return;
+                        sizeButtons.forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+
+                        var id = this.getAttribute('data-id');
+                        var priceMod = parseFloat(this.getAttribute('data-price-modifier') || '0');
+                        var stock = parseInt(this.getAttribute('data-stock') || '0');
+
+                        if (sizeStockCount) sizeStockCount.textContent = stock;
+
+                        if (sizeStockAlert) {
+                            if (stock > 0 && stock <= 10) {
+                                sizeStockAlert.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Son ' + stock + ' ədəd!';
+                                sizeStockAlert.classList.remove('d-none');
+                            } else {
+                                sizeStockAlert.classList.add('d-none');
+                            }
+                        }
+
+                        updateVariantState(id, priceMod, stock);
+                    });
+                });
+
+                // Avtomatik seçim: stoku olan ilk düymə, əks halda birinci düymə
+                var defaultBtn = Array.from(sizeButtons).find(b => !b.disabled) || sizeButtons[0];
+                if (defaultBtn) {
+                    defaultBtn.click();
+                }
+            }
+
+            // --- Ümumi Variant Açılan Menyu (əgər varsa) ---
+            var generalSelect = document.getElementById('generalVariantSelector');
+            if (generalSelect) {
+                function handleGeneralChange() {
+                    var opt = generalSelect.options[generalSelect.selectedIndex];
+                    if (!opt) return;
+                    var id = opt.value;
+                    var priceMod = parseFloat(opt.getAttribute('data-price-modifier') || '0');
+                    var stock = parseInt(opt.getAttribute('data-stock') || '0');
+                    updateVariantState(id, priceMod, stock);
+                }
+                generalSelect.addEventListener('change', handleGeneralChange);
+                handleGeneralChange();
+            }
+
+            // Əgər heç bir variant yoxdursa
+            if (!weightSelect && sizeButtons.length === 0 && !generalSelect) {
+                var baseStock = @Model.Product.StockQuantity;
+                updateVariantState(null, 0, baseStock);
+            }
+
+            // Say (Quantity) Input-unun Yoxlanışı
+            if (cartQuantityInput) {
+                cartQuantityInput.addEventListener('change', function () {
+                    var val = parseInt(this.value) || 1;
+                    var max = parseInt(this.max) || 999999;
+                    if (val > max) this.value = max;
+                    if (val < 1) this.value = 1;
+                });
+            }
+        });
+    </script>
+}

@@ -1,93 +1,129 @@
-﻿<main class="dashboard-content">
+@model PetShop.Areas.Admin.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard | Admin";
+    var currentYear = DateTime.Now.Year;
+    var totalYearSales = Model.MonthlySales?.Sum() ?? 0m;
+    var hasSales = totalYearSales > 0m;
+}
+
+<main class="dashboard-content">
     <div class="container-fluid px-3 px-lg-4 py-4">
         <div class="page-heading">
             <div class="page-heading-copy">
                 <span class="page-icon"><i class="bi bi-speedometer2" aria-hidden="true"></i></span>
                 <div>
-                    <p class="eyebrow mb-1">Overview</p>
-                    <h1 class="h3 mb-1">Dashboard</h1>
-                    <p class="text-muted mb-0">Monitor performance, sales, users, and support from one clean workspace.</p>
+                    <p class="eyebrow mb-1">İcmal</p>
+                    <h1 class="h3 mb-1">İdarəetmə Paneli (Dashboard)</h1>
+                    <p class="text-muted mb-0">Satışları, sifarişləri, məhsulları və real vaxt statistikalarını idarə edin.</p>
                 </div>
             </div>
-            <div class="heading-actions"><button class="btn btn-outline-secondary btn-sm" type="button"><i class="bi bi-download" aria-hidden="true"></i> Export</button><button class="btn btn-primary btn-sm" type="button"><i class="bi bi-file-earmark-plus" aria-hidden="true"></i> Create Report</button></div>
+            <div class="heading-actions">
+                <a asp-controller="Orders" asp-action="Index" class="btn btn-primary btn-sm">
+                    <i class="bi bi-cart-check me-1"></i>Sifarişlərə Bax
+                </a>
+                <a asp-controller="Products" asp-action="Create" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Yeni Məhsul
+                </a>
+            </div>
         </div>
 
+        <!-- Statistika Kartları (Real DB sorğuları ilə) -->
         <section class="row g-3 mt-1" aria-label="Dashboard metrics">
-            <div class="col-12 col-sm-6 col-xl-3">
-                <article class="metric-card metric-primary">
-                    <div class="metric-top">
-                        <span class="metric-label">Revenue</span>
-                        <span class="metric-icon"><i class="bi bi-currency-dollar" aria-hidden="true"></i></span>
-                    </div>
-                    <div class="metric-value">$48,240</div>
-                    <div class="metric-meta">
-                        <span class="text-success">+12.5%</span>
-                        <span>from last month</span>
-                    </div>
-                </article>
-            </div>
-
+            <!-- 1. Ümumi Sifariş Sayı -->
             <div class="col-12 col-sm-6 col-xl-3">
                 <article class="metric-card metric-success">
                     <div class="metric-top">
-                        <span class="metric-label">Orders</span>
+                        <span class="metric-label">Ümumi Sifarişlər</span>
                         <span class="metric-icon"><i class="bi bi-bag-check" aria-hidden="true"></i></span>
                     </div>
-                    <div class="metric-value">1,284</div>
+                    <div class="metric-value">@Model.TotalOrders</div>
                     <div class="metric-meta">
-                        <span class="text-success">+8.2%</span>
-                        <span>new orders</span>
+                        <span class="text-success"><i class="bi bi-arrow-up-right me-1"></i>Qeydə alınan</span>
+                        <span>bütün sifarişlər</span>
                     </div>
                 </article>
             </div>
 
+            <!-- 2. Bugünkü Satış -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <article class="metric-card metric-primary">
+                    <div class="metric-top">
+                        <span class="metric-label">Bugünkü Satış</span>
+                        <span class="metric-icon"><i class="bi bi-calendar-check" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="metric-value">@Model.TodaySales.ToString("0.00") ₼</div>
+                    <div class="metric-meta">
+                        <span class="text-primary"><i class="bi bi-clock-history me-1"></i>Bu gün</span>
+                        <span>tamamlanan satışlar</span>
+                    </div>
+                </article>
+            </div>
+
+            <!-- 3. Ümumi Gəlir -->
             <div class="col-12 col-sm-6 col-xl-3">
                 <article class="metric-card metric-warning">
                     <div class="metric-top">
-                        <span class="metric-label">Customers</span>
-                        <span class="metric-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                        <span class="metric-label">Ümumi Gəlir</span>
+                        <span class="metric-icon"><i class="bi bi-currency-dollar" aria-hidden="true"></i></span>
                     </div>
-                    <div class="metric-value">8,742</div>
+                    <div class="metric-value">@Model.TotalRevenue.ToString("0.00") ₼</div>
                     <div class="metric-meta">
-                        <span class="text-success">+5.1%</span>
-                        <span>active users</span>
+                        <span class="text-success"><i class="bi bi-graph-up me-1"></i>Yekun dövriyyə</span>
                     </div>
                 </article>
             </div>
 
+            <!-- 4. Aktiv Məhsul Sayı -->
             <div class="col-12 col-sm-6 col-xl-3">
                 <article class="metric-card metric-danger">
                     <div class="metric-top">
-                        <span class="metric-label">Tickets</span>
-                        <span class="metric-icon"><i class="bi bi-life-preserver" aria-hidden="true"></i></span>
+                        <span class="metric-label">Aktiv Məhsullar</span>
+                        <span class="metric-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
                     </div>
-                    <div class="metric-value">36</div>
+                    <div class="metric-value">@Model.ActiveProductsCount</div>
                     <div class="metric-meta">
-                        <span class="text-danger">3 urgent</span>
-                        <span>need review</span>
+                        <span class="text-success"><i class="bi bi-check-circle me-1"></i>Satışda olan</span>
+                        <span>məhsul sayı</span>
                     </div>
                 </article>
             </div>
         </section>
 
-        <section class="row g-3 mt-1">
+        <!-- Satış Diaqramı və Fəaliyyət Panelləri -->
+        <section class="row g-3 mt-2">
             <div class="col-12 col-xl-8">
                 <div class="panel">
-                    <div class="panel-header">
+                    <div class="panel-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <div>
-                            <h2 class="h5 mb-1 section-title"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i><span>Sales Performance</span></h2>
-                            <p class="text-muted mb-0">Monthly revenue compared with operational targets.</p>
+                            <h2 class="h5 mb-1 section-title"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i><span>Satış Dinamikası (@currentYear)</span></h2>
+                            <p class="text-muted mb-0">Ödənilmiş ("Paid") sifarişlər üzrə aylıq satış göstəriciləri.</p>
                         </div>
-                        <a class="btn btn-light btn-sm" href="charts.html">View Details</a>
+                        <div>
+                            @if (hasSales)
+                            {
+                                <span class="badge text-bg-success py-2 px-3 fs-6">
+                                    <i class="bi bi-check2-circle me-1"></i>İllik Cəm: @totalYearSales.ToString("N2") ₼
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-secondary py-2 px-3">
+                                    <i class="bi bi-info-circle me-1"></i>Hələ satış məlumatı yoxdur
+                                </span>
+                            }
+                        </div>
                     </div>
 
-                    <div class="chart-bars" aria-label="Sales performance chart">
-                        <div class="chart-column bar-42"><span></span><small>Jan</small></div>
-                        <div class="chart-column bar-58"><span></span><small>Feb</small></div>
-                        <div class="chart-column bar-51"><span></span><small>Mar</small></div>
-                        <div class="chart-column bar-72"><span></span><small>Apr</small></div>
-                        <div class="chart-column bar-66"><span></span><small>May</small></div>
-                        <div class="chart-column bar-83"><span></span><small>Jun</small></div>
+                    <div class="p-3">
+                        @if (!hasSales)
+                        {
+                            <div class="alert alert-light border text-secondary small mb-3 text-center py-2">
+                                <i class="bi bi-info-circle me-1 text-primary"></i> Cari ildə hələ ödənilmiş ("Paid") sifariş qeydə alınmayıb. Qrafik 0 dəyərləri ilə əks olunur.
+                            </div>
+                        }
+                        <div style="position: relative; height: 280px; width: 100%;">
+                            <canvas id="salesChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -96,115 +132,210 @@
                 <div class="panel h-100">
                     <div class="panel-header">
                         <div>
-                            <h2 class="h5 mb-1 section-title"><i class="bi bi-activity" aria-hidden="true"></i><span>Team Activity</span></h2>
-                            <p class="text-muted mb-0">Recent operational updates.</p>
+                            <h2 class="h5 mb-1 section-title"><i class="bi bi-activity" aria-hidden="true"></i><span>Sistem Statusu</span></h2>
+                            <p class="text-muted mb-0">Son sistem yenilikləri.</p>
                         </div>
                     </div>
 
                     <div class="activity-list">
-                        <div class="activity-item"><span class="activity-dot bg-primary"></span><div><p class="mb-1 fw-semibold">New campaign launched</p><p class="text-muted small mb-0">Marketing team published the May offer.</p></div></div>
-                        <div class="activity-item"><span class="activity-dot bg-success"></span><div><p class="mb-1 fw-semibold">Payment batch cleared</p><p class="text-muted small mb-0">246 invoices were processed successfully.</p></div></div>
-                        <div class="activity-item"><span class="activity-dot bg-warning"></span><div><p class="mb-1 fw-semibold">Support queue rising</p><p class="text-muted small mb-0">Average first response time is 18 minutes.</p></div></div>
+                        <div class="activity-item"><span class="activity-dot bg-primary"></span><div><p class="mb-1 fw-semibold">Order Sistemi Aktivdir</p><p class="text-muted small mb-0">Sifarişlər birbaşa verilənlər bazasına yazılır.</p></div></div>
+                        <div class="activity-item"><span class="activity-dot bg-success"></span><div><p class="mb-1 fw-semibold">Ödəniş və Səbət Tam İnteqrasiya Edildi</p><p class="text-muted small mb-0">Sifariş tamamlandıqda səbət avtomatik təmizlənir.</p></div></div>
+                        <div class="activity-item"><span class="activity-dot bg-warning"></span><div><p class="mb-1 fw-semibold">Stok Nəzarəti Aktivdir</p><p class="text-muted small mb-0">Məhsul variantları və sayı izlənilir.</p></div></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="panel mt-3">
-            <div class="panel-header">
+        <!-- Son 5 Sifariş Siyahısı (Real DB sorğuları ilə) -->
+        <section class="panel mt-4">
+            <div class="panel-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h2 class="h5 mb-1 section-title"><i class="bi bi-people" aria-hidden="true"></i><span>Recent Users</span></h2>
-                    <p class="text-muted mb-0">Latest account activity across the workspace.</p>
+                    <h2 class="h5 mb-1 section-title">
+                        <i class="bi bi-cart-check" aria-hidden="true"></i>
+                        <span>Son 5 Sifariş</span>
+                    </h2>
+                    <p class="text-muted mb-0">Bazaya daxil olan ən son sifarişlərin real siyahısı.</p>
                 </div>
-                <a class="btn btn-outline-secondary btn-sm" href="users.html">Manage Users</a>
+                <a class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1" asp-controller="Orders" asp-action="Index">
+                    <span>Bütün Sifarişlər</span>
+                    <i class="bi bi-chevron-right small"></i>
+                </a>
             </div>
             <div class="table-responsive">
-                <table class="table align-middle mb-0">
-                    <thead><tr><th scope="col">User</th><th scope="col">Role</th><th scope="col">Team</th><th scope="col">Status</th><th scope="col">Joined</th><th scope="col" class="text-end">Action</th></tr></thead>
+                <table class="table align-middle mb-0 table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Sifariş No</th>
+                            <th scope="col">Müştəri</th>
+                            <th scope="col">Məhsul Sayı</th>
+                            <th scope="col">Məbləğ</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Tarix</th>
+                            <th scope="col" class="text-end">Əməliyyat</th>
+                        </tr>
+                    </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <img class="avatar-img avatar-sm" src="~/admin/assets/images/avatar/avatar-1.jpg" alt="Sarah Ahmed">
-                                    <div>
-                                        <p class="fw-semibold mb-0">Sarah Ahmed</p>
-                                        <p class="text-muted small mb-0">sarah@example.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Admin</td>
-                            <td>Operations</td>
-                            <td><span class="badge text-bg-success">Active</span></td>
-                            <td>Jan 12, 2026</td>
-                            <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <img class="avatar-img avatar-sm" src="~/admin/assets/images/avatar/avatar-2.jpg" alt="Rafi Khan">
-                                    <div>
-                                        <p class="fw-semibold mb-0">Rafi Khan</p>
-                                        <p class="text-muted small mb-0">rafi@example.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Manager</td>
-                            <td>Sales</td>
-                            <td><span class="badge text-bg-success">Active</span></td>
-                            <td>Feb 03, 2026</td>
-                            <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <img class="avatar-img avatar-sm" src="~/admin/assets/images/avatar/avatar-3.jpg" alt="Nadia Islam">
-                                    <div>
-                                        <p class="fw-semibold mb-0">Nadia Islam</p>
-                                        <p class="text-muted small mb-0">nadia@example.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Editor</td>
-                            <td>Content</td>
-                            <td><span class="badge text-bg-warning">Pending</span></td>
-                            <td>Mar 18, 2026</td>
-                            <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <img class="avatar-img avatar-sm" src="~/admin/assets/images/avatar/avatar-4.jpg" alt="Mina Torres">
-                                    <div>
-                                        <p class="fw-semibold mb-0">Mina Torres</p>
-                                        <p class="text-muted small mb-0">mina@example.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Viewer</td>
-                            <td>Finance</td>
-                            <td><span class="badge text-bg-secondary">Suspended</span></td>
-                            <td>Apr 07, 2026</td>
-                            <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <img class="avatar-img avatar-sm" src="~/admin/assets/images/avatar/avatar-5.jpg" alt="Jon Oliver">
-                                    <div>
-                                        <p class="fw-semibold mb-0">Jon Oliver</p>
-                                        <p class="text-muted small mb-0">jon@example.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Analyst</td>
-                            <td>Data</td>
-                            <td><span class="badge text-bg-success">Active</span></td>
-                            <td>Apr 22, 2026</td>
-                            <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                        </tr>
+                        @if (Model.RecentOrders != null && Model.RecentOrders.Count > 0)
+                        {
+                            @foreach (var order in Model.RecentOrders)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="fw-bold text-decoration-none">
+                                            @order.OrderNumber
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold text-dark">@order.CustomerName</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-light border text-dark">@order.OrderItems.Count məhsul</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-dark">@order.TotalPrice.ToString("0.00") ₼</strong>
+                                    </td>
+                                    <td>
+                                        @switch (order.Status)
+                                        {
+                                            case PetShop.DataContext.Entites.OrderStatus.Pending:
+                                                <span class="badge text-bg-warning"><i class="bi bi-hourglass-split me-1"></i>Gözləmədə</span>
+                                                break;
+                                            case PetShop.DataContext.Entites.OrderStatus.Processing:
+                                                <span class="badge text-bg-primary"><i class="bi bi-gear-fill me-1"></i>Hazırlanır</span>
+                                                break;
+                                            case PetShop.DataContext.Entites.OrderStatus.Shipped:
+                                                <span class="badge text-bg-info text-dark"><i class="bi bi-truck me-1"></i>Yoldadır</span>
+                                                break;
+                                            case PetShop.DataContext.Entites.OrderStatus.Delivered:
+                                                <span class="badge text-bg-success"><i class="bi bi-check-circle-fill me-1"></i>Çatdırıldı</span>
+                                                break;
+                                            case PetShop.DataContext.Entites.OrderStatus.Cancelled:
+                                                <span class="badge text-bg-danger"><i class="bi bi-x-circle-fill me-1"></i>Ləğv edildi</span>
+                                                break;
+                                            default:
+                                                <span class="badge text-bg-secondary">@order.Status</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="text-muted small">
+                                        @order.CreatedDate.ToString("dd.MM.yyyy, HH:mm")
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="btn btn-light btn-sm">
+                                            <i class="bi bi-eye me-1"></i>Bax
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox fs-2 d-block mb-1"></i>
+                                    Hələ heç bir sifariş qeydə alınmayıb.
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
         </section>
     </div>
 </main>
+
+@section Scripts {
+    <script src="~/admin/assets/js/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const canvas = document.getElementById('salesChart');
+            if (!canvas) return;
+
+            const salesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlySales));
+            const monthLabels = ["Yan", "Fev", "Mar", "Apr", "May", "İyn", "İyl", "Avq", "Sen", "Okt", "Noy", "Dek"];
+
+            const ctx = canvas.getContext('2d');
+
+            // Gradient fill
+            const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+            gradient.addColorStop(0, 'rgba(37, 99, 235, 0.85)');
+            gradient.addColorStop(1, 'rgba(16, 185, 129, 0.35)');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: monthLabels,
+                    datasets: [{
+                        label: 'Satış (₼)',
+                        data: salesData,
+                        backgroundColor: gradient,
+                        hoverBackgroundColor: 'rgba(37, 99, 235, 1)',
+                        borderColor: '#2563eb',
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        maxBarThickness: 42
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleColor: '#f8fafc',
+                            bodyColor: '#f8fafc',
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                title: function (items) {
+                                    return items[0].label + ' ' + @currentYear;
+                                },
+                                label: function (context) {
+                                    const val = Number(context.parsed.y || 0);
+                                    return 'Satış: ' + val.toFixed(2) + ' ₼';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(226, 232, 240, 0.6)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                },
+                                color: '#64748b',
+                                callback: function (value) {
+                                    return value + ' ₼';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                },
+                                color: '#64748b'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

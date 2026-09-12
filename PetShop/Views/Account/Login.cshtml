@@ -1,0 +1,88 @@
+@model PetShop.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Daxil Ol";
+}
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Daxil Ol</h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Ana Səhifə</a>
+                <span class="breadcrumb-item active" aria-current="page">Giriş</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<section class="login-section py-5 my-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-8">
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold mb-2">Xoş Gəlmisiniz!</h3>
+                        <p class="text-muted">Hesabınıza daxil olmaq üçün məlumatlarınızı qeyd edin</p>
+                    </div>
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <form asp-controller="Account" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold">E-poçt ünvanı</label>
+                            <input asp-for="Email" class="form-control form-control-lg rounded-3 ps-3" placeholder="numune@domain.com" autofocus />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label asp-for="Password" class="form-label fw-semibold">Şifrə</label>
+                            </div>
+                            <input asp-for="Password" class="form-control form-control-lg rounded-3 ps-3" placeholder="••••••••" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMe" />
+                            <label class="form-check-label text-muted" for="rememberMe">
+                                Məni xatırla
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 py-3 fw-bold shadow-sm">
+                            Daxil Ol
+                        </button>
+                    </form>
+
+                    <hr class="my-4" />
+
+                    <div class="text-center">
+                        <p class="text-muted mb-0">
+                            Hesabınız yoxdur?
+                            <a asp-controller="Account" asp-action="Register" asp-route-returnUrl="@ViewData["ReturnUrl"]" class="text-primary fw-bold text-decoration-none">
+                                Qeydiyyatdan keçin
+                            </a>
+                        </p>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-light rounded-3 text-center border">
+                        <small class="text-muted d-block fw-semibold mb-1">Demo Admin Girişi:</small>
+                        <small class="text-muted d-block">E-poçt: <code>admin@petshop.com</code> | Şifrə: <code>Admin123!</code></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,234 @@
+@model List<PetShop.DataContext.Entites.Brand>
+@{
+    ViewData["Title"] = "Brendlər | Admin";
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+        
+        <!-- Səhifə Başlığı və Düymələr -->
+        <div class="page-heading d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-award" aria-hidden="true"></i></span>
+                <div>
+                    <p class="eyebrow mb-1">Kataloq İdarəetməsi</p>
+                    <h1 class="h3 mb-1">Brendlər</h1>
+                    <p class="text-muted mb-0">Partnyor brendlərin və istehsalçıların siyahısı və idarə olunması.</p>
+                </div>
+            </div>
+            <div class="heading-actions">
+                <a asp-action="Create" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Yeni Brend</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bildiriş Mesajları (Alerts) -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <div>@TempData["Success"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <div>@TempData["Warning"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-x-circle-fill fs-5"></i>
+                <div>@TempData["Error"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+
+        <!-- Axtarış Paneli -->
+        <div class="panel mb-4">
+            <div class="p-3">
+                <form method="get" asp-action="Index" class="row g-2 align-items-center">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="search" value="@ViewBag.Search" 
+                                   class="form-control border-start-0 ps-0" 
+                                   placeholder="Brend adı axtar...">
+                            @if (!string.IsNullOrWhiteSpace(ViewBag.Search))
+                            {
+                                <a asp-action="Index" class="btn btn-outline-secondary" title="Axtarışı təmizlə">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            }
+                            <button class="btn btn-primary" type="submit">Axtar</button>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-6 text-md-end text-muted small">
+                        Cəmi <strong>@Model.Count</strong> brend mövcuddur
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Brend Cədvəli -->
+        <section class="panel">
+            <div class="panel-header d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0 section-title">
+                    <i class="bi bi-list-ul"></i>
+                    <span>Brend Siyahısı</span>
+                </h2>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60px;">#</th>
+                            <th style="width: 90px;">Loqo</th>
+                            <th>Brend Adı</th>
+                            <th>Məhsul Sayı</th>
+                            <th class="text-end" style="width: 140px;">Əməliyyatlar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td><span class="text-muted small">@item.Id</span></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.LogoUrl))
+                                        {
+                                            <img src="@item.LogoUrl" alt="@item.Name" 
+                                                 class="rounded object-fit-contain shadow-sm p-1 bg-white" 
+                                                 style="width: 60px; height: 40px; border: 1px solid #e9ecef;" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center text-muted" 
+                                                 style="width: 60px; height: 40px; border: 1px dashed #ced4da;">
+                                                <i class="bi bi-award"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold text-dark">@item.Name</span>
+                                    </td>
+                                    <td>
+                                        @if (item.Products.Count > 0)
+                                        {
+                                            <span class="badge text-bg-info text-dark">@item.Products.Count məhsul</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-light text-muted border">0 məhsul</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" 
+                                               class="btn btn-outline-primary" title="Redaktə et">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-delete" 
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                    data-brand-id="@item.Id" 
+                                                    data-brand-name="@item.Name"
+                                                    data-product-count="@item.Products.Count"
+                                                    title="Sil">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        <p class="mb-1">Heç bir brend tapılmadı.</p>
+                                        @if (!string.IsNullOrWhiteSpace(ViewBag.Search))
+                                        {
+                                            <a asp-action="Index" class="btn btn-sm btn-outline-primary mt-2">Bütün brendləri göstər</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- Silmə Modalı -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" asp-action="Delete" id="deleteForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="deleteBrandId" value="" />
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="deleteModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Brendin Silinməsi
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Həqiqətən <strong id="deleteBrandName" class="text-dark"></strong> brendini silmək istəyirsiniz?</p>
+                    <div id="brandProductWarning" class="alert alert-warning py-2 px-3 small mb-0 d-none">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i>
+                        <span>Diqqət: Bu brendə bağlı <strong id="brandWarningProductCount">0</strong> məhsul var. Məhsulu olan brendi silmək mümkün deyil!</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash me-1"></i>Bəli, Sil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var deleteButtons = document.querySelectorAll('.btn-delete');
+            var deleteBrandIdInput = document.getElementById('deleteBrandId');
+            var deleteBrandNameSpan = document.getElementById('deleteBrandName');
+            var brandProductWarning = document.getElementById('brandProductWarning');
+            var brandWarningProductCount = document.getElementById('brandWarningProductCount');
+
+            deleteButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var id = this.getAttribute('data-brand-id');
+                    var name = this.getAttribute('data-brand-name');
+                    var count = parseInt(this.getAttribute('data-product-count') || '0', 10);
+
+                    if (deleteBrandIdInput) deleteBrandIdInput.value = id;
+                    if (deleteBrandNameSpan) deleteBrandNameSpan.textContent = name;
+
+                    if (count > 0 && brandProductWarning) {
+                        brandWarningProductCount.textContent = count;
+                        brandProductWarning.classList.remove('d-none');
+                    } else if (brandProductWarning) {
+                        brandProductWarning.classList.add('d-none');
+                    }
+                });
+            });
+        });
+    </script>
+}

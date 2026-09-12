@@ -1,0 +1,319 @@
+@model List<PetShop.DataContext.Entites.Coupon>
+@{
+    ViewData["Title"] = "Kuponlar | Admin";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalItems = ViewBag.TotalItems ?? (Model?.Count ?? 0);
+    string search = ViewBag.Search ?? "";
+    string status = ViewBag.Status ?? "";
+    var now = DateTime.UtcNow;
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+        
+        <!-- Səhifə Başlığı və Əməliyyat Düyməsi -->
+        <div class="page-heading d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-ticket-perforated" aria-hidden="true"></i></span>
+                <div>
+                    <p class="eyebrow mb-1">Marketinq & Kampaniyalar</p>
+                    <h1 class="h3 mb-1">Kuponlar</h1>
+                    <p class="text-muted mb-0">Endirim kuponlarının, kampaniya kodlarının və şərtlərinin idarə edilməsi.</p>
+                </div>
+            </div>
+            <div class="heading-actions">
+                <a asp-action="Create" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Yeni Kupon</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bildiriş Mesajları (Alerts) -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <div>@TempData["Success"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <div>@TempData["Warning"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+                <i class="bi bi-x-circle-fill fs-5"></i>
+                <div>@TempData["Error"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+
+        <!-- Axtarış və Filtr Paneli -->
+        <div class="panel mb-4">
+            <div class="p-3">
+                <form method="get" asp-action="Index" class="row g-2 align-items-center">
+                    <div class="col-12 col-md-5 col-lg-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="search" value="@search" 
+                                   class="form-control border-start-0 ps-0" 
+                                   placeholder="Kupon koduna görə axtar...">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-4">
+                        <select name="status" class="form-select" onchange="this.form.submit()">
+                            <option value="" selected="@(string.IsNullOrEmpty(status))">Bütün Statuslar</option>
+                            <option value="active" selected="@(status == "active")">Yalnız Aktiv Kuponlar</option>
+                            <option value="inactive" selected="@(status == "inactive")">Deaktiv Kuponlar</option>
+                            <option value="expired" selected="@(status == "expired")">Vaxtı Bitmiş Kuponlar</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3 col-lg-3 d-flex gap-2">
+                        <button class="btn btn-primary flex-grow-1" type="submit">Filtrlə</button>
+                        @if (!string.IsNullOrWhiteSpace(search) || !string.IsNullOrEmpty(status))
+                        {
+                            <a asp-action="Index" class="btn btn-outline-secondary" title="Filtrləri təmizlə">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Kuponlar Cədvəli -->
+        <section class="panel">
+            <div class="panel-header d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0 section-title">
+                    <i class="bi bi-list-ul"></i>
+                    <span>Kupon Siyahısı</span>
+                </h2>
+                <span class="text-muted small">Cəmi: <strong>@totalItems</strong> kupon</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Kupon Kodu</th>
+                            <th>Endirim Növü</th>
+                            <th>Dəyəri</th>
+                            <th>Min. Sifariş</th>
+                            <th>Bitmə Tarixi</th>
+                            <th>Status</th>
+                            <th class="text-end" style="width: 140px;">Əməliyyatlar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            @foreach (var item in Model)
+                            {
+                                bool isExpired = item.ExpiryDate.HasValue && item.ExpiryDate.Value < now;
+                                <tr>
+                                    <td><span class="text-muted small">@item.Id</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge text-bg-dark font-monospace fs-6 px-2 py-1">@item.Code</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (item.DiscountType == DiscountType.Percentage)
+                                        {
+                                            <span class="badge text-bg-primary">
+                                                <i class="bi bi-percent me-1"></i>Faizlə Endirim
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-success">
+                                                <i class="bi bi-cash me-1"></i>Sabit Məbləğ
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong class="text-dark">
+                                            @if (item.DiscountType == DiscountType.Percentage)
+                                            {
+                                                <span>%@item.DiscountValue.ToString("0.##")</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@item.DiscountValue.ToString("N2") ₼</span>
+                                            }
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        @if (item.MinOrderAmount.HasValue && item.MinOrderAmount.Value > 0)
+                                        {
+                                            <span>@item.MinOrderAmount.Value.ToString("N2") ₼</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Məhdudiyyətsiz</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.ExpiryDate.HasValue)
+                                        {
+                                            <div>
+                                                <span>@item.ExpiryDate.Value.ToString("dd.MM.yyyy")</span>
+                                                @if (isExpired)
+                                                {
+                                                    <span class="badge bg-danger-subtle text-danger ms-1">Bitib</span>
+                                                }
+                                                else
+                                                {
+                                                    var daysLeft = (item.ExpiryDate.Value.Date - now.Date).Days;
+                                                    <span class="badge bg-light text-muted border ms-1">@(daysLeft == 0 ? "Bu gün son" : $"{daysLeft} gün qalıb")</span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small"><i class="bi bi-infinity me-1"></i>Müddətsiz</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <form method="post" asp-action="ToggleStatus" asp-route-id="@item.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            @if (item.IsActive && !isExpired)
+                                            {
+                                                <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-2 py-0" title="Deaktiv etmək üçün klikləyin">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>Aktiv
+                                                </button>
+                                            }
+                                            else if (isExpired)
+                                            {
+                                                <span class="badge bg-secondary-subtle text-secondary border">Müddəti bitib</span>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0" title="Aktivləşdirmək üçün klikləyin">
+                                                    <i class="bi bi-dash-circle me-1"></i>Deaktiv
+                                                </button>
+                                            }
+                                        </form>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" 
+                                               class="btn btn-outline-primary" title="Redaktə et">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-delete" 
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                    data-coupon-id="@item.Id" 
+                                                    data-coupon-code="@item.Code"
+                                                    title="Sil">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-ticket-perforated fs-1 d-block mb-2"></i>
+                                        <p class="mb-1">Heç bir kupon tapılmadı.</p>
+                                        @if (!string.IsNullOrWhiteSpace(search) || !string.IsNullOrEmpty(status))
+                                        {
+                                            <a asp-action="Index" class="btn btn-sm btn-outline-primary mt-2">Bütün kuponları göstər</a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="Create" class="btn btn-sm btn-primary mt-2">İlk kuponu yarat</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Səhifələmə (Pagination) -->
+            @if (totalPages > 1)
+            {
+                <div class="p-3 border-top d-flex justify-content-center">
+                    <nav aria-label="Kupon səhifələri">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-search="@search" asp-route-status="@status">Əvvəlki</a>
+                            </li>
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@search" asp-route-status="@status">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-search="@search" asp-route-status="@status">Növbəti</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            }
+        </section>
+    </div>
+</main>
+
+<!-- Silmə Modalı -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" asp-action="Delete" id="deleteForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="deleteCouponId" value="" />
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="deleteModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Kuponun Silinməsi
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Həqiqətən <strong id="deleteCouponCode" class="text-dark"></strong> kuponunu birdəfəlik silmək istəyirsiniz?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash me-1"></i>Bəli, Sil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var deleteButtons = document.querySelectorAll('.btn-delete');
+            var deleteCouponIdInput = document.getElementById('deleteCouponId');
+            var deleteCouponCodeSpan = document.getElementById('deleteCouponCode');
+
+            deleteButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var id = this.getAttribute('data-coupon-id');
+                    var code = this.getAttribute('data-coupon-code');
+
+                    if (deleteCouponIdInput) deleteCouponIdInput.value = id;
+                    if (deleteCouponCodeSpan) deleteCouponCodeSpan.textContent = code;
+                });
+            });
+        });
+    </script>
+}

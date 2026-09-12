@@ -22,6 +22,139 @@ namespace PetShop.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
+
             modelBuilder.Entity("PetShop.DataContext.Entites.AnimalType", b =>
                 {
                     b.Property<int>("Id")
@@ -67,6 +200,97 @@ namespace PetShop.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PetShop.DataContext.Entites.ApplicationUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Bio")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Department")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JobTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TimeZone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
             modelBuilder.Entity("PetShop.DataContext.Entites.Basket", b =>
                 {
                     b.Property<int>("Id")
@@ -82,7 +306,12 @@ namespace PetShop.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Baskets");
                 });
@@ -119,6 +348,98 @@ namespace PetShop.Migrations
                     b.HasIndex("ProductVariantId");
 
                     b.ToTable("BasketItems");
+                });
+
+            modelBuilder.Entity("PetShop.DataContext.Entites.BlogPost", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("BlogPosts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AuthorName = "Admin",
+                            Content = "Heyvanlara qayğı göstərmək və onların ehtiyaclarını qarşılamaq hər bir cəmiyyətin məsuliyyətidir. Bu yazıda dörd pəncəli dostlarımıza necə dəstək ola biləcəyimizi və bu addımların ətraf mühitimizə necə müsbət təsir etdiyini araşdırırıq.\n\n1. Şəfqət və empatiya hissinin formalaşması: Heyvanlarla ünsiyyət insanlarda, xüsusilə uşaqlarda mərhəmət və məsuliyyət hissini inkişaf etdirir.\n2. Təbiət və biomüxtəlifliyin qorunması: Canlıların sağlam həyat mühitinə sahib olması ekosistemin tarazlığını təmin edir.\n3. Küçə heyvanlarına sığınacaq və yemək təminatı: Xüsusilə qış aylarında isti sığınacaq və quru yem onların həyatda qalması üçün həyati vacibdir.\n4. Baytarlıq və peyvəndlərin əhəmiyyəti: Müntəzəm peyvəndlər heyvanları təhlükəli infeksiyalardan qoruyur.\n5. Düzgün sahiblənmə mədəniyyəti: Heyvan almaq əvəzinə sığınacaqlardan sahiblənmək bir canı xilas etmək deməkdir.",
+                            CreatedDate = new DateTime(2025, 2, 20, 10, 0, 0, 0, DateTimeKind.Utc),
+                            ImageUrl = "/images/blog1.jpg",
+                            Slug = "10-reasons-to-be-helpful-towards-any-animals",
+                            Summary = "At the core of our practice is the idea that cities are the incubators of our greatest achievements, and the best hope for a sustainable future.",
+                            Title = "10 Reasons to be helpful towards any animals"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AuthorName = "Dr. Leyla",
+                            Content = "Ev heyvanları danışa bilməsə də, onların davranışları bizə çox şey deyir. Aclıq siqnalını düzgün anlamaq onların həddindən artıq kökəlməsinin və ya qidasız qalmasının qarşısını alır.\n\n- Qabının yanında gözləmək və ya qabı döyəcləmək: Pişik və itlərin ən yayğın vərdişlərindən biridir.\n- Narahatlıq və diqqət axtarışı: Əgər ev heyvanınız adi vaxtdan daha çox ayaqlarınıza sürtünür və ya səslər çıxarırsa, yemək vaxtı gəlmiş ola bilər.\n- Düzgün yemləmə qrafiki: Heyvanları gün ərzində eyni saatlarda yemləmək onların həzm sistemini tənzimləyir.\n- Porsiyanın çəkiyə uyğunluğu: Yem qablaşdırmasındakı cədvələ uyğun olaraq çəkiyə və yaşa uyğun qrammatura təyin edilməlidir. Təbii və quru yemlərin balansı mütləq qorunmalıdır.",
+                            CreatedDate = new DateTime(2025, 2, 21, 12, 30, 0, 0, DateTimeKind.Utc),
+                            ImageUrl = "/images/blog2.jpg",
+                            Slug = "how-to-know-your-pet-is-hungry",
+                            Summary = "Ev heyvanınızın ac olduğunu necə anlaya bilərsiniz? Qidalanma rejimi, aclıq siqnalları və düzgün porsiya seçimi haqqında əsas məsləhətlər.",
+                            Title = "How to know your pet is hungry"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AuthorName = "Murad Əliyev",
+                            Content = "Evdə heyvan saxlamaq böyük sevinc bəxş etməklə yanaşı, onların təhlükəsizliyi üçün evdə xüsusi şərait qurmağı tələb edir.\n\n- Rahat yataq və istirahət guşəsi: Hər bir heyvanın özünə aid sakit, cərəyan olmayan bir guşəsi olmalıdır.\n- Təhlükəli əşyaların uzaqlaşdırılması: Açıqda qalan elektrik naqilləri, zəhərli otaq bitkiləri və kiçik oyuncaqlar yığışdırılmalıdır.\n- Əyləncə və fiziki aktivlik: Pişiklər üçün cırmaqlama taxtası, itlər üçün diş qaşıyan oyuncaqlar onların enerjisini düzgün istiqamətləndirir.\n- Daimi təmiz su mənbəyi: Su qabları həmişə təmiz və dolu saxlanılmalıdır.",
+                            CreatedDate = new DateTime(2025, 2, 22, 15, 0, 0, 0, DateTimeKind.Utc),
+                            ImageUrl = "/images/blog3.jpg",
+                            Slug = "best-home-for-your-pets",
+                            Summary = "Ev şəraitində heyvanlar üçün rahat, təhlükəsiz və əyləncəli mühitin yaradılması üzrə bələdçi.",
+                            Title = "Best home for your pets"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            AuthorName = "Veterinar Elmir",
+                            Content = "Düzgün qidalanma ev heyvanlarının parlaq tük örtüyü, möhkəm dişləri və güclü immuniteti üçün vacibdir.\n\n1. Premium yemlərin üstünlükləri: Yüksək keyfiyyətli quru yemlər təbii ət mənbələri, zəruri minerallar və vitaminlərlə zəngindir.\n2. Yaş həddinə görə ayrılma: Balalar (Puppy/Kitten) üçün yüksək kalorili və kalsiumlu yemlər, yetkin heyvanlar üçün isə balanslı rasion tələb olunur.\n3. İnsan yeməklərinin zərərləri: Şokolad, soğan, sarımsaq, şirniyyat və ədviyyatlı yeməklər heyvanların qaraciyər və mədəsinə ciddi zərər vura bilər.\n4. Mövsümi vitamin əlavələri: Xüsusilə tük tökülməsi dövründə baytar məsləhəti ilə Omega-3 və multivitaminlər qəbul edilməlidir.",
+                            CreatedDate = new DateTime(2025, 3, 1, 9, 15, 0, 0, DateTimeKind.Utc),
+                            ImageUrl = "/images/blog1.jpg",
+                            Slug = "ev-heyvanlari-ucun-duzgun-qidalanma-qaydalari",
+                            Summary = "İt və pişiklərin yaş və çəkisinə uyğun düzgün rasion seçilməsi və vitamin balansının qorunması haqqında məlumat.",
+                            Title = "Ev heyvanları üçün düzgün qidalanma qaydaları"
+                        });
                 });
 
             modelBuilder.Entity("PetShop.DataContext.Entites.Brand", b =>
@@ -171,6 +492,147 @@ namespace PetShop.Migrations
                             Id = 6,
                             Name = "Klaws"
                         });
+                });
+
+            modelBuilder.Entity("PetShop.DataContext.Entites.Coupon", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DiscountType")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("DiscountValue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("MinOrderAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Coupons");
+                });
+
+            modelBuilder.Entity("PetShop.DataContext.Entites.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CouponCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PaymentIntentId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderNumber")
+                        .IsUnique();
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("PetShop.DataContext.Entites.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("PetShop.DataContext.Entites.Product", b =>
@@ -524,6 +986,42 @@ namespace PetShop.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PetShop.DataContext.Entites.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ProductId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("Reviews");
+                });
+
             modelBuilder.Entity("PetShop.DataContext.Entites.Wishlist", b =>
                 {
                     b.Property<int>("Id")
@@ -542,14 +1040,80 @@ namespace PetShop.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
 
                     b.HasIndex("SessionId", "ProductId")
                         .IsUnique();
 
                     b.ToTable("Wishlist");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.HasOne("PetShop.DataContext.Entites.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("PetShop.DataContext.Entites.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PetShop.DataContext.Entites.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("PetShop.DataContext.Entites.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PetShop.DataContext.Entites.Basket", b =>
+                {
+                    b.HasOne("PetShop.DataContext.Entites.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PetShop.DataContext.Entites.BasketItem", b =>
@@ -572,6 +1136,32 @@ namespace PetShop.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Basket");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
+                });
+
+            modelBuilder.Entity("PetShop.DataContext.Entites.OrderItem", b =>
+                {
+                    b.HasOne("PetShop.DataContext.Entites.Order", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PetShop.DataContext.Entites.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetShop.DataContext.Entites.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Order");
 
                     b.Navigation("Product");
 
@@ -647,6 +1237,25 @@ namespace PetShop.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("PetShop.DataContext.Entites.Review", b =>
+                {
+                    b.HasOne("PetShop.DataContext.Entites.Product", "Product")
+                        .WithMany("Reviews")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PetShop.DataContext.Entites.ApplicationUser", "User")
+                        .WithMany("Reviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PetShop.DataContext.Entites.Wishlist", b =>
                 {
                     b.HasOne("PetShop.DataContext.Entites.Product", "Product")
@@ -655,12 +1264,24 @@ namespace PetShop.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PetShop.DataContext.Entites.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Product");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PetShop.DataContext.Entites.AnimalType", b =>
                 {
                     b.Navigation("ProductAnimalTypes");
+                });
+
+            modelBuilder.Entity("PetShop.DataContext.Entites.ApplicationUser", b =>
+                {
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("PetShop.DataContext.Entites.Basket", b =>
@@ -673,6 +1294,11 @@ namespace PetShop.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("PetShop.DataContext.Entites.Order", b =>
+                {
+                    b.Navigation("OrderItems");
+                });
+
             modelBuilder.Entity("PetShop.DataContext.Entites.Product", b =>
                 {
                     b.Navigation("BasketItems");
@@ -680,6 +1306,8 @@ namespace PetShop.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("ProductAnimalTypes");
+
+                    b.Navigation("Reviews");
 
                     b.Navigation("Variants");
                 });

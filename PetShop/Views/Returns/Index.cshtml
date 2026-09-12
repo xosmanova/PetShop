@@ -1,0 +1,110 @@
+@{
+    ViewData["Title"] = "Geri Qaytarma və Kompensasiya Qaydaları";
+}
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Returns <span class="text-primary">& Refunds</span></h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                <span class="breadcrumb-item active" aria-current="page">Returns & Refunds</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<div class="my-5 py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <div class="text-center mb-5">
+                    <span class="badge bg-secondary-subtle text-primary fs-6 px-3 py-2 rounded-pill fw-semibold mb-2">MÜŞTƏRİ MƏMNUNİYYƏTİ</span>
+                    <h2 class="display-5 fw-bold">Geri Qaytarma və Pulun İadəsi Şərtləri</h2>
+                    <p class="text-muted fs-6">Sizin və sevimli heyvanlarınızın məmnuniyyəti bizim üçün ən vacib meyardır.</p>
+                </div>
+
+                <!-- 3 Əsas Şərt Kartı -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center" style="background: #fafafa;">
+                            <div class="mb-3">
+                                <iconify-icon icon="solar:calendar-date-bold-duotone" class="text-primary" style="font-size: 48px;"></iconify-icon>
+                            </div>
+                            <h4 class="fw-bold mb-2">14 Günlük Müddət</h4>
+                            <p class="text-muted small lh-base">
+                                Məhsulu təhvil aldığınız andan etibarən 14 gün ərzində heç bir səbəb göstərmədən qaytara və ya dəyişdirə bilərsiniz.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center" style="background: #fafafa;">
+                            <div class="mb-3">
+                                <iconify-icon icon="solar:box-bold-duotone" class="text-primary" style="font-size: 48px;"></iconify-icon>
+                            </div>
+                            <h4 class="fw-bold mb-2">Orijinal Qablaşdırma</h4>
+                            <p class="text-muted small lh-base">
+                                Məhsul istifadə olunmamış, əmtəə görünüşü, etiketləri, aksesuarları və orijinal qutusu tam saxlanılmış olmalıdır.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center" style="background: #fafafa;">
+                            <div class="mb-3">
+                                <iconify-icon icon="solar:wallet-money-bold-duotone" class="text-primary" style="font-size: 48px;"></iconify-icon>
+                            </div>
+                            <h4 class="fw-bold mb-2">5-7 İş Gününə İadə</h4>
+                            <p class="text-muted small lh-base">
+                                Qaytarılan məhsul təhvil alındıqdan sonra ödənişiniz 5-7 iş günü ərzində tam olaraq bank kartınıza geri köçürülür.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ətraflı Şərtlər Bölməsi -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-5 bg-white">
+                    <h3 class="fw-bold mb-4">Geri Qaytarma Qaydaları və Mərhələləri</h3>
+                    
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark"><span class="badge bg-primary rounded-circle me-2">1</span> Müraciətin qeydə alınması</h5>
+                        <p class="text-secondary lh-lg ms-4">
+                            Geri qaytarmaq istədiyiniz məhsul üçün sifariş nömrənizi qeyd edərək <strong><a asp-controller="Contact" asp-action="Index" class="text-decoration-underline text-dark">Əlaqə</a></strong> səhifəmizdən və ya müştəri xidmətləri nömrəmizdən bizə müraciət edin.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark"><span class="badge bg-primary rounded-circle me-2">2</span> Məhsulun təhvil verilməsi</h5>
+                        <p class="text-secondary lh-lg ms-4">
+                            Kuryerimiz göstərdiyiniz ünvana yaxınlaşaraq məhsulu təhvil alır və ya siz məhsulu mərkəzi filialımıza yaxınlaşdıraraq təqdim edə bilərsiniz.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark"><span class="badge bg-primary rounded-circle me-2">3</span> Yoxlama və Ödənişin İadəsi</h5>
+                        <p class="text-secondary lh-lg ms-4">
+                            Məhsul anbarımızda keyfiyyət komandamız tərəfindən ilkin baxışdan keçirildikdən sonra <strong>5-7 iş günü</strong> ərzində ilkin ödəniş üsulunuza uyğun olaraq (bank kartınıza və ya nağd) kompensasiya həyata keçirilir.
+                        </p>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 border-start border-4 border-warning mt-4">
+                        <p class="mb-0 text-secondary small">
+                            <strong>Diqqət:</strong> Gigiyena və heyvan sağlamlığı qaydalarına uyğun olaraq, açılmış və ya istifadə edilmiş quru/yaş yemlər, dərman preparatları və baxım kosmetikaları (əgər fabrik qüsuru yoxdursa) geri qaytarılmır.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Müraciət Düyməsi bloku -->
+                <div class="text-center">
+                    <p class="text-muted mb-3">Məhsul qaytarmaq və ya dəyişdirmək istəyirsiniz?</p>
+                    <a asp-controller="Contact" asp-action="Index" class="btn btn-primary px-5 py-3 rounded-pill fw-semibold text-uppercase">
+                        Qaytarma Sorğusu Göndər
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

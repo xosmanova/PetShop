@@ -1,0 +1,169 @@
+@model PetShop.Areas.Admin.Models.AdminBlogListViewModel
+@{
+    ViewData["Title"] = "Məqalələr (Blog) | Admin";
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+        
+        <!-- Səhifə Başlığı və Düymələr -->
+        <div class="page-heading d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
+                <div>
+                    <p class="eyebrow mb-1">Məzmun İdarəetməsi</p>
+                    <h1 class="h3 mb-1">Məqalələr (Blog)</h1>
+                    <p class="text-muted mb-0">Bloq məqalələrinin yaradılması, redaktəsi və idarə olunması.</p>
+                </div>
+            </div>
+            <div class="heading-actions">
+                <a asp-action="Create" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Yeni Məqalə</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bildiriş Mesajları (Alerts) -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <div>@TempData["Success"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-x-circle-fill fs-5"></i>
+                <div>@TempData["Error"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+
+        <!-- Axtarış Paneli -->
+        <div class="panel mb-4">
+            <div class="p-3">
+                <form method="get" asp-action="Index" class="row g-2 align-items-center">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="search" value="@Model.Search" 
+                                   class="form-control border-start-0" 
+                                   placeholder="Başlıq, müəllif və ya mətndə axtar..." />
+                            <button type="submit" class="btn btn-dark">Axtar</button>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.Search))
+                    {
+                        <div class="col-auto">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-1"></i>Filtrləri sıfırla
+                            </a>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+
+        <!-- Məqalələr Cədvəli -->
+        <section class="panel">
+            <div class="panel-header d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0 section-title">
+                    <i class="bi bi-list-ul"></i>
+                    <span>Məqalə Siyahısı (@Model.TotalCount)</span>
+                </h2>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 70px;">Şəkil</th>
+                            <th>Başlıq</th>
+                            <th>Slug (URL)</th>
+                            <th>Müəllif</th>
+                            <th>Tarix</th>
+                            <th class="text-end" style="width: 140px;">Əməliyyatlar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Posts != null && Model.Posts.Count > 0)
+                        {
+                            @foreach (var post in Model.Posts)
+                            {
+                                var img = !string.IsNullOrEmpty(post.ImageUrl) ? post.ImageUrl : "/images/blog1.jpg";
+                                <tr>
+                                    <td>
+                                        <img src="@img" class="rounded-2 shadow-sm" style="width: 50px; height: 40px; object-fit: cover;" alt="@post.Title" loading="lazy">
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">@post.Title</div>
+                                        <div class="text-muted small text-truncate" style="max-width: 350px;">@post.Summary</div>
+                                    </td>
+                                    <td>
+                                        <code>@post.Slug</code>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-light border text-dark">
+                                            <i class="bi bi-person-fill me-1"></i>@post.AuthorName
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">@post.CreatedDate.ToString("dd.MM.yyyy HH:mm")</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1">
+                                            <a asp-area="" asp-controller="Blog" asp-action="Details" asp-route-slug="@post.Slug" target="_blank"
+                                               class="btn btn-sm btn-outline-info" title="Saytda bax">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@post.Id" 
+                                               class="btn btn-sm btn-outline-primary" title="Redaktə et">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <form method="post" asp-action="Delete" asp-route-id="@post.Id" 
+                                                  class="d-inline" onsubmit="return confirm('\'@post.Title\' məqaləsini silmək istədiyinizdən əminsiniz?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    Hələ heç bir məqalə tapılmadı.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <div class="p-3 border-top d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">Səhifə @Model.CurrentPage / @Model.TotalPages</span>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@Model.Search">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            }
+        </section>
+    </div>
+</main>

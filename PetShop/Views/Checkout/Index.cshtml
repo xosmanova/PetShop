@@ -1,4 +1,4 @@
-﻿@model PetShop.DataContext.Entites.Basket
+@model PetShop.DataContext.Entites.Basket
 
 <section id="banner" class="py-3" style="background: #F9F3EC;">
     <div class="container">
@@ -20,10 +20,10 @@
                     <h2 class="text-dark pb-3">Billing Details</h2>
                     <div class="billing-details">
                         <label for="fname">First Name*</label>
-                        <input type="text" id="fname" name="firstname" class="form-control mt-2 mb-4 ps-3" required>
+                        <input type="text" id="fname" name="firstname" value="@ViewBag.User?.FirstName" class="form-control mt-2 mb-4 ps-3" required>
 
                         <label for="lname">Last Name*</label>
-                        <input type="text" id="lname" name="lastname" class="form-control mt-2 mb-4 ps-3" required>
+                        <input type="text" id="lname" name="lastname" value="@ViewBag.User?.LastName" class="form-control mt-2 mb-4 ps-3" required>
 
                         <label for="cname">Company Name (optional)</label>
                         <input type="text" id="cname" name="companyname" class="form-control mt-2 mb-4">
@@ -38,13 +38,13 @@
                         </select>
 
                         <label for="address">Street Address*</label>
-                        <input type="text" id="address" name="address" placeholder="House number and street name"
+                        <input type="text" id="address" name="address" value="@ViewBag.User?.Address" placeholder="House number and street name"
                                class="form-control mt-3 ps-3 mb-3" required>
                         <input type="text" id="address2" name="address2" placeholder="Apartments, suite, etc."
                                class="form-control ps-3 mb-4">
 
                         <label for="city">Town / City *</label>
-                        <input type="text" id="city" name="city" class="form-control mt-3 ps-3 mb-4" required>
+                        <input type="text" id="city" name="city" value="@ViewBag.User?.City" class="form-control mt-3 ps-3 mb-4" required>
 
                         <label for="state">State *</label>
                         <input type="text" id="state" name="state" class="form-control mt-2 mb-4 ps-3">
@@ -53,10 +53,10 @@
                         <input type="text" id="zip" name="zip" class="form-control mt-2 mb-4 ps-3">
 
                         <label for="phone">Phone *</label>
-                        <input type="text" id="phone" name="phone" class="form-control mt-2 mb-4 ps-3" required>
+                        <input type="text" id="phone" name="phone" value="@ViewBag.User?.PhoneNumber" class="form-control mt-2 mb-4 ps-3" required>
 
                         <label for="email">Email address *</label>
-                        <input type="email" id="email" name="email" class="form-control mt-2 mb-4 ps-3" required>
+                        <input type="email" id="email" name="email" value="@ViewBag.User?.Email" class="form-control mt-2 mb-4 ps-3" required>
                     </div>
                 </div>
 
@@ -75,78 +75,105 @@
                                 <tbody>
                                     @foreach (var item in Model.BasketItems)
                                     {
+                                        var isDiscounted = item.Product.DiscountPrice.HasValue && item.Product.DiscountPrice.Value < item.Product.Price;
+                                        var originalLineTotal = (item.Product.Price + (item.ProductVariant?.PriceModifier ?? 0m)) * item.Quantity;
+                                        var lineTotal = item.UnitPrice * item.Quantity;
                                         <tr>
-                                            <th>@item.Product.Name <small class="text-muted">x @item.Quantity</small></th>
-                                            <td>
-                                                <span class="price-amount amount ps-5">
-                                                    @(item.UnitPrice* item.Quantity) ₼
+                                            <th>
+                                                <div class="fw-semibold text-dark">@item.Product.Name</div>
+                                                <small class="text-secondary">x @item.Quantity (@item.UnitPrice.ToString("0.00") ₼ / ədəd)</small>
+                                            </th>
+                                            <td class="text-end">
+                                                <span class="price-amount amount ps-3">
+                                                    @if (isDiscounted)
+                                                    {
+                                                        <del class="text-muted text-decoration-line-through small me-2">@originalLineTotal.ToString("0.00") ₼</del>
+                                                        <span class="fw-bold text-danger">@lineTotal.ToString("0.00") ₼</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="fw-semibold text-dark">@lineTotal.ToString("0.00") ₼</span>
+                                                    }
                                                 </span>
                                             </td>
                                         </tr>
                                     }
                                     <tr class="subtotal border-top border-bottom pt-2 pb-2 text-uppercase">
-                                        <th>Subtotal</th>
-                                        <td data-title="Subtotal">
-                                            <span class="price-amount amount ps-5">
-                                                @Model.BasketItems.Sum(i => i.UnitPrice * i.Quantity) ₼
+                                        <th>Ara Cəm (Subtotal)</th>
+                                        <td data-title="Subtotal" class="text-end">
+                                            <span class="price-amount amount ps-3 fw-semibold">
+                                                @(((decimal)(ViewBag.Subtotal ?? Model.BasketItems.Sum(i => i.UnitPrice * i.Quantity))).ToString("0.00")) ₼
                                             </span>
                                         </td>
                                     </tr>
+                                    @if (ViewBag.DiscountAmount != null && (decimal)ViewBag.DiscountAmount > 0)
+                                    {
+                                        var couponCode = ViewBag.AppliedCoupon != null ? ((PetShop.DataContext.Entites.Coupon)ViewBag.AppliedCoupon).Code : "";
+                                        <tr class="discount-total border-bottom pt-2 pb-2 text-uppercase text-danger">
+                                            <th>Kupon Endirimi @(!string.IsNullOrEmpty(couponCode) ? $"({couponCode})" : "")</th>
+                                            <td data-title="Discount" class="text-end">
+                                                <span class="price-amount amount ps-3 fw-bold">
+                                                    -@(((decimal)ViewBag.DiscountAmount).ToString("0.00")) ₼
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
                                     <tr class="order-total border-bottom pt-2 pb-2 text-uppercase">
-                                        <th>Total</th>
-                                        <td data-title="Total">
-                                            <span class="price-amount amount ps-5">
-                                                @Model.BasketItems.Sum(i => i.UnitPrice * i.Quantity) ₼
+                                        <th>Yekun Məbləğ (Total)</th>
+                                        <td data-title="Total" class="text-end">
+                                            <span class="price-amount amount ps-3 fw-bold text-primary fs-5">
+                                                @(((decimal)(ViewBag.Total ?? Model.BasketItems.Sum(i => i.UnitPrice * i.Quantity))).ToString("0.00")) ₼
                                             </span>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
 
-                            <div class="list-group mt-5 mb-3">
-                                <label class="list-group-item d-flex gap-2 border-0">
+                            @if (TempData["Error"] != null)
+                            {
+                                <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+                                </div>
+                            }
+
+                            <div class="list-group mt-4 mb-3">
+                                <label class="list-group-item d-flex gap-2 border p-3 rounded mb-2 bg-light">
                                     <input class="form-check-input flex-shrink-0" type="radio" name="paymentMethod"
-                                           value="BankTransfer" checked>
-                                    <span>
-                                        <strong class="text-uppercase">Direct bank transfer</strong>
-                                        <small class="d-block text-body-secondary">
-                                            Make your payment directly into our bank account.
-                                            Please use your Order ID. Your order will shipped after funds have cleared in our account.
-                                        </small>
+                                           value="Stripe" id="pm-stripe" checked>
+                                    <span class="w-100">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <strong class="text-dark"><i class="bi bi-credit-card-2-front text-primary me-1"></i>Bank Kartı (Stripe)</strong>
+                                            <span class="badge text-bg-primary">Tövsiyə olunur</span>
+                                        </div>
+                                        <small class="d-block text-secondary mt-1">Visa, Mastercard və digər bank kartları ilə ani və təhlükəsiz onlayn ödəniş.</small>
                                     </span>
                                 </label>
-                                <label class="list-group-item d-flex gap-2 border-0">
+
+                                <div id="stripe-payment-container" class="p-3 border rounded mb-3 bg-white shadow-sm">
+                                    <label class="form-label fw-semibold small text-secondary mb-2">Kart Məlumatları (Stripe Test):</label>
+                                    <div id="payment-element" class="p-2 border rounded bg-light">
+                                        <div id="stripe-loading" class="text-center py-3 text-secondary small">
+                                            <span class="spinner-border spinner-border-sm me-1" role="status"></span> Ödəniş modulu hazırlanır...
+                                        </div>
+                                    </div>
+                                    <div id="card-errors" class="alert alert-danger mt-2 py-2 px-3 small d-none" role="alert"></div>
+                                    <input type="hidden" name="paymentIntentId" id="paymentIntentId" />
+                                </div>
+
+                                <label class="list-group-item d-flex gap-2 border p-3 rounded mb-2">
                                     <input class="form-check-input flex-shrink-0" type="radio" name="paymentMethod"
-                                           value="Check">
+                                           value="CashOnDelivery" id="pm-cod">
                                     <span>
-                                        <strong class="text-uppercase">Check payments</strong>
-                                        <small class="d-block text-body-secondary">
-                                            Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.
-                                        </small>
-                                    </span>
-                                </label>
-                                <label class="list-group-item d-flex gap-2 border-0">
-                                    <input class="form-check-input flex-shrink-0" type="radio" name="paymentMethod"
-                                           value="CashOnDelivery">
-                                    <span>
-                                        <strong class="text-uppercase">Cash on delivery</strong>
-                                        <small class="d-block text-body-secondary">Pay with cash upon delivery.</small>
-                                    </span>
-                                </label>
-                                <label class="list-group-item d-flex gap-2 border-0">
-                                    <input class="form-check-input flex-shrink-0" type="radio" name="paymentMethod"
-                                           value="PayPal">
-                                    <span>
-                                        <strong class="text-uppercase">Paypal</strong>
-                                        <small class="d-block text-body-secondary">
-                                            Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.
-                                        </small>
+                                        <strong class="text-dark"><i class="bi bi-cash-stack text-success me-1"></i>Çatdırılmada Nağd Ödəniş</strong>
+                                        <small class="d-block text-secondary mt-1">Məhsulu təhvil aldıqda kuryerə nağd şəkildə ödəyin.</small>
                                     </span>
                                 </label>
                             </div>
 
-                            <button type="submit" name="submit" class="btn btn-dark btn-lg rounded-1 w-100">
-                                Place an order
+                            <button type="submit" id="submit-button" class="btn btn-dark btn-lg rounded-1 w-100 py-3 d-flex align-items-center justify-content-center gap-2">
+                                <span id="button-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                <span id="button-text">Sifarişi Təsdiqlə və Ödə</span>
                             </button>
                         </div>
                     </div>
@@ -155,3 +182,147 @@
         </form>
     </div>
 </section>
+
+@section Scripts {
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const form = document.querySelector('form[action*="PlaceOrder"]') || document.querySelector('form');
+            const stripeRadio = document.getElementById('pm-stripe');
+            const codRadio = document.getElementById('pm-cod');
+            const stripeContainer = document.getElementById('stripe-payment-container');
+            const submitBtn = document.getElementById('submit-button');
+            const btnText = document.getElementById('button-text');
+            const btnSpinner = document.getElementById('button-spinner');
+            const cardErrors = document.getElementById('card-errors');
+            const paymentIntentInput = document.getElementById('paymentIntentId');
+            const stripeLoading = document.getElementById('stripe-loading');
+
+            const stripeKey = '@ViewBag.StripePublishableKey';
+            let stripe = null;
+            let elements = null;
+            let clientSecret = null;
+            let paymentIntentId = null;
+            let isSimulated = false;
+
+            // Toggle Stripe container visibility
+            function togglePaymentMethod() {
+                if (stripeRadio && stripeRadio.checked) {
+                    if (stripeContainer) stripeContainer.classList.remove('d-none');
+                    if (btnText) btnText.textContent = 'Kartla Ödə və Sifarişi Tamamla';
+                } else {
+                    if (stripeContainer) stripeContainer.classList.add('d-none');
+                    if (btnText) btnText.textContent = 'Sifarişi Təsdiqlə';
+                }
+            }
+
+            document.querySelectorAll('input[name="paymentMethod"]').forEach(r => {
+                r.addEventListener('change', togglePaymentMethod);
+            });
+            togglePaymentMethod();
+
+            // Initialize Stripe Elements
+            try {
+                if (window.Stripe && stripeKey) {
+                    stripe = Stripe(stripeKey);
+                }
+
+                var antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                const response = await fetch('@Url.Action("CreatePaymentIntent", "Checkout")', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': antiForgeryToken
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    clientSecret = data.clientSecret;
+                    paymentIntentId = data.paymentIntentId;
+                    isSimulated = !!data.isSimulated;
+
+                    if (paymentIntentInput) paymentIntentInput.value = paymentIntentId;
+
+                    if (stripe && clientSecret && !isSimulated) {
+                        elements = stripe.elements({ clientSecret: clientSecret });
+                        const paymentElement = elements.create('payment');
+                        if (stripeLoading) stripeLoading.remove();
+                        paymentElement.mount('#payment-element');
+                    } else {
+                        // Test/Demo fallback UI when using dummy keys
+                        if (stripeLoading) {
+                            stripeLoading.innerHTML = `
+                                <div class="text-success p-2">
+                                    <i class="bi bi-shield-check fs-4 d-block mb-1"></i>
+                                    <strong>Stripe Test Rejimi Aktivdir</strong>
+                                    <div class="small text-muted mt-1">Test kartı ilə simulyasiya edilmiş təhlükəsiz ödəniş. 'Kartla Ödə' düyməsinə klikləməklə ödəniş uğurla tamamlanacaq.</div>
+                                </div>
+                            `;
+                        }
+                    }
+                } else {
+                    if (stripeLoading) {
+                        stripeLoading.innerHTML = '<span class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>Ödəniş modulu yüklənmədi.</span>';
+                    }
+                }
+            } catch (err) {
+                console.warn('Stripe init warning:', err);
+                if (stripeLoading) {
+                    stripeLoading.innerHTML = '<span class="text-muted small">Stripe Test Rejimi hazırdır.</span>';
+                }
+            }
+
+            // Form Submit handler
+            if (form) {
+                form.addEventListener('submit', async function (e) {
+                    const isStripe = stripeRadio && stripeRadio.checked;
+                    if (!isStripe) {
+                        return true; // Let regular CashOnDelivery form submit
+                    }
+
+                    e.preventDefault();
+
+                    if (cardErrors) {
+                        cardErrors.classList.add('d-none');
+                        cardErrors.textContent = '';
+                    }
+
+                    if (submitBtn) submitBtn.disabled = true;
+                    if (btnSpinner) btnSpinner.classList.remove('d-none');
+                    if (btnText) btnText.textContent = 'Ödəniş icra olunur...';
+
+                    if (stripe && elements && clientSecret && !isSimulated) {
+                        const { error, paymentIntent } = await stripe.confirmPayment({
+                            elements: elements,
+                            redirect: 'if_required'
+                        });
+
+                        if (error) {
+                            if (cardErrors) {
+                                cardErrors.textContent = error.message || 'Ödəniş zamanı xəta baş verdi.';
+                                cardErrors.classList.remove('d-none');
+                            }
+                            if (submitBtn) submitBtn.disabled = false;
+                            if (btnSpinner) btnSpinner.classList.add('d-none');
+                            if (btnText) btnText.textContent = 'Kartla Ödə və Sifarişi Tamamla';
+                            return;
+                        }
+
+                        if (paymentIntent && (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing')) {
+                            if (paymentIntentInput) paymentIntentInput.value = paymentIntent.id;
+                            form.submit();
+                            return;
+                        }
+                    } else {
+                        // Test mode or simulation
+                        if (paymentIntentInput && !paymentIntentInput.value && paymentIntentId) {
+                            paymentIntentInput.value = paymentIntentId;
+                        }
+                        form.submit();
+                    }
+                });
+            }
+        });
+    </script>
+}

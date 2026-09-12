@@ -1,0 +1,128 @@
+@model PetShop.Models.BlogListViewModel
+@{
+    ViewData["Title"] = "Blog - Faydalı Məqalələr";
+}
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Our <span class="text-primary">Blog</span></h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                <span class="breadcrumb-item active" aria-current="page">Blog</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<section class="my-5 py-5">
+    <div class="container">
+        <div class="section-header d-md-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="text-primary text-uppercase fw-semibold">Xəbərlər və Məsləhətlər</span>
+                <h2 class="display-4 fw-normal mt-1">Son Məqalələrimiz</h2>
+            </div>
+            <div class="text-muted">
+                <span>Cəmi <strong>@Model.TotalCount</strong> məqalə</span>
+            </div>
+        </div>
+
+        @if (!Model.Posts.Any())
+        {
+            <div class="text-center py-5 my-5">
+                <iconify-icon icon="mdi:newspaper-variant-outline" class="display-1 text-muted mb-3"></iconify-icon>
+                <h3 class="fw-normal">Hələ heç bir məqalə paylaşılmayıb.</h3>
+                <p class="text-muted">Tezliklə maraqlı məqalələrimiz burada yer alacaq.</p>
+                <a asp-controller="Shop" asp-action="Index" class="btn btn-outline-dark mt-3">Mağazaya Keç</a>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var post in Model.Posts)
+                {
+                    var imageUrl = !string.IsNullOrEmpty(post.ImageUrl) ? post.ImageUrl : "/images/blog1.jpg";
+
+                    <div class="col-md-6 col-lg-4 my-4">
+                        <div class="card position-relative border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white">
+                            <div class="z-1 position-absolute rounded-3 m-3 px-3 pt-1 bg-light shadow-sm">
+                                <h3 class="secondary-font text-primary m-0">@post.CreatedDate.Day</h3>
+                                <p class="secondary-font fs-6 m-0">@post.CreatedDate.ToString("MMM")</p>
+                            </div>
+
+                            <a asp-controller="Blog" asp-action="Details" asp-route-slug="@post.Slug" class="overflow-hidden">
+                                <img src="@imageUrl" class="img-fluid w-100" style="height: 240px; object-fit: cover; transition: transform 0.3s ease;" alt="@post.Title" loading="lazy">
+                            </a>
+
+                            <div class="card-body p-4 d-flex flex-column">
+                                <div class="text-muted small mb-2 d-flex align-items-center gap-2">
+                                    <span class="d-inline-flex align-items-center gap-1">
+                                        <iconify-icon icon="mdi:account" class="text-primary"></iconify-icon>
+                                        @post.AuthorName
+                                    </span>
+                                    <span>•</span>
+                                    <span class="d-inline-flex align-items-center gap-1">
+                                        <iconify-icon icon="mdi:calendar-outline" class="text-primary"></iconify-icon>
+                                        @post.CreatedDate.ToString("dd.MM.yyyy")
+                                    </span>
+                                </div>
+
+                                <a asp-controller="Blog" asp-action="Details" asp-route-slug="@post.Slug" class="text-decoration-none text-dark">
+                                    <h4 class="card-title mb-3 fs-5 fw-semibold" style="min-height: 52px;">@post.Title</h4>
+                                </a>
+
+                                <p class="card-text text-muted flex-grow-1 fs-6 mb-4">
+                                    @post.Summary
+                                </p>
+
+                                <div class="mt-auto pt-2 border-top">
+                                    <a asp-controller="Blog" asp-action="Details" asp-route-slug="@post.Slug" class="btn btn-outline-dark btn-sm text-uppercase px-3 py-2 rounded-1">
+                                        Ətraflı oxu
+                                        <svg width="18" height="18" viewBox="0 0 24 24" class="ms-1 mb-1">
+                                            <use xlink:href="#arrow-right"></use>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="navigation paging-navigation text-center mt-5" role="navigation">
+                    <div class="pagination loop-pagination d-flex justify-content-center align-items-center">
+                        @if (Model.CurrentPage > 1)
+                        {
+                            <a asp-controller="Blog" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)"
+                               class="pagination-arrow d-flex align-items-center mx-3 text-dark text-decoration-none">
+                                <iconify-icon icon="ic:baseline-keyboard-arrow-left" class="pagination-arrow fs-1"></iconify-icon>
+                            </a>
+                        }
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            if (i == Model.CurrentPage)
+                            {
+                                <span aria-current="page" class="page-numbers current pe-3 fw-bold text-primary">@i</span>
+                            }
+                            else
+                            {
+                                <a class="page-numbers pe-3 text-dark text-decoration-none" asp-controller="Blog" asp-action="Index" asp-route-page="@i">@i</a>
+                            }
+                        }
+
+                        @if (Model.CurrentPage < Model.TotalPages)
+                        {
+                            <a asp-controller="Blog" asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)"
+                               class="pagination-arrow d-flex align-items-center mx-3 text-dark text-decoration-none">
+                                <iconify-icon icon="ic:baseline-keyboard-arrow-right" class="pagination-arrow fs-1"></iconify-icon>
+                            </a>
+                        }
+                    </div>
+                </nav>
+            }
+        }
+    </div>
+</section>

@@ -1,0 +1,172 @@
+@{
+    ViewData["Title"] = "Tez-tez Verilən Suallar (FAQs)";
+}
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Help <span class="text-primary">& FAQs</span></h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                <span class="breadcrumb-item active" aria-current="page">FAQs</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<div class="my-5 py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="text-center mb-5">
+                    <span class="badge bg-secondary-subtle text-primary fs-6 px-3 py-2 rounded-pill fw-semibold mb-2">DƏSTƏK MƏRKƏZİ</span>
+                    <h2 class="display-5 fw-bold">Tez-tez Verilən Suallar</h2>
+                    <p class="text-muted fs-6">Sifarişlər, ödənişlər, çatdırılma və geri qaytarma qaydaları haqqında ən çox soruşulan sualların cavabları.</p>
+                </div>
+
+                <div class="accordion custom-faq-accordion" id="faqAccordion">
+
+                    <!-- Sual 1 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden shadow-sm">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button fw-bold py-3 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                <iconify-icon icon="solar:box-minimalistic-bold-duotone" class="text-primary me-3 fs-4"></iconify-icon>
+                                Sifarişimi necə izləyə bilərəm?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary lh-lg pt-1 pb-4 px-4">
+                                Sifarişinizi tamamladıqdan sonra sizə dərhal elektron poçt vasitəsilə unikal sifariş nömrəsi (məsələn: <code>ORD-2026-XXXXXX</code>) göndərilir. Əgər saytımızda qeydiyyatdan keçmisinizsə, şəxsi kabinetinizdəki <strong>"Sifarişlərim"</strong> bölməsinə daxil olaraq sifarişinizin cari icra vəziyyətini (Gözləmədə, Təsdiqləndi, Çatdırılmada, Tamamlandı) addım-addım canlı izləyə bilərsiniz.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sual 2 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden shadow-sm">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed fw-bold py-3 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                <iconify-icon icon="solar:map-point-wave-bold-duotone" class="text-primary me-3 fs-4"></iconify-icon>
+                                Hansı şəhərlərə çatdırırsınız?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary lh-lg pt-1 pb-4 px-4">
+                                Biz Bakı şəhəri və Abşeron yarımadasının bütün qəsəbələri, Sumqayıt, Xırdalan daxil olmaqla, həmçinin Azərbaycanın bütün rayon və bölgələrinə (Gəncə, Şəki, Lənkəran, Quba, Qəbələ və s.) etibarlı kuryer xidmətləri vasitəsilə sürətli çatdırılma həyata keçiririk.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sual 3 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden shadow-sm">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed fw-bold py-3 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                <iconify-icon icon="solar:tag-price-bold-duotone" class="text-primary me-3 fs-4"></iconify-icon>
+                                Kupon kodu necə istifadə olunur?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary lh-lg pt-1 pb-4 px-4">
+                                Səbət (<strong>Basket</strong>) səhifəsində "Kupon kodu" xanasına sahib olduğunuz promo kodu (məsələn: <code>PET10</code>) daxil edib <strong>"Tətbiq et"</strong> düyməsinə klikləyin. Kupon endirimi səbətinizdəki məhsulların endirimli cəminə dərhal tətbiq olunacaq və yekun ödəniləcək məbləğ xülasədə aydın əks etdiriləcəkdir.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sual 4 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden shadow-sm">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed fw-bold py-3 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                <iconify-icon icon="solar:restart-bold-duotone" class="text-primary me-3 fs-4"></iconify-icon>
+                                Geri qaytarma mümkündürmü?
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary lh-lg pt-1 pb-4 px-4">
+                                Bəli! İstehlakçıların hüquqlarının müdafiəsi haqqında qanunvericiliyə uyğun olaraq, məhsulu təhvil aldığınız andan etibarən <strong>14 gün ərzində</strong> orijinal qablaşdırmasında, istifadə edilməmiş və əmtəə görünüşü saxlanılmış vəziyyətdə geri qaytara və ya başqa məhsulla dəyişdirə bilərsiniz.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sual 5 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden shadow-sm">
+                        <h2 class="accordion-header" id="headingFive">
+                            <button class="accordion-button collapsed fw-bold py-3 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                <iconify-icon icon="solar:card-2-bold-duotone" class="text-primary me-3 fs-4"></iconify-icon>
+                                Hansı ödəniş üsullarını qəbul edirsiniz?
+                            </button>
+                        </h2>
+                        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary lh-lg pt-1 pb-4 px-4">
+                                Alış-veriş rahatlığınız üçün iki əsas ödəniş seçimini təqdim edirik:
+                                <ul class="mt-2 mb-0">
+                                    <li><strong>Onlayn Bank Kartı ilə:</strong> Stripe beynəlxalq ödəniş şlüzü vasitəsilə Visa və Mastercard kartları ilə komissiyasız, 3D Secure təhlükəsizliyi ilə.</li>
+                                    <li><strong>Qapıda Nağd Ödəniş:</strong> Sifarişi kuryerdən təhvil alarkən nağd pulla ödəmək imkanı.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sual 6 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden shadow-sm">
+                        <h2 class="accordion-header" id="headingSix">
+                            <button class="accordion-button collapsed fw-bold py-3 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                <iconify-icon icon="solar:close-circle-bold-duotone" class="text-primary me-3 fs-4"></iconify-icon>
+                                Sifarişi ləğv edə bilərəmmi?
+                            </button>
+                        </h2>
+                        <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary lh-lg pt-1 pb-4 px-4">
+                                Bəli, sifarişiniz kuryerə təhvil verilməmişdən əvvəl (yəni "Gözləmədə" statusunda olduqda) istənilən vaxt müştəri xidmətlərimizlə və ya <strong>Əlaqə</strong> səhifəsi vasitəsilə müraciət edərək heç bir cərimə olmadan ləğv edilə bilər. Əgər ödəniş onlayn kartla edilibsə, məbləğ dərhal geri qaytarılır.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sual 7 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden shadow-sm">
+                        <h2 class="accordion-header" id="headingSeven">
+                            <button class="accordion-button collapsed fw-bold py-3 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                                <iconify-icon icon="solar:shield-warning-bold-duotone" class="text-primary me-3 fs-4"></iconify-icon>
+                                Məhsul zədəli və ya yanlış gələrsə nə etməliyəm?
+                            </button>
+                        </h2>
+                        <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary lh-lg pt-1 pb-4 px-4">
+                                Kuryer məhsulu təqdim edərkən bağlamanı yerində yoxlamağınız tövsiyə olunur. Əgər hər hansı zədə və ya yanlış məhsul aşkar edilsə, kuryerə bildirin və ya dərhal dəstək nömrəmizlə əlaqə saxlayın. Qüsurlu məhsul 24 saat ərzində tamamilə ödənişsiz olaraq yenisi ilə dəyişdiriləcəkdir.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sual 8 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden shadow-sm">
+                        <h2 class="accordion-header" id="headingEight">
+                            <button class="accordion-button collapsed fw-bold py-3 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                                <iconify-icon icon="solar:delivery-bold-duotone" class="text-primary me-3 fs-4"></iconify-icon>
+                                Minimum sifariş məbləği və pulsuz çatdırılma şərti necədir?
+                            </button>
+                        </h2>
+                        <div id="collapseEight" class="accordion-collapse collapse" aria-labelledby="headingEight" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary lh-lg pt-1 pb-4 px-4">
+                                Mağazamızda heç bir minimum sifariş məhdudiyyəti yoxdur. İstənilən məbləğdə sifariş yerləşdirə bilərsiniz. Bakı şəhəri üzrə <strong>50 AZN və yuxarı</strong> olan bütün sifarişlər üçün çatdırılma tamamilə <strong>PULSUZDUR</strong>.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Əlaqə Kömək Kartı -->
+                <div class="card border-0 bg-light rounded-4 p-4 p-md-5 mt-5 text-center shadow-sm">
+                    <h3 class="fw-bold mb-2">Başqa bir sualınız qaldı?</h3>
+                    <p class="text-muted mb-4">Bizim mehriban dəstək komandamız sizə kömək etməyə hər zaman hazırdır.</p>
+                    <div>
+                        <a asp-controller="Contact" asp-action="Index" class="btn btn-primary px-4 py-3 rounded-pill fw-semibold text-uppercase me-2">
+                            Bizimlə Əlaqə Saxlayın
+                        </a>
+                        <a asp-controller="Shop" asp-action="Index" class="btn btn-outline-dark px-4 py-3 rounded-pill fw-semibold text-uppercase">
+                            Mağazaya Keçin
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

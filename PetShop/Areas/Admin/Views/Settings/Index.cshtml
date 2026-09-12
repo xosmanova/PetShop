@@ -1,0 +1,296 @@
+@{
+    ViewData["Title"] = "Settings | adminHMD";
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+
+        <!-- Səhifə Başlığı (Page Heading) -->
+        <div class="page-heading d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-gear-fill" aria-hidden="true"></i></span>
+                <div>
+                    <p class="eyebrow mb-1">WORKSPACE</p>
+                    <h1 class="h3 mb-1">Settings</h1>
+                    <p class="text-muted mb-0">Customize workspace defaults, security options, and notification preferences.</p>
+                </div>
+            </div>
+            <div class="heading-actions">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard-a Qayıt</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Uğurlu Bildiriş (Success Alert) -->
+        <div id="saveSuccessAlert" class="alert alert-success alert-dismissible fade d-none align-items-center gap-2 mb-4 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <div>
+                <strong>Uğurlu!</strong> Tənzimləmələr uğurla yadda saxlanıldı (Settings saved successfully).
+            </div>
+            <button type="button" class="btn-close" aria-label="Close" onclick="dismissSuccessAlert()"></button>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sol Tərəf: General Settings Kartı -->
+            <div class="col-12 col-lg-6">
+                <div class="panel h-100 d-flex flex-column">
+                    <div class="panel-header">
+                        <h2 class="h5 mb-1 section-title">
+                            <i class="bi bi-sliders me-2 text-primary"></i>
+                            <span>General Settings</span>
+                        </h2>
+                        <p class="text-muted mb-0">Configure workspace identity and defaults.</p>
+                    </div>
+
+                    <div class="p-4 pt-2 flex-grow-1 d-flex flex-column justify-content-between">
+                        <form id="generalSettingsForm" onsubmit="event.preventDefault(); saveAllSettings();">
+                            <div class="mb-4">
+                                <label for="workspaceNameInput" class="form-label fw-semibold">
+                                    <i class="bi bi-building me-1 text-primary"></i>Workspace name
+                                </label>
+                                <input type="text" id="workspaceNameInput" class="form-control" placeholder="Məs: PetShop" value="PetShop" required>
+                                <div class="form-text">Your organization or brand display name across admin panels.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="defaultLanguageSelect" class="form-label fw-semibold">
+                                    <i class="bi bi-translate me-1 text-primary"></i>Default language
+                                </label>
+                                <select id="defaultLanguageSelect" class="form-select">
+                                    <option value="az">Azərbaycan</option>
+                                    <option value="en">English</option>
+                                    <option value="ru">Русский</option>
+                                    <option value="tr">Türkçe</option>
+                                </select>
+                                <div class="form-text">Choose default language for admin controls, reports, and system emails.</div>
+                            </div>
+
+                            <div class="pt-2">
+                                <button type="submit" id="saveSettingsBtn" class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2">
+                                    <i class="bi bi-check2-circle fs-6"></i>
+                                    <span>Save Settings</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Tərəf: Preferences Kartı -->
+            <div class="col-12 col-lg-6">
+                <div class="panel h-100 d-flex flex-column">
+                    <div class="panel-header">
+                        <h2 class="h5 mb-1 section-title">
+                            <i class="bi bi-shield-check me-2 text-primary"></i>
+                            <span>Preferences</span>
+                        </h2>
+                        <p class="text-muted mb-0">Control notifications and security options.</p>
+                    </div>
+
+                    <div class="p-4 pt-2 flex-grow-1 d-flex flex-column justify-content-between">
+                        <div class="d-flex flex-column gap-3">
+                            <!-- Toggle 1: Email alerts -->
+                            <div class="preference-box p-3 rounded-3 border d-flex align-items-center justify-content-between">
+                                <div class="pe-3">
+                                    <label class="form-check-label fw-semibold d-flex align-items-center gap-2 mb-1 cursor-pointer" for="emailAlertsSwitch">
+                                        <i class="bi bi-envelope-check text-primary fs-5"></i>
+                                        <span>Email alerts</span>
+                                    </label>
+                                    <span class="text-muted small d-block">Receive important account updates.</span>
+                                </div>
+                                <div class="form-check form-switch m-0 fs-5">
+                                    <input class="form-check-input cursor-pointer" type="checkbox" role="switch" id="emailAlertsSwitch" checked>
+                                </div>
+                            </div>
+
+                            <!-- Toggle 2: Weekly reports -->
+                            <div class="preference-box p-3 rounded-3 border d-flex align-items-center justify-content-between">
+                                <div class="pe-3">
+                                    <label class="form-check-label fw-semibold d-flex align-items-center gap-2 mb-1 cursor-pointer" for="weeklyReportsSwitch">
+                                        <i class="bi bi-calendar-week text-info fs-5"></i>
+                                        <span>Weekly reports</span>
+                                    </label>
+                                    <span class="text-muted small d-block">Send summary reports every Monday.</span>
+                                </div>
+                                <div class="form-check form-switch m-0 fs-5">
+                                    <input class="form-check-input cursor-pointer" type="checkbox" role="switch" id="weeklyReportsSwitch">
+                                </div>
+                            </div>
+
+                            <!-- Toggle 3: Two-factor authentication -->
+                            <div class="preference-box p-3 rounded-3 border d-flex align-items-center justify-content-between">
+                                <div class="pe-3">
+                                    <label class="form-check-label fw-semibold d-flex align-items-center gap-2 mb-1 cursor-pointer" for="twoFactorSwitch">
+                                        <i class="bi bi-shield-lock text-success fs-5"></i>
+                                        <span>Two-factor authentication</span>
+                                    </label>
+                                    <span class="text-muted small d-block">Require extra verification for admins.</span>
+                                </div>
+                                <div class="form-check form-switch m-0 fs-5">
+                                    <input class="form-check-input cursor-pointer" type="checkbox" role="switch" id="twoFactorSwitch" checked>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-2 border-top d-flex align-items-center gap-2 text-muted small">
+                            <i class="bi bi-info-circle text-primary"></i>
+                            <span>Tənzimləmələri dəyişdikdən sonra "Save Settings" düyməsi ilə yadda saxlayın.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .preference-box {
+        background-color: var(--admin-surface-soft, rgba(255, 255, 255, 0.03));
+        border-color: var(--admin-border, #dbe4ef) !important;
+        transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .preference-box:hover {
+        border-color: var(--admin-primary, #2563eb) !important;
+    }
+    .form-check-input:checked {
+        background-color: #2563eb;
+        border-color: #2563eb;
+    }
+</style>
+
+@section Scripts {
+<script>
+    (function () {
+        "use strict";
+
+        var STORAGE_KEY = "petshop_admin_settings";
+        var alertTimer = null;
+
+        var workspaceInput = document.getElementById("workspaceNameInput");
+        var languageSelect = document.getElementById("defaultLanguageSelect");
+        var emailSwitch = document.getElementById("emailAlertsSwitch");
+        var reportsSwitch = document.getElementById("weeklyReportsSwitch");
+        var twoFactorSwitch = document.getElementById("twoFactorSwitch");
+        var alertEl = document.getElementById("saveSuccessAlert");
+
+        function getDefaultSettings() {
+            return {
+                workspaceName: "PetShop",
+                defaultLanguage: "az",
+                emailAlerts: true,
+                weeklyReports: false,
+                twoFactor: true
+            };
+        }
+
+        function loadSettings() {
+            var settings = getDefaultSettings();
+            try {
+                var stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    var parsed = JSON.parse(stored);
+                    settings = Object.assign({}, settings, parsed);
+                }
+            } catch (e) {
+                console.error("Error reading settings from localStorage", e);
+            }
+
+            if (workspaceInput) workspaceInput.value = settings.workspaceName;
+            if (languageSelect) languageSelect.value = settings.defaultLanguage;
+            if (emailSwitch) emailSwitch.checked = Boolean(settings.emailAlerts);
+            if (reportsSwitch) reportsSwitch.checked = Boolean(settings.weeklyReports);
+            if (twoFactorSwitch) twoFactorSwitch.checked = Boolean(settings.twoFactor);
+
+            // Update sidebar workspace name if element exists
+            var sidebarWorkspace = document.querySelector(".sidebar-user small");
+            if (sidebarWorkspace && settings.workspaceName) {
+                sidebarWorkspace.textContent = settings.workspaceName;
+            }
+        }
+
+        window.dismissSuccessAlert = function () {
+            if (alertEl) {
+                alertEl.classList.remove("show");
+                alertEl.classList.add("d-none");
+                alertEl.classList.remove("d-flex");
+            }
+            if (alertTimer) {
+                clearTimeout(alertTimer);
+                alertTimer = null;
+            }
+        };
+
+        window.saveAllSettings = function () {
+            var nameVal = (workspaceInput ? workspaceInput.value.trim() : "") || "PetShop";
+            var langVal = languageSelect ? languageSelect.value : "az";
+            var emailVal = emailSwitch ? emailSwitch.checked : false;
+            var reportsVal = reportsSwitch ? reportsSwitch.checked : false;
+            var twoFactorVal = twoFactorSwitch ? twoFactorSwitch.checked : false;
+
+            var settings = {
+                workspaceName: nameVal,
+                defaultLanguage: langVal,
+                emailAlerts: emailVal,
+                weeklyReports: reportsVal,
+                twoFactor: twoFactorVal
+            };
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+            } catch (e) {
+                console.error("Error saving settings to localStorage", e);
+            }
+
+            // Sync sidebar workspace label
+            var sidebarWorkspace = document.querySelector(".sidebar-user small");
+            if (sidebarWorkspace) {
+                sidebarWorkspace.textContent = nameVal;
+            }
+
+            // Show success alert
+            if (alertEl) {
+                alertEl.classList.remove("d-none");
+                alertEl.classList.add("d-flex");
+                // Allow CSS transition to kick in
+                setTimeout(function () {
+                    alertEl.classList.add("show");
+                }, 10);
+
+                if (alertTimer) {
+                    clearTimeout(alertTimer);
+                }
+                alertTimer = setTimeout(function () {
+                    window.dismissSuccessAlert();
+                }, 4000);
+            }
+        };
+
+        // Smooth switch change listener - saves switch states immediately and enables instant feedback
+        [emailSwitch, reportsSwitch, twoFactorSwitch].forEach(function (sw) {
+            if (sw) {
+                sw.addEventListener("change", function () {
+                    // Update storage immediately on switch toggle as well
+                    try {
+                        var stored = localStorage.getItem(STORAGE_KEY);
+                        var settings = stored ? JSON.parse(stored) : getDefaultSettings();
+                        settings.emailAlerts = emailSwitch.checked;
+                        settings.weeklyReports = reportsSwitch.checked;
+                        settings.twoFactor = twoFactorSwitch.checked;
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+                    } catch (e) {}
+                });
+            }
+        });
+
+        // Initialize values on page ready
+        document.addEventListener("DOMContentLoaded", loadSettings);
+        loadSettings();
+    })();
+</script>
+}

@@ -1,0 +1,295 @@
+@model PetShop.Models.ProfileViewModel
+@using PetShop.DataContext.Entites
+@{
+    ViewData["Title"] = "Profilim";
+}
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Hesabım</h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Ana Səhifə</a>
+                <span class="breadcrumb-item active" aria-current="page">Profil</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<section class="profile-section py-5 my-3">
+    <div class="container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <iconify-icon icon="mdi:check-circle" class="fs-5 me-2 align-middle"></iconify-icon>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            <!-- Sol Panel: İstifadəçi Qısa Məlumatı və Menyular -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center mb-4">
+                    <div class="avatar-circle mx-auto mb-3 bg-primary text-white d-flex align-items-center justify-content-center rounded-circle"
+                         style="width: 80px; height: 80px; font-size: 32px; font-weight: 600;">
+                        @(string.IsNullOrEmpty(Model.FirstName) ? "U" : Model.FirstName[..1].ToUpper())@(string.IsNullOrEmpty(Model.LastName) ? "" : Model.LastName[..1].ToUpper())
+                    </div>
+                    <h4 class="fw-bold mb-1">@Model.FirstName @Model.LastName</h4>
+                    <p class="text-muted mb-3">@Model.Email</p>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="mb-3">
+                            <span class="badge bg-danger px-3 py-2 fs-6 rounded-pill">
+                                <iconify-icon icon="mdi:shield-crown" class="me-1 align-middle"></iconify-icon> Administrator
+                            </span>
+                        </div>
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-danger w-100 rounded-3 mb-2">
+                            <iconify-icon icon="mdi:view-dashboard" class="me-1 align-middle"></iconify-icon> Admin Panelə Keç
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <span class="badge bg-secondary px-3 py-2 rounded-pill">
+                                <iconify-icon icon="mdi:account-check" class="me-1 align-middle"></iconify-icon> Qeydiyyatlı Üzv
+                            </span>
+                        </div>
+                    }
+
+                    <div class="list-group list-group-flush text-start mt-3">
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Ümumi Sifarişlər:</span>
+                            <span class="badge bg-primary rounded-pill">@Model.Orders.Count</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Telefon:</span>
+                            <span class="fw-semibold">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "Təyin edilməyib" : Model.PhoneNumber)</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Şəhər:</span>
+                            <span class="fw-semibold">@(string.IsNullOrEmpty(Model.City) ? "Təyin edilməyib" : Model.City)</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Ünvan:</span>
+                            <span class="fw-semibold text-truncate ms-2" style="max-width: 170px;" title="@Model.Address">@(string.IsNullOrEmpty(Model.Address) ? "Təyin edilməyib" : Model.Address)</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex flex-column gap-2">
+                        <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-primary w-100 rounded-3">
+                            <iconify-icon icon="mdi:package-variant-closed" class="me-1 align-middle"></iconify-icon> Sifarişlərimə Bax
+                        </a>
+                        <form asp-controller="Account" asp-action="Logout" method="post">
+                            <button type="submit" class="btn btn-outline-secondary w-100 rounded-3">
+                                <iconify-icon icon="mdi:logout" class="me-1 align-middle"></iconify-icon> Hesabdan Çıxış
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Panel: Redaktə və Sifarişlər Tabları -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <ul class="nav nav-pills mb-4" id="profileTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active rounded-3 px-4 py-2" id="orders-tab" data-bs-toggle="pill" data-bs-target="#orders" type="button" role="tab">
+                                <iconify-icon icon="mdi:package-variant-closed" class="me-1 align-middle"></iconify-icon> Sifarişlərim (@Model.Orders.Count)
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-3 px-4 py-2" id="edit-tab" data-bs-toggle="pill" data-bs-target="#edit" type="button" role="tab">
+                                <iconify-icon icon="mdi:account-edit" class="me-1 align-middle"></iconify-icon> Profil Məlumatları
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="profileTabsContent">
+                        <!-- 1. SİFARİŞLƏRİM TABI -->
+                        <div class="tab-pane fade show active" id="orders" role="tabpanel">
+                            @if (!Model.Orders.Any())
+                            {
+                                <div class="text-center py-5">
+                                    <iconify-icon icon="mdi:cart-remove" class="display-3 text-muted mb-3"></iconify-icon>
+                                    <h5 class="fw-bold text-muted">Hələ heç bir sifarişiniz yoxdur</h5>
+                                    <p class="text-muted mb-4">Məhsullarımızı kəşf edin və ilk sifarişinizi verin!</p>
+                                    <a asp-controller="Shop" asp-action="Index" class="btn btn-primary rounded-3 px-4 py-2">
+                                        Məhsullara Bax
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="accordion" id="ordersAccordion">
+                                    @foreach (var order in Model.Orders)
+                                    {
+                                        var badgeClass = order.Status switch
+                                        {
+                                            OrderStatus.Delivered => "bg-success",
+                                            OrderStatus.Shipped => "bg-info text-dark",
+                                            OrderStatus.Processing => "bg-primary",
+                                            OrderStatus.Cancelled => "bg-danger",
+                                            _ => "bg-warning text-dark"
+                                        };
+
+                                        var statusText = order.Status switch
+                                        {
+                                            OrderStatus.Delivered => "Çatdırıldı",
+                                            OrderStatus.Shipped => "Yoldadır",
+                                            OrderStatus.Processing => "Hazırlanır",
+                                            OrderStatus.Cancelled => "Ləğv edildi",
+                                            _ => "Gözləmədə"
+                                        };
+
+                                        <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
+                                            <h2 class="accordion-header" id="heading-@order.Id">
+                                                <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@order.Id" aria-expanded="false">
+                                                    <div class="d-flex flex-wrap justify-content-between align-items-center w-100 me-3">
+                                                        <div>
+                                                            <span class="fw-bold text-dark me-2">#@order.OrderNumber</span>
+                                                            <small class="text-muted d-block d-sm-inline">(@order.CreatedDate.ToString("dd.MM.yyyy HH:mm"))</small>
+                                                        </div>
+                                                        <div class="d-flex align-items-center gap-3 mt-2 mt-sm-0">
+                                                            <span class="badge @badgeClass rounded-pill px-3 py-1">@statusText</span>
+                                                            <span class="fw-bold text-primary fs-5">@order.TotalPrice.ToString("N2") ₼</span>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            </h2>
+                                            <div id="collapse-@order.Id" class="accordion-collapse collapse" data-bs-parent="#ordersAccordion">
+                                                <div class="accordion-body bg-light">
+                                                    <div class="mb-3">
+                                                        <small class="text-muted d-block"><strong>Çatdırılma ünvanı:</strong> @order.Address, @order.City</small>
+                                                        <small class="text-muted d-block"><strong>Əlaqə telefonu:</strong> @order.Phone</small>
+                                                    </div>
+                                                    <h6 class="fw-bold mb-2">Məhsullar:</h6>
+                                                    <div class="table-responsive bg-white rounded-3 border">
+                                                        <table class="table table-sm table-hover mb-0 align-middle">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>Məhsul</th>
+                                                                    <th>Ölçü/Rəng</th>
+                                                                    <th class="text-center">Say</th>
+                                                                    <th class="text-end">Qiymət</th>
+                                                                    <th class="text-end">Cəm</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach (var item in order.OrderItems)
+                                                                {
+                                                                    <tr>
+                                                                        <td>
+                                                                            <span class="fw-semibold">@(item.Product?.Name ?? "Məhsul #" + item.ProductId)</span>
+                                                                        </td>
+                                                                        <td>
+                                                                            @if (item.ProductVariant != null)
+                                                                            {
+                                                                                <span class="badge bg-light text-dark border">
+                                                                                    @(item.ProductVariant.Size ?? "") @(item.ProductVariant.Color ?? "")
+                                                                                </span>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <span class="text-muted">-</span>
+                                                                            }
+                                                                        </td>
+                                                                        <td class="text-center">@item.Quantity</td>
+                                                                        <td class="text-end">@item.UnitPrice.ToString("N2") ₼</td>
+                                                                        <td class="text-end fw-semibold">@((item.Quantity * item.UnitPrice).ToString("N2")) ₼</td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <!-- 2. PROFİL MƏLUMATLARININ REDAKTƏSİ TABI -->
+                        <div class="tab-pane fade" id="edit" role="tabpanel">
+                            <form asp-controller="Account" asp-action="Profile" method="post">
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                                <h5 class="fw-bold mb-3">Şəxsi Məlumatlar</h5>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-sm-6">
+                                        <label asp-for="FirstName" class="form-label fw-semibold">Ad *</label>
+                                        <input asp-for="FirstName" class="form-control rounded-3" />
+                                        <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label asp-for="LastName" class="form-label fw-semibold">Soyad *</label>
+                                        <input asp-for="LastName" class="form-control rounded-3" />
+                                        <span asp-validation-for="LastName" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-sm-6">
+                                        <label asp-for="Email" class="form-label fw-semibold">E-poçt ünvanı *</label>
+                                        <input asp-for="Email" class="form-control rounded-3" />
+                                        <span asp-validation-for="Email" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label asp-for="PhoneNumber" class="form-label fw-semibold">Telefon nömrəsi</label>
+                                        <input asp-for="PhoneNumber" class="form-control rounded-3" placeholder="+994 50 123 45 67" />
+                                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-sm-8">
+                                        <label asp-for="Address" class="form-label fw-semibold">Ünvan</label>
+                                        <input asp-for="Address" class="form-control rounded-3" placeholder="Məs: Nizami küç. 45, mənzil 12" />
+                                        <span asp-validation-for="Address" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label asp-for="City" class="form-label fw-semibold">Şəhər</label>
+                                        <input asp-for="City" class="form-control rounded-3" placeholder="Bakı" />
+                                        <span asp-validation-for="City" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <hr class="my-4" />
+
+                                <h5 class="fw-bold mb-3">Şifrəni Dəyişdir <small class="text-muted fw-normal fs-6">(İstəyə bağlı)</small></h5>
+                                <div class="mb-3">
+                                    <label asp-for="CurrentPassword" class="form-label fw-semibold">Cari Şifrə</label>
+                                    <input asp-for="CurrentPassword" class="form-control rounded-3" placeholder="Hazırkı şifrəniz" />
+                                    <span asp-validation-for="CurrentPassword" class="text-danger small"></span>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-sm-6">
+                                        <label asp-for="NewPassword" class="form-label fw-semibold">Yeni Şifrə</label>
+                                        <input asp-for="NewPassword" class="form-control rounded-3" placeholder="Minimum 6 simvol" />
+                                        <span asp-validation-for="NewPassword" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label asp-for="ConfirmNewPassword" class="form-label fw-semibold">Yeni Şifrə Təkrarı</label>
+                                        <input asp-for="ConfirmNewPassword" class="form-control rounded-3" placeholder="Yeni şifrəni təkrar yazın" />
+                                        <span asp-validation-for="ConfirmNewPassword" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary rounded-3 px-4 py-2 fw-semibold">
+                                    Məlumatları Yadda Saxla
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

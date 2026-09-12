@@ -1,14 +1,150 @@
-﻿<!DOCTYPE html>
+@{
+    // Centralized Admin User Profile Configuration (Single Source of Truth)
+    var adminName = "Admin Hasan";
+    var adminRole = "Administrator";
+    var adminEmail = "admin@petshop.com";
+    var adminWorkspace = "PetShop";
+
+    // Dinamik baş hərflər (Calculate initials automatically from name)
+    Func<string, string> getInitials = (name) => {
+        if (string.IsNullOrWhiteSpace(name)) return "AV";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Length >= 2 ? parts[0].Substring(0, 2).ToUpper() : parts[0].ToUpper();
+        return $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[1][0])}";
+    };
+    var adminInitials = getInitials(adminName);
+
+    // Reusable Avatar Helper Function (Single Component for Dropdown & Sidebar)
+    Func<string, string, Microsoft.AspNetCore.Html.IHtmlContent> renderAvatar = (sizeClass, extraClass) => {
+        return new Microsoft.AspNetCore.Html.HtmlString(
+            $"<div class=\"admin-avatar-badge {sizeClass} {extraClass}\" aria-label=\"{adminName}\" title=\"{adminName}\"><span>{adminInitials}</span></div>"
+        );
+    };
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="adminHMD professional admin dashboard template">
-    <title>Dashboard | adminHMD</title>
+    <title>@(ViewData["Title"] ?? "Dashboard | adminHMD")</title>
 
     <link rel="stylesheet" href="~/admin/assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="~/admin/assets/vendors/bootstrap-icons/bootstrap-icons.css">
-    <link rel="stylesheet" href="~/admin/assets/css/style.css">
+    <link rel="stylesheet" href="~/admin/assets/css/style.css?v=@DateTime.Now.Ticks">
+
+    <style>
+        html[data-theme="dark"],
+        [data-bs-theme="dark"] {
+            --admin-text: #f1f5f9;
+            --admin-muted: #94a3b8;
+            --bs-body-color: #f1f5f9;
+            --bs-heading-color: #ffffff;
+        }
+        html[data-theme="dark"] body,
+        [data-bs-theme="dark"] body {
+            color: #f1f5f9 !important;
+        }
+        html[data-theme="dark"] .text-dark,
+        [data-bs-theme="dark"] .text-dark {
+            color: #f8fafc !important;
+        }
+        html[data-theme="dark"] .text-secondary,
+        [data-bs-theme="dark"] .text-secondary {
+            color: #94a3b8 !important;
+        }
+        html[data-theme="dark"] .text-muted,
+        [data-bs-theme="dark"] .text-muted {
+            color: #94a3b8 !important;
+        }
+        html[data-theme="dark"] code,
+        html[data-theme="dark"] code.text-dark,
+        [data-bs-theme="dark"] code,
+        [data-bs-theme="dark"] code.text-dark {
+            color: #93c5fd !important;
+            background-color: rgba(59, 130, 246, 0.15) !important;
+            border: 1px solid rgba(59, 130, 246, 0.25) !important;
+            border-radius: 4px;
+            padding: 2px 6px;
+        }
+        html[data-theme="dark"] .table,
+        [data-bs-theme="dark"] .table {
+            --bs-table-color: #e2e8f0;
+            --bs-table-striped-color: #f1f5f9;
+            color: #e2e8f0;
+        }
+        html[data-theme="dark"] .table thead.table-light,
+        html[data-theme="dark"] .table thead.table-light th,
+        html[data-theme="dark"] .table-light,
+        [data-bs-theme="dark"] .table thead.table-light,
+        [data-bs-theme="dark"] .table thead.table-light th,
+        [data-bs-theme="dark"] .table-light {
+            background-color: #1e293b !important;
+            color: #cbd5e1 !important;
+            border-bottom: 1px solid #334155 !important;
+        }
+        html[data-theme="dark"] .table thead th.text-dark,
+        [data-bs-theme="dark"] .table thead th.text-dark {
+            color: #e2e8f0 !important;
+        }
+        html[data-theme="dark"] .table tbody td,
+        [data-bs-theme="dark"] .table tbody td {
+            color: #cbd5e1;
+            border-bottom-color: #232f45;
+        }
+        html[data-theme="dark"] .table tbody tr:hover,
+        [data-bs-theme="dark"] .table tbody tr:hover {
+            background-color: #1a2538 !important;
+        }
+        html[data-theme="dark"] .badge.text-bg-light,
+        html[data-theme="dark"] .badge.bg-light,
+        [data-bs-theme="dark"] .badge.text-bg-light,
+        [data-bs-theme="dark"] .badge.bg-light {
+            background-color: #1e293b !important;
+            color: #e2e8f0 !important;
+            border-color: #334155 !important;
+        }
+        html[data-theme="dark"] .badge.text-bg-secondary,
+        [data-bs-theme="dark"] .badge.text-bg-secondary {
+            background-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        html[data-theme="dark"] .input-group-text,
+        [data-bs-theme="dark"] .input-group-text {
+            background-color: #182235 !important;
+            border-color: #2f3b52 !important;
+            color: #94a3b8 !important;
+        }
+        html[data-theme="dark"] .bg-white,
+        [data-bs-theme="dark"] .bg-white {
+            background-color: #182235 !important;
+            color: #f1f5f9 !important;
+        }
+        html[data-theme="dark"] .text-decoration-line-through,
+        [data-bs-theme="dark"] .text-decoration-line-through {
+            color: #94a3b8 !important;
+        }
+        html[data-theme="dark"] strong.text-dark,
+        html[data-theme="dark"] span.text-dark,
+        html[data-theme="dark"] div.text-dark,
+        html[data-theme="dark"] h1.text-dark,
+        html[data-theme="dark"] h2.text-dark,
+        html[data-theme="dark"] h3.text-dark,
+        html[data-theme="dark"] h4.text-dark,
+        html[data-theme="dark"] h5.text-dark,
+        html[data-theme="dark"] p.text-dark,
+        [data-bs-theme="dark"] strong.text-dark,
+        [data-bs-theme="dark"] span.text-dark,
+        [data-bs-theme="dark"] div.text-dark,
+        [data-bs-theme="dark"] h1.text-dark,
+        [data-bs-theme="dark"] h2.text-dark,
+        [data-bs-theme="dark"] h3.text-dark,
+        [data-bs-theme="dark"] h4.text-dark,
+        [data-bs-theme="dark"] h5.text-dark,
+        [data-bs-theme="dark"] p.text-dark {
+            color: #f8fafc !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -27,60 +163,60 @@
             </div>
 
             <nav class="sidebar-nav">
-                <a class="nav-link active" href="index.html" aria-current="page">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
                     <span class="nav-icon"><i class="bi bi-speedometer2" aria-hidden="true"></i></span>
                     <span class="nav-text">Dashboard</span>
                 </a>
-                <a class="nav-link" href="users.html">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Orders" ? "active" : "")" asp-area="Admin" asp-controller="Orders" asp-action="Index">
+                    <span class="nav-icon"><i class="bi bi-cart-check" aria-hidden="true"></i></span>
+                    <span class="nav-text">Orders</span>
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Products" ? "active" : "")" asp-area="Admin" asp-controller="Products" asp-action="Index">
+                    <span class="nav-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+                    <span class="nav-text">Products</span>
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Categories" ? "active" : "")" asp-area="Admin" asp-controller="Categories" asp-action="Index">
+                    <span class="nav-icon"><i class="bi bi-tags" aria-hidden="true"></i></span>
+                    <span class="nav-text">Categories</span>
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Brands" ? "active" : "")" asp-area="Admin" asp-controller="Brands" asp-action="Index">
+                    <span class="nav-icon"><i class="bi bi-award" aria-hidden="true"></i></span>
+                    <span class="nav-text">Brands</span>
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Coupons" ? "active" : "")" asp-area="Admin" asp-controller="Coupons" asp-action="Index">
+                    <span class="nav-icon"><i class="bi bi-ticket-perforated" aria-hidden="true"></i></span>
+                    <span class="nav-text">Coupons</span>
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Blog" ? "active" : "")" asp-area="Admin" asp-controller="Blog" asp-action="Index">
+                    <span class="nav-icon"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
+                    <span class="nav-text">Blog</span>
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-area="Admin" asp-controller="Users" asp-action="Index">
                     <span class="nav-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
                     <span class="nav-text">Users</span>
                 </a>
-                <a class="nav-link" href="add-user.html">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" && ViewContext.RouteData.Values["action"]?.ToString() == "AddUser" ? "active" : "")" asp-area="Admin" asp-controller="Users" asp-action="AddUser">
                     <span class="nav-icon"><i class="bi bi-person-plus" aria-hidden="true"></i></span>
                     <span class="nav-text">Add User</span>
                 </a>
-                <a class="nav-link" href="profile.html">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Profile" ? "active" : "")" asp-area="Admin" asp-controller="Profile" asp-action="Index">
                     <span class="nav-icon"><i class="bi bi-person-badge" aria-hidden="true"></i></span>
                     <span class="nav-text">Profile</span>
                 </a>
-                <a class="nav-link" href="charts.html">
-                    <span class="nav-icon"><i class="bi bi-bar-chart-line" aria-hidden="true"></i></span>
-                    <span class="nav-text">Charts</span>
-                </a>
-                <a class="nav-link" href="tables.html">
-                    <span class="nav-icon"><i class="bi bi-table" aria-hidden="true"></i></span>
-                    <span class="nav-text">Tables</span>
-                </a>
-                <a class="nav-link" href="forms.html">
-                    <span class="nav-icon"><i class="bi bi-ui-checks-grid" aria-hidden="true"></i></span>
-                    <span class="nav-text">Forms</span>
-                </a>
-                <a class="nav-link" href="components.html">
-                    <span class="nav-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span>
-                    <span class="nav-text">Components</span>
-                </a>
-                <a class="nav-link" href="alerts.html">
-                    <span class="nav-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span>
-                    <span class="nav-text">Alerts</span>
-                </a>
-                <a class="nav-link" href="modals.html">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Modals" ? "active" : "")" asp-area="Admin" asp-controller="Modals" asp-action="Index">
                     <span class="nav-icon"><i class="bi bi-window-stack" aria-hidden="true"></i></span>
                     <span class="nav-text">Modals</span>
                 </a>
-                <a class="nav-link" href="settings.html">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Settings" ? "active" : "")" asp-area="Admin" asp-controller="Settings" asp-action="Index">
                     <span class="nav-icon"><i class="bi bi-gear" aria-hidden="true"></i></span>
                     <span class="nav-text">Settings</span>
-                </a>
-                <a class="nav-link" href="blank.html">
-                    <span class="nav-icon"><i class="bi bi-file-earmark" aria-hidden="true"></i></span>
-                    <span class="nav-text">Blank Page</span>
                 </a>
             </nav>
 
             <div class="sidebar-user">
-                <img class="avatar-img avatar-md sidebar-user-avatar" src="~/admin/assets/images/avatar/avatar.jpg" alt="Admin Hasan">
-                <strong>Admin Hasan</strong>
-                <small>Active Workspace</small>
+                @renderAvatar("admin-avatar-md", "")
+                <strong>@adminName</strong>
+                <small>@adminWorkspace</small>
             </div>
 
             <div class="sidebar-footer">
@@ -98,8 +234,25 @@
                         <span></span>
                     </button>
 
-                    <form class="d-none d-md-flex ms-3 flex-grow-1" role="search">
-                        <input class="form-control search-input" type="search" placeholder="Search users, orders, reports" aria-label="Search">
+                    <form class="d-none d-md-flex ms-3 flex-grow-1" role="search" onsubmit="return false;">
+                        <div class="position-relative w-100 search-box-wrapper" id="adminGlobalSearchWrapper" style="max-width: 520px;">
+                            <input class="form-control search-input pe-5" 
+                                   type="search" 
+                                   id="adminGlobalSearchInput"
+                                   placeholder="Search users, orders, reports" 
+                                   aria-label="Search"
+                                   autocomplete="off">
+                            <span class="position-absolute end-0 top-50 translate-middle-y me-3 text-primary" id="adminSearchSpinner" style="display: none; pointer-events: none;">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            </span>
+                            
+                            <!-- Live Search Dropdown -->
+                            <div class="global-search-dropdown shadow-lg rounded-3 border" 
+                                 id="adminGlobalSearchDropdown" 
+                                 style="display: none;">
+                                <div id="adminGlobalSearchResults"></div>
+                            </div>
+                        </div>
                     </form>
 
                     <div class="navbar-actions ms-auto">
@@ -107,37 +260,99 @@
                             <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
                         </button>
                         <div class="dropdown">
-                            <button class="icon-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-                                <span class="notification-dot"></span>
+                            <button class="icon-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications" id="notificationDropdownButton">
+                                <span class="notification-dot" id="notificationBadge" style="display: none;">3</span>
                                 <i class="bi bi-bell" aria-hidden="true"></i>
                             </button>
-                            <div class="dropdown-menu dropdown-menu-end notification-menu">
-                                <div class="dropdown-header fw-bold text-body">Notifications</div>
-                                <a class="dropdown-item" href="users.html">
-                                    <span class="notification-title">New user registered</span>
-                                    <span class="notification-time">4 minutes ago</span>
-                                </a>
-                                <a class="dropdown-item" href="charts.html">
-                                    <span class="notification-title">Revenue target reached</span>
-                                    <span class="notification-time">32 minutes ago</span>
-                                </a>
-                                <a class="dropdown-item" href="settings.html">
-                                    <span class="notification-title">Security review completed</span>
-                                    <span class="notification-time">1 hour ago</span>
-                                </a>
+                            <div class="dropdown-menu dropdown-menu-end notification-menu shadow-sm" aria-labelledby="notificationDropdownButton">
+                                <div class="dropdown-header d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
+                                    <div class="fw-bold text-body d-flex align-items-center gap-2">
+                                        <span>Bildirişlər</span>
+                                        <span class="badge rounded-pill bg-danger-subtle text-danger small px-2 py-1" id="notificationHeaderBadge">3 yeni</span>
+                                    </div>
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-muted" id="markAllNotificationsReadBtn" title="Bütün bildirişləri oxunmuş kimi qeyd et" style="font-size: 0.75rem;">
+                                        Hamısını oxu
+                                    </button>
+                                </div>
+                                <div class="notification-list" id="notificationList">
+                                    <a class="dropdown-item notification-item unread d-flex align-items-start gap-2 px-3 py-2 border-bottom" 
+                                       asp-area="Admin" asp-controller="Users" asp-action="Index" 
+                                       data-notif-id="notif-user">
+                                        <span class="notif-icon-circle bg-primary-subtle text-primary mt-1">
+                                            <i class="bi bi-person-plus-fill"></i>
+                                        </span>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span class="notification-title text-body">Yeni istifadəçi qeydə alındı</span>
+                                                <span class="unread-indicator-dot"></span>
+                                            </div>
+                                            <span class="notification-desc text-secondary d-block">Yeni komanda üzvü hesabı yaradıldı.</span>
+                                            <span class="notification-time"><i class="bi bi-clock me-1"></i>4 dəqiqə əvvəl</span>
+                                        </div>
+                                    </a>
+                                    <a class="dropdown-item notification-item unread d-flex align-items-start gap-2 px-3 py-2 border-bottom" 
+                                       asp-area="Admin" asp-controller="Dashboard" asp-action="Index" 
+                                       data-notif-id="notif-revenue">
+                                        <span class="notif-icon-circle bg-success-subtle text-success mt-1">
+                                            <i class="bi bi-graph-up-arrow"></i>
+                                        </span>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span class="notification-title text-body">Gəlir hədəfinə çatıldı</span>
+                                                <span class="unread-indicator-dot"></span>
+                                            </div>
+                                            <span class="notification-desc text-secondary d-block">Aylıq satış planı 100% tamamlandı.</span>
+                                            <span class="notification-time"><i class="bi bi-clock me-1"></i>32 dəqiqə əvvəl</span>
+                                        </div>
+                                    </a>
+                                    <a class="dropdown-item notification-item unread d-flex align-items-start gap-2 px-3 py-2" 
+                                       asp-area="Admin" asp-controller="Settings" asp-action="Index" 
+                                       data-notif-id="notif-security">
+                                        <span class="notif-icon-circle bg-info-subtle text-info mt-1">
+                                            <i class="bi bi-shield-check"></i>
+                                        </span>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span class="notification-title text-body">Təhlükəsizlik icmalı tamamlandı</span>
+                                                <span class="unread-indicator-dot"></span>
+                                            </div>
+                                            <span class="notification-desc text-secondary d-block">Sistem parametrləri və icazələr yoxlanıldı.</span>
+                                            <span class="notification-time"><i class="bi bi-clock me-1"></i>1 saat əvvəl</span>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="dropdown-footer px-3 py-2 bg-light-subtle d-flex align-items-center justify-content-between border-top">
+                                    <span class="small text-muted" id="notificationStatusText">3 oxunmamış bildiriş</span>
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-secondary" id="resetNotificationsBtn" style="font-size: 0.72rem;" title="Test üçün bildirişləri yenilə">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Sıfırla
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         <div class="dropdown">
                             <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img class="avatar-img avatar-sm" src="~/admin/assets/images/avatar/avatar.jpg" alt="Admin Hasan">
-                                <span class="profile-name d-none d-sm-inline">Admin Hasan</span>
+                                @renderAvatar("admin-avatar-sm", "")
+                                <span class="profile-name d-none d-sm-inline">@adminName</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="profile.html">Profile</a></li>
-                                <li><a class="dropdown-item" href="settings.html">Account settings</a></li>
+                                <li class="dropdown-header d-flex align-items-center gap-2 px-3 py-2 border-bottom mb-1">
+                                    @renderAvatar("admin-avatar-sm", "")
+                                    <div class="lh-sm">
+                                        <div class="fw-bold text-body">@adminName</div>
+                                        <small class="text-muted">@adminRole &bull; @adminEmail</small>
+                                    </div>
+                                </li>
+                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Profile" asp-action="Index"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Settings" asp-action="Index"><i class="bi bi-gear me-2"></i>Account settings</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-shop me-2"></i>PetShop Storefront</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="login.html">Sign out</a></li>
+                                <li>
+                                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item text-danger border-0 bg-transparent text-start w-100"><i class="bi bi-box-arrow-right me-2"></i>Sign out</button>
+                                    </form>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -153,7 +368,15 @@
 </div>
 </div>
 
+<script>
+    window.adminHMDUser = {
+        name: "@adminName",
+        workspace: "@adminWorkspace",
+        initials: "@adminInitials"
+    };
+</script>
 <script src="~/admin/assets/js/bootstrap.bundle.min.js"></script>
-<script src="~/admin/assets/js/main.js"></script>
+<script src="~/admin/assets/js/main.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

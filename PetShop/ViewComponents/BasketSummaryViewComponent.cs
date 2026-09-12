@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetShop.DataContext;
 using PetShop.DataContext.Entites;
@@ -18,22 +19,35 @@ namespace PetShop.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var sessionId = HttpContext.Session.GetString(SessionKey);
+            var userId = HttpContext.User.Identity?.IsAuthenticated == true
+                ? HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                : null;
 
-            Basket basket;
+            Basket? basket = null;
 
-            if (string.IsNullOrEmpty(sessionId))
-            {
-                basket = new Basket { BasketItems = new List<BasketItem>() };
-            }
-            else
+            if (!string.IsNullOrEmpty(userId))
             {
                 basket = await _context.Baskets
                     .Include(b => b.BasketItems)
                         .ThenInclude(bi => bi.Product)
                             .ThenInclude(p => p.Images)
-                    .FirstOrDefaultAsync(b => b.SessionId == sessionId)
-                    ?? new Basket { BasketItems = new List<BasketItem>() };
+                    .Include(b => b.BasketItems)
+                        .ThenInclude(bi => bi.ProductVariant)
+                    .FirstOrDefaultAsync(b => b.UserId == userId);
             }
+
+            if (basket == null && !string.IsNullOrEmpty(sessionId))
+            {
+                basket = await _context.Baskets
+                    .Include(b => b.BasketItems)
+                        .ThenInclude(bi => bi.Product)
+                            .ThenInclude(p => p.Images)
+                    .Include(b => b.BasketItems)
+                        .ThenInclude(bi => bi.ProductVariant)
+                    .FirstOrDefaultAsync(b => b.SessionId == sessionId && b.UserId == null);
+            }
+
+            basket ??= new Basket { BasketItems = new List<BasketItem>() };
 
             return View(basket);
         }

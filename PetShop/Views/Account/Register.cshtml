@@ -1,0 +1,92 @@
+@model PetShop.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Qeydiyyat";
+}
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">Qeydiyyat</h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Ana Səhifə</a>
+                <span class="breadcrumb-item active" aria-current="page">Qeydiyyat</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<section class="register-section py-5 my-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-9">
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold mb-2">Yeni Hesab Yarat</h3>
+                        <p class="text-muted">PetShop ailəsinə qoşulun və sifarişlərinizi rahat izləyin</p>
+                    </div>
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <form asp-controller="Account" asp-action="Register" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label asp-for="FirstName" class="form-label fw-semibold">Ad *</label>
+                                <input asp-for="FirstName" class="form-control rounded-3 ps-3" placeholder="Əli" autofocus />
+                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="LastName" class="form-label fw-semibold">Soyad *</label>
+                                <input asp-for="LastName" class="form-control rounded-3 ps-3" placeholder="Məmmədov" />
+                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold">E-poçt ünvanı *</label>
+                            <input asp-for="Email" class="form-control rounded-3 ps-3" placeholder="ali@example.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold">Telefon nömrəsi</label>
+                            <input asp-for="PhoneNumber" class="form-control rounded-3 ps-3" placeholder="+994 50 123 45 67" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <label asp-for="Password" class="form-label fw-semibold">Şifrə *</label>
+                                <input asp-for="Password" class="form-control rounded-3 ps-3" placeholder="Minimum 6 simvol" />
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="ConfirmPassword" class="form-label fw-semibold">Şifrə təkrarı *</label>
+                                <input asp-for="ConfirmPassword" class="form-control rounded-3 ps-3" placeholder="Şifrəni təkrar yazın" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 py-3 fw-bold shadow-sm">
+                            Qeydiyyatdan Keç
+                        </button>
+                    </form>
+
+                    <hr class="my-4" />
+
+                    <div class="text-center">
+                        <p class="text-muted mb-0">
+                            Artıq hesabınız var?
+                            <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" class="text-primary fw-bold text-decoration-none">
+                                Daxil olun
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

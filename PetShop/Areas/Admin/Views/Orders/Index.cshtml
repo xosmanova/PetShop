@@ -1,0 +1,265 @@
+@model PetShop.Areas.Admin.Models.OrderListAdminViewModel
+@{
+    ViewData["Title"] = "Sifarişlər | Admin";
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+        
+        <!-- Səhifə Başlığı -->
+        <div class="page-heading d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-cart-check" aria-hidden="true"></i></span>
+                <div>
+                    <p class="eyebrow mb-1">Satış İdarəetməsi</p>
+                    <h1 class="h3 mb-1">Sifarişlər</h1>
+                    <p class="text-muted mb-0">Müştəri sifarişlərinin siyahısı, statusları, tarixləri və detalları.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bildirişlər -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <div>@TempData["Success"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-x-circle-fill fs-5"></i>
+                <div>@TempData["Error"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+
+        <!-- Filter və Axtarış Paneli -->
+        <div class="panel mb-4">
+            <div class="p-3">
+                <form method="get" asp-action="Index" class="row g-3 align-items-end">
+                    <!-- Axtarış -->
+                    <div class="col-12 col-md-3">
+                        <label class="form-label small fw-semibold text-muted">Axtarış</label>
+                        <input type="text" name="search" value="@Model.Search" 
+                               class="form-control form-control-sm" 
+                               placeholder="Sifariş no, müştəri adı, tel..." />
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label class="form-label small fw-semibold text-muted">Status</label>
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="">-- Bütün Statuslar --</option>
+                            @foreach (var val in Enum.GetValues<PetShop.DataContext.Entites.OrderStatus>())
+                            {
+                                if (Model.SelectedStatus == val)
+                                {
+                                    <option value="@val" selected>@val</option>
+                                }
+                                else
+                                {
+                                    <option value="@val">@val</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Başlanğıc Tarixi -->
+                    <div class="col-6 col-sm-3 col-md-2">
+                        <label class="form-label small fw-semibold text-muted">Başlanğıc Tarixi</label>
+                        <input type="date" name="startDate" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" 
+                               class="form-control form-control-sm" />
+                    </div>
+
+                    <!-- Bitmə Tarixi -->
+                    <div class="col-6 col-sm-3 col-md-2">
+                        <label class="form-label small fw-semibold text-muted">Bitmə Tarixi</label>
+                        <input type="date" name="endDate" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" 
+                               class="form-control form-control-sm" />
+                    </div>
+
+                    <!-- Düymələr -->
+                    <div class="col-12 col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                            <i class="bi bi-filter me-1"></i>Filtrlə
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-sm" title="Filtrləri təmizlə">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="px-3 pb-2 text-muted small border-top pt-2 d-flex justify-content-between">
+                <span>Cəmi <strong>@Model.TotalCount</strong> sifariş tapıldı</span>
+                <span>Səhifə @Model.CurrentPage / @Model.TotalPages</span>
+            </div>
+        </div>
+
+        <!-- Sifarişlər Cədvəli -->
+        <section class="panel">
+            <div class="panel-header d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0 section-title">
+                    <i class="bi bi-list-check"></i>
+                    <span>Sifariş Siyahısı</span>
+                </h2>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sifariş No</th>
+                            <th>Müştəri</th>
+                            <th>Əlaqə</th>
+                            <th>Məhsul Sayı</th>
+                            <th>Məbləğ</th>
+                            <th>Status</th>
+                            <th>Tarix</th>
+                            <th class="text-end" style="width: 100px;">Əməliyyat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Orders != null && Model.Orders.Count > 0)
+                        {
+                            @foreach (var item in Model.Orders)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="fw-bold text-decoration-none">
+                                            @item.OrderNumber
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold text-dark">@item.CustomerName</span>
+                                    </td>
+                                    <td>
+                                        <div class="small text-dark">@item.Phone</div>
+                                        <div class="small text-muted">@item.Email</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-light border text-dark">
+                                            @item.OrderItems.Count məhsul
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-dark">@item.TotalPrice.ToString("0.00") ₼</strong>
+                                    </td>
+                                    <td>
+                                        @switch (item.Status)
+                                        {
+                                            case PetShop.DataContext.Entites.OrderStatus.Pending:
+                                                <span class="badge text-bg-warning"><i class="bi bi-hourglass-split me-1"></i>Gözləmədə</span>
+                                                break;
+                                            case PetShop.DataContext.Entites.OrderStatus.Processing:
+                                                <span class="badge text-bg-primary"><i class="bi bi-gear-fill me-1"></i>Hazırlanır</span>
+                                                break;
+                                            case PetShop.DataContext.Entites.OrderStatus.Shipped:
+                                                <span class="badge text-bg-info text-dark"><i class="bi bi-truck me-1"></i>Yoldadır</span>
+                                                break;
+                                            case PetShop.DataContext.Entites.OrderStatus.Delivered:
+                                                <span class="badge text-bg-success"><i class="bi bi-check-circle-fill me-1"></i>Çatdırıldı</span>
+                                                break;
+                                            case PetShop.DataContext.Entites.OrderStatus.Cancelled:
+                                                <span class="badge text-bg-danger"><i class="bi bi-x-circle-fill me-1"></i>Ləğv edildi</span>
+                                                break;
+                                            case PetShop.DataContext.Entites.OrderStatus.Paid:
+                                                <span class="badge text-bg-success"><i class="bi bi-credit-card-2-front-fill me-1"></i>Ödənilib</span>
+                                                break;
+                                            default:
+                                                <span class="badge text-bg-secondary">@item.Status</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="text-muted small">
+                                        @item.CreatedDate.ToString("dd.MM.yyyy, HH:mm")
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="Details" asp-route-id="@item.Id" 
+                                           class="btn btn-outline-primary btn-sm" title="Detallara bax">
+                                            <i class="bi bi-eye"></i> Detal
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        <p class="mb-1">Heç bir sifariş tapılmadı.</p>
+                                        @if (Model.SelectedStatus.HasValue || Model.StartDate.HasValue || Model.EndDate.HasValue || !string.IsNullOrWhiteSpace(Model.Search))
+                                        {
+                                            <a asp-action="Index" class="btn btn-sm btn-outline-primary mt-2">Bütün sifarişləri göstər</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Səhifələmə (Pagination) -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span class="text-muted small">
+                        Göstərilir: @(((Model.CurrentPage - 1) * Model.PageSize) + 1) - @Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount) / @Model.TotalCount
+                    </span>
+                    <nav aria-label="Sifariş səhifələməsi">
+                        <ul class="pagination pagination-sm mb-0">
+                            <!-- Əvvəlki düyməsi -->
+                            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" 
+                                   asp-route-page="@(Model.CurrentPage - 1)" 
+                                   asp-route-status="@Model.SelectedStatus"
+                                   asp-route-startDate="@(Model.StartDate?.ToString("yyyy-MM-dd"))"
+                                   asp-route-endDate="@(Model.EndDate?.ToString("yyyy-MM-dd"))"
+                                   asp-route-search="@Model.Search">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+
+                            <!-- Səhifə nömrələri -->
+                            @for (int p = 1; p <= Model.TotalPages; p++)
+                            {
+                                if (p == 1 || p == Model.TotalPages || (p >= Model.CurrentPage - 2 && p <= Model.CurrentPage + 2))
+                                {
+                                    <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" 
+                                           asp-route-page="@p" 
+                                           asp-route-status="@Model.SelectedStatus"
+                                           asp-route-startDate="@(Model.StartDate?.ToString("yyyy-MM-dd"))"
+                                           asp-route-endDate="@(Model.EndDate?.ToString("yyyy-MM-dd"))"
+                                           asp-route-search="@Model.Search">@p</a>
+                                    </li>
+                                }
+                                else if (p == Model.CurrentPage - 3 || p == Model.CurrentPage + 3)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                }
+                            }
+
+                            <!-- Növbəti düyməsi -->
+                            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" 
+                                   asp-route-page="@(Model.CurrentPage + 1)" 
+                                   asp-route-status="@Model.SelectedStatus"
+                                   asp-route-startDate="@(Model.StartDate?.ToString("yyyy-MM-dd"))"
+                                   asp-route-endDate="@(Model.EndDate?.ToString("yyyy-MM-dd"))"
+                                   asp-route-search="@Model.Search">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            }
+        </section>
+    </div>
+</main>

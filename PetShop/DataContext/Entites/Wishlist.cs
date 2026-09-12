@@ -1,9 +1,11 @@
-﻿namespace PetShop.DataContext.Entites
+namespace PetShop.DataContext.Entites
 {
     public class Wishlist
     {
         public int Id { get; set; }
         public string SessionId { get; set; } = null!;
+        public string? UserId { get; set; } // Nullable - Login olanda UserId-yə bağlanır
+        public ApplicationUser? User { get; set; }
 
         public int ProductId { get; set; }
         public Product Product { get; set; } = null!;

@@ -137,48 +137,31 @@
           },
         });
 
-    window.addEventListener("load", (event) => {
-      //isotope
-      $('.isotope-container').isotope({
-        // options
-        itemSelector: '.item',
-        layoutMode: 'masonry'
-      });
+    // Pet Foodies filtering (Grid-safe, eliminates overlapping cards)
+    $(document).off('click.petfoodies', '.filter-button').on('click.petfoodies', '.filter-button', function (e) {
+      e.preventDefault();
+      $('.filter-button').removeClass('active');
+      $(this).addClass('active');
 
+      var filterValue = $(this).attr('data-filter');
+      var $items = $('.isotope-container .item');
+      var $emptyMsg = $('#no-foodies-message');
 
-      var $grid = $('.entry-container').isotope({
-        itemSelector: '.entry-item',
-        layoutMode: 'masonry'
-      });
-
-
-      // Initialize Isotope
-      var $container = $('.isotope-container').isotope({
-        // options
-        itemSelector: '.item',
-        layoutMode: 'masonry'
-      });
-
-      $(document).ready(function () {
-        //active button
-        $('.filter-button').click(function () {
-          $('.filter-button').removeClass('active');
-          $(this).addClass('active');
-        });
-      });
-
-      // Filter items on button click
-      $('.filter-button').click(function () {
-        var filterValue = $(this).attr('data-filter');
-        if (filterValue === '*') {
-          // Show all items
-          $container.isotope({ filter: '*' });
-        } else {
-          // Show filtered items
-          $container.isotope({ filter: filterValue });
+      if (!filterValue || filterValue === '*') {
+        $items.removeClass('is-hidden d-none').addClass('d-flex').css('display', '');
+        if ($emptyMsg.length) $emptyMsg.addClass('d-none');
+      } else {
+        var $matched = $items.filter(filterValue);
+        $items.not(filterValue).addClass('is-hidden d-none').removeClass('d-flex').css('display', 'none');
+        $matched.removeClass('is-hidden d-none').addClass('d-flex').css('display', '');
+        if ($emptyMsg.length) {
+          if ($matched.length === 0) {
+            $emptyMsg.removeClass('d-none');
+          } else {
+            $emptyMsg.addClass('d-none');
+          }
         }
-      });
-
+      }
     });
 
   }); // End of a document

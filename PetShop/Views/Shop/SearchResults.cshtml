@@ -1,4 +1,4 @@
-﻿@model List<PetShop.DataContext.Entites.Product>
+@model List<PetShop.DataContext.Entites.Product>
 
 <section id="banner" class="py-3" style="background: #F9F3EC;">
     <div class="container">
@@ -23,14 +23,33 @@
             @foreach (var product in Model)
             {
                 var mainImage = product.Images.FirstOrDefault(i => i.IsMain)?.ImageUrl ?? "/images/no-image.png";
-                <div class="col-md-3 my-3">
-                    <div class="card">
-                        <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id">
-                            <img src="@mainImage" class="img-fluid rounded-4" alt="@product.Name">
-                        </a>
-                        <div class="card-body">
-                            <h5>@product.Name</h5>
-                            <p>@(product.DiscountPrice ?? product.Price) ₼</p>
+                var displayPrice = product.DiscountPrice ?? product.Price;
+                <div class="col-sm-6 col-md-4 col-lg-3 my-3 d-flex align-items-stretch">
+                    <div class="card position-relative h-100 w-100 product-card border-0 shadow-sm rounded-4 p-3 d-flex flex-column justify-content-between">
+                        <div class="d-flex flex-column flex-grow-1">
+                            <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" class="product-image-container" style="height: 260px; width: 100%; overflow: hidden; display: block; border-radius: 1rem; background-color: #f8f9fa;">
+                                <img src="@mainImage" class="img-fluid rounded-4 product-img" alt="@product.Name" loading="lazy" style="height: 100%; width: 100%; object-fit: cover; object-position: center; display: block;">
+                            </a>
+                            <div class="card-body p-0 pt-3 d-flex flex-column justify-content-between flex-grow-1">
+                                <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark">
+                                    <h5 class="card-title m-0 text-dark fw-bold product-title">@product.Name</h5>
+                                </a>
+                                <div class="card-text mt-auto pt-2">
+                                    <h4 class="secondary-font text-primary m-0">@displayPrice ₼</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
+                            <form asp-controller="Basket" asp-action="AddToCart" method="post" class="m-0 flex-grow-1 me-2">
+                                <input type="hidden" name="productId" value="@product.Id" />
+                                <button type="submit" class="btn btn-outline-dark w-100 rounded-pill py-2 d-flex align-items-center justify-content-center gap-2">
+                                    <iconify-icon icon="la:shopping-cart" class="fs-5"></iconify-icon>
+                                    <span>Səbətə at</span>
+                                </button>
+                            </form>
+                            <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;" title="Ətraflı">
+                                <iconify-icon icon="solar:arrow-right-linear" class="fs-5"></iconify-icon>
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -62,30 +62,32 @@
                             var displayPrice = product.DiscountPrice ?? product.Price;
                             var isWishlisted = Model.WishlistProductIds.Contains(product.Id);
 
-                            <div class="col-md-4 my-4">
-                                <div class="card position-relative">
-                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
-                                        <img src="@mainImage" class="img-fluid rounded-4" alt="@product.Name">
-                                    </a>
-                                    <div class="card-body p-0">
-                                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
-                                            <h3 class="card-title pt-4 m-0">@product.Name</h3>
+                            <div class="col-md-4 my-4 d-flex align-items-stretch">
+                                <div class="card position-relative h-100 w-100 product-card">
+                                    <div>
+                                        <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" class="product-image-container" style="height: 260px; width: 100%; overflow: hidden; display: block; border-radius: 1rem; background-color: #f8f9fa;">
+                                            <img src="@mainImage" class="img-fluid rounded-4 product-img" alt="@product.Name" loading="lazy" style="height: 100%; width: 100%; object-fit: cover; object-position: center; display: block;">
                                         </a>
+                                        <div class="card-body p-0 pt-3">
+                                            <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark">
+                                                <h3 class="card-title m-0 text-dark product-title">@product.Name</h3>
+                                            </a>
+                                        </div>
+                                    </div>
 
-                                        <div class="card-text">
-                                            <h3 class="secondary-font text-primary">@displayPrice ₼</h3>
+                                    <div class="card-text mt-auto pt-3">
+                                        <h3 class="secondary-font text-primary">@displayPrice ₼</h3>
 
-                                            <div class="d-flex flex-wrap mt-3">
-                                                <form asp-controller="Basket" asp-action="AddToCart" method="post" class="me-3">
-                                                    <input type="hidden" name="productId" value="@product.Id" />
-                                                    <button type="submit" class="btn-cart px-4 pt-3 pb-3 border-0 bg-transparent">
-                                                        <h5 class="text-uppercase m-0">Add to Cart</h5>
-                                                    </button>
-                                                </form>
-                                                <a href="#" class="btn-wishlist px-4 pt-3 @(isWishlisted ? "active-wishlist" : "")" data-product-id="@product.Id" title="İstək siyahısına əlavə et">
-                                                    <iconify-icon icon="fluent:heart-28-filled" class="fs-5" style="@(isWishlisted ? "color: #dc3545;" : "")"></iconify-icon>
-                                                </a>
-                                            </div>
+                                        <div class="d-flex flex-wrap mt-3">
+                                            <form asp-controller="Basket" asp-action="AddToCart" method="post" class="me-3">
+                                                <input type="hidden" name="productId" value="@product.Id" />
+                                                <button type="submit" class="btn-cart px-4 pt-3 pb-3 border-0 bg-transparent">
+                                                    <h5 class="text-uppercase m-0">Add to Cart</h5>
+                                                </button>
+                                            </form>
+                                            <a href="#" class="btn-wishlist px-4 pt-3 @(isWishlisted ? "active-wishlist" : "")" data-product-id="@product.Id" title="İstək siyahısına əlavə et">
+                                                <iconify-icon icon="fluent:heart-28-filled" class="fs-5" style="@(isWishlisted ? "color: #dc3545;" : "")"></iconify-icon>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -188,15 +190,19 @@
                             </li>
                             <li class="cat-item">
                                 <a asp-controller="Shop" asp-action="Index" asp-route-category="Food"
-                                   class="nav-link @(Model.SelectedCategory == "Food" ? "fw-bold text-primary" : "")">Food</a>
+                                   class="nav-link @(Model.SelectedCategory?.Equals("Food", StringComparison.OrdinalIgnoreCase) == true || Model.SelectedCategory?.Equals("Yem", StringComparison.OrdinalIgnoreCase) == true ? "fw-bold text-primary" : "")">Food</a>
                             </li>
                             <li class="cat-item">
                                 <a asp-controller="Shop" asp-action="Index" asp-route-category="Cats"
-                                   class="nav-link @(Model.SelectedCategory == "Cats" ? "fw-bold text-primary" : "")">Cats</a>
+                                   class="nav-link @(Model.SelectedCategory?.Equals("Cats", StringComparison.OrdinalIgnoreCase) == true ? "fw-bold text-primary" : "")">Cats</a>
                             </li>
                             <li class="cat-item">
                                 <a asp-controller="Shop" asp-action="Index" asp-route-category="Birds"
-                                   class="nav-link @(Model.SelectedCategory == "Birds" ? "fw-bold text-primary" : "")">Birds</a>
+                                   class="nav-link @(Model.SelectedCategory?.Equals("Birds", StringComparison.OrdinalIgnoreCase) == true ? "fw-bold text-primary" : "")">Birds</a>
+                            </li>
+                            <li class="cat-item">
+                                <a asp-controller="Shop" asp-action="Index" asp-route-category="Geyim"
+                                   class="nav-link @(Model.SelectedCategory?.Equals("Geyim", StringComparison.OrdinalIgnoreCase) == true || Model.SelectedCategory?.Equals("Clothes", StringComparison.OrdinalIgnoreCase) == true || Model.SelectedCategory?.Equals("Clothing", StringComparison.OrdinalIgnoreCase) == true ? "fw-bold text-primary" : "")">Clothing</a>
                             </li>
                         </ul>
                     </div>

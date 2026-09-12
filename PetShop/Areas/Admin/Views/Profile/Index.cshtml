@@ -1,0 +1,170 @@
+﻿@model PetShop.Areas.Admin.Models.AdminProfileViewModel
+@{
+    ViewData["Title"] = "Admin Profile | adminHMD";
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+
+        <!-- Səhifə Başlığı -->
+        <div class="page-heading d-flex justify-content-between align-items-center mb-4">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-person-badge" aria-hidden="true"></i></span>
+                <div>
+                    <p class="eyebrow mb-1">İnzibatçı Tənzimləmələri</p>
+                    <h1 class="h3 mb-1">Admin Profile</h1>
+                    <p class="text-muted mb-0">Şəxsi profil məlumatlarını və sistem parametrlərini idarə edin.</p>
+                </div>
+            </div>
+            <div class="heading-actions">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard-a Qayıt</span>
+                </a>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <div>@TempData["SuccessMessage"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            <!-- Sol Tərəf: Profil Kartı (Avatar, Ad, Vəzifə, Badge-lər, Read-only Info) -->
+            <div class="col-12 col-lg-4 col-xl-4">
+                <div class="panel h-100">
+                    <div class="d-flex flex-column align-items-center text-center p-4">
+                        <div class="admin-avatar-circle mb-3 d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
+                             style="width: 88px; height: 88px; border-radius: 50%; font-size: 2rem; background: linear-gradient(135deg, #2563eb, #10b981); letter-spacing: 1px;">
+                            @Model.Initials
+                        </div>
+                        <h4 class="mb-1 text-dark fw-bold">@Model.FullName</h4>
+                        <p class="text-secondary mb-2 small fw-medium">@Model.JobTitle</p>
+                        
+                        <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+                            <span class="badge text-bg-primary px-3 py-2 rounded-pill">
+                                <i class="bi bi-shield-lock-fill me-1"></i>Admin
+                            </span>
+                            <span class="badge text-bg-success px-3 py-2 rounded-pill">
+                                <i class="bi bi-patch-check-fill me-1"></i>Verified
+                            </span>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Bio))
+                        {
+                            <p class="text-secondary small px-2 mb-0" style="line-height: 1.5;">
+                                @Model.Bio
+                            </p>
+                        }
+                    </div>
+
+                    <div class="border-top px-4 py-3">
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-secondary small"><i class="bi bi-envelope me-2 text-primary"></i>Email</span>
+                            <span class="text-dark fw-semibold small text-break">@Model.Email</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-secondary small"><i class="bi bi-building me-2 text-primary"></i>Department</span>
+                            <span class="text-dark fw-semibold small">@Model.Department</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-secondary small"><i class="bi bi-clock me-2 text-primary"></i>Time Zone</span>
+                            <span class="text-dark fw-semibold small">@Model.TimeZone</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2">
+                            <span class="text-secondary small"><i class="bi bi-telephone me-2 text-primary"></i>Phone</span>
+                            <span class="text-dark fw-semibold small">@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "Qeyd edilməyib" : Model.PhoneNumber)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Tərəf: "Profile Settings" Formu -->
+            <div class="col-12 col-lg-8 col-xl-8">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="h5 mb-1 section-title">
+                            <i class="bi bi-person-gear me-2"></i>
+                            <span>Profile Settings</span>
+                        </h2>
+                        <p class="text-muted mb-0">İnzibatçı məlumatlarını yeniləyin və dəyişiklikləri yadda saxlayın.</p>
+                    </div>
+
+                    <div class="p-4">
+                        <form method="post" asp-area="Admin" asp-controller="Profile" asp-action="Index">
+                            @Html.AntiForgeryToken()
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="FirstName" class="form-label fw-semibold">Ad <span class="text-danger">*</span></label>
+                                    <input asp-for="FirstName" class="form-control" placeholder="Adınızı daxil edin" />
+                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="LastName" class="form-label fw-semibold">Soyad <span class="text-danger">*</span></label>
+                                    <input asp-for="LastName" class="form-control" placeholder="Soyadınızı daxil edin" />
+                                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="Email" class="form-label fw-semibold">E-poçt <span class="text-danger">*</span></label>
+                                    <input asp-for="Email" type="email" class="form-control" placeholder="admin@petshop.com" />
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="PhoneNumber" class="form-label fw-semibold">Əlaqə Nömrəsi</label>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="+994 50 123 45 67" />
+                                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="Department" class="form-label fw-semibold">Şöbə (Department)</label>
+                                    <input asp-for="Department" class="form-control" placeholder="Məs: Product Management" />
+                                    <span asp-validation-for="Department" class="text-danger small"></span>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="JobTitle" class="form-label fw-semibold">Vəzifə / Rol (Job Title)</label>
+                                    <input asp-for="JobTitle" class="form-control" placeholder="Məs: Product Administrator" />
+                                    <span asp-validation-for="JobTitle" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="TimeZone" class="form-label fw-semibold">Saat Qurşağı (Time Zone)</label>
+                                <input asp-for="TimeZone" class="form-control" placeholder="Məs: Baku (UTC+04:00)" />
+                                <span asp-validation-for="TimeZone" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Bio" class="form-label fw-semibold">Bio (Haqqında Qısa Məlumat)</label>
+                                <textarea asp-for="Bio" class="form-control" rows="4" placeholder="İnzibatçı fəaliyyəti və ya ixtisas sahəsi haqqında qısa təsvir yazın..."></textarea>
+                                <span asp-validation-for="Bio" class="text-danger small"></span>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-3">
+                                <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2">
+                                    <i class="bi bi-check2-circle fs-5"></i>
+                                    <span class="fw-semibold">Save Profile</span>
+                                </button>
+                                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn btn-light text-muted">Ləğv Et</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

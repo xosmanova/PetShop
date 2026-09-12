@@ -1,0 +1,260 @@
+@model PetShop.DataContext.Entites.Order
+@{
+    ViewData["Title"] = $"Sifariş #{Model.OrderNumber} | Admin";
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+        
+        <!-- Səhifə Başlığı və Geri Düyməsi -->
+        <div class="page-heading d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span>
+                <div>
+                    <p class="eyebrow mb-1">Satış İdarəetməsi</p>
+                    <h1 class="h3 mb-1">Sifariş Detalları: <code>#@Model.OrderNumber</code></h1>
+                    <p class="text-muted mb-0">Tarix: @Model.CreatedDate.ToString("dd.MM.yyyy, HH:mm")</p>
+                </div>
+            </div>
+            <div class="heading-actions">
+                <a asp-action="Index" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Sifarişlərə Qayıt</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bildirişlər -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <div>@TempData["Success"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+                <i class="bi bi-x-circle-fill fs-5"></i>
+                <div>@TempData["Error"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Bağla"></button>
+            </div>
+        }
+
+        <!-- Status Yeniləmə Paneli -->
+        <div class="panel mb-4">
+            <div class="p-3 bg-light rounded d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fw-semibold text-dark">Cari Status:</span>
+                    @switch (Model.Status)
+                    {
+                        case PetShop.DataContext.Entites.OrderStatus.Pending:
+                            <span class="badge text-bg-warning fs-6 px-3 py-2"><i class="bi bi-hourglass-split me-1"></i>Gözləmədə</span>
+                            break;
+                        case PetShop.DataContext.Entites.OrderStatus.Processing:
+                            <span class="badge text-bg-primary fs-6 px-3 py-2"><i class="bi bi-gear-fill me-1"></i>Hazırlanır</span>
+                            break;
+                        case PetShop.DataContext.Entites.OrderStatus.Shipped:
+                            <span class="badge text-bg-info text-dark fs-6 px-3 py-2"><i class="bi bi-truck me-1"></i>Yoldadır</span>
+                            break;
+                        case PetShop.DataContext.Entites.OrderStatus.Delivered:
+                            <span class="badge text-bg-success fs-6 px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i>Çatdırıldı</span>
+                            break;
+                        case PetShop.DataContext.Entites.OrderStatus.Cancelled:
+                            <span class="badge text-bg-danger fs-6 px-3 py-2"><i class="bi bi-x-circle-fill me-1"></i>Ləğv edildi</span>
+                            break;
+                        case PetShop.DataContext.Entites.OrderStatus.Paid:
+                            <span class="badge text-bg-success fs-6 px-3 py-2"><i class="bi bi-credit-card-2-front-fill me-1"></i>Ödənilib</span>
+                            break;
+                        default:
+                            <span class="badge text-bg-secondary fs-6 px-3 py-2">@Model.Status</span>
+                            break;
+                    }
+                </div>
+
+                <form method="post" asp-action="UpdateStatus" class="d-flex align-items-center gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <label class="form-label mb-0 small text-muted text-nowrap">Statusu Dəyiş:</label>
+                    <select name="newStatus" class="form-select form-select-sm" style="min-width: 160px;">
+                        @foreach (var val in Enum.GetValues<PetShop.DataContext.Entites.OrderStatus>())
+                        {
+                            if (Model.Status == val)
+                            {
+                                <option value="@val" selected>@val</option>
+                            }
+                            else
+                            {
+                                <option value="@val">@val</option>
+                            }
+                        }
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm text-nowrap">
+                        <i class="bi bi-arrow-repeat me-1"></i>Yenilə
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sol Sütun: Sifariş Məhsulları -->
+            <div class="col-12 col-lg-8">
+                <div class="panel">
+                    <div class="panel-header d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0 section-title">
+                            <i class="bi bi-box-seam"></i>
+                            <span>Sifariş Edilən Məhsullar (@Model.OrderItems.Count)</span>
+                        </h2>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0 table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 65px;">Şəkil</th>
+                                    <th>Məhsul</th>
+                                    <th class="text-center">Say</th>
+                                    <th class="text-end">Vahid Qiymət</th>
+                                    <th class="text-end">Cəm</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    var img = item.Product?.Images?.FirstOrDefault(i => i.IsMain)?.ImageUrl 
+                                           ?? item.Product?.Images?.FirstOrDefault()?.ImageUrl;
+                                    var lineTotal = item.Quantity * item.UnitPrice;
+
+                                    <tr>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(img))
+                                            {
+                                                <img src="@img" alt="@(item.Product?.Name ?? "Məhsul")" 
+                                                     class="rounded object-fit-cover shadow-sm" 
+                                                     style="width: 50px; height: 50px; border: 1px solid #e9ecef;" loading="lazy" />
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-light rounded d-flex align-items-center justify-content-center text-muted" 
+                                                     style="width: 50px; height: 50px;">
+                                                    <i class="bi bi-image"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">@(item.Product?.Name ?? "Məhsul")</div>
+                                            @if (item.ProductVariant != null)
+                                            {
+                                                <div class="text-muted small mt-1">
+                                                    @if (!string.IsNullOrEmpty(item.ProductVariant.Size))
+                                                    {
+                                                        <span class="badge text-bg-light border me-1">Ölçü: @item.ProductVariant.Size</span>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(item.ProductVariant.Color))
+                                                    {
+                                                        <span class="badge text-bg-light border me-1">Rəng: @item.ProductVariant.Color</span>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(item.ProductVariant.Weight))
+                                                    {
+                                                        <span class="badge text-bg-light border me-1">Çəki: @item.ProductVariant.Weight</span>
+                                                    }
+                                                </div>
+                                            }
+                                        </td>
+                                        <td class="text-center fw-semibold">@item.Quantity</td>
+                                        <td class="text-end text-muted">@item.UnitPrice.ToString("0.00") ₼</td>
+                                        <td class="text-end fw-bold text-dark">@lineTotal.ToString("0.00") ₼</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Sütun: Müştəri və Çatdırılma -->
+            <div class="col-12 col-lg-4">
+                <!-- Çatdırılma Detalları -->
+                <div class="panel mb-4">
+                    <div class="panel-header">
+                        <h2 class="h5 mb-0 section-title">
+                            <i class="bi bi-person-lines-fill"></i>
+                            <span>Müştəri Məlumatları</span>
+                        </h2>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Ad, Soyad</small>
+                            <strong class="text-dark fs-6">@Model.CustomerName</strong>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Telefon</small>
+                            <span class="text-dark"><i class="bi bi-telephone me-1 text-muted"></i>@Model.Phone</span>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted d-block">E-poçt</small>
+                            <span class="text-dark"><i class="bi bi-envelope me-1 text-muted"></i>@Model.Email</span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Çatdırılma Ünvanı</small>
+                            <span class="text-dark"><i class="bi bi-geo-alt me-1 text-muted"></i>@Model.Address, @Model.City</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hesab Xülasəsi -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="h5 mb-0 section-title">
+                            <i class="bi bi-wallet2"></i>
+                            <span>Ödəniş Xülasəsi</span>
+                        </h2>
+                    </div>
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Məhsul məbləği:</span>
+                            <span class="fw-semibold">@((Model.TotalPrice + Model.DiscountAmount).ToString("0.00")) ₼</span>
+                        </div>
+                        @if (Model.DiscountAmount > 0)
+                        {
+                            <div class="d-flex justify-content-between mb-2 text-danger">
+                                <span><i class="bi bi-ticket-perforated me-1"></i>Kupon (@Model.CouponCode):</span>
+                                <span class="fw-bold">-@Model.DiscountAmount.ToString("0.00") ₼</span>
+                            </div>
+                        }
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Ödəniş Üsulu:</span>
+                            <span class="fw-semibold">
+                                @if (Model.PaymentMethod == "Stripe")
+                                {
+                                    <span class="badge text-bg-primary"><i class="bi bi-credit-card me-1"></i>Stripe (Kart)</span>
+                                }
+                                else
+                                {
+                                    <span>@(Model.PaymentMethod ?? "Nağd")</span>
+                                }
+                            </span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.PaymentIntentId))
+                        {
+                            <div class="d-flex justify-content-between mb-2 small">
+                                <span class="text-muted">Stripe ID:</span>
+                                <code class="small">@Model.PaymentIntentId</code>
+                            </div>
+                        }
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Çatdırılma:</span>
+                            <span class="text-success fw-semibold">Pulsuz</span>
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between align-items-center pt-2">
+                            <span class="fw-bold fs-6">Yekun Məbləğ:</span>
+                            <span class="fw-bold fs-4 text-success">@Model.TotalPrice.ToString("0.00") ₼</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

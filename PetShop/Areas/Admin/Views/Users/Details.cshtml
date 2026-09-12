@@ -1,0 +1,183 @@
+﻿@model PetShop.Areas.Admin.Models.AdminUserDetailsViewModel
+@{
+    ViewData["Title"] = $"{Model.FullName} - User Details | Admin";
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+
+        <!-- Səhifə Başlığı -->
+        <div class="page-heading d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-person-badge" aria-hidden="true"></i></span>
+                <div>
+                    <p class="eyebrow mb-1">MANAGEMENT</p>
+                    <h1 class="h3 mb-1">User Details</h1>
+                    <p class="text-muted mb-0">Inspect account status, profile data, permissions, and recent activity.</p>
+                </div>
+            </div>
+            <div class="heading-actions d-flex align-items-center gap-2">
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Back to Users</span>
+                </a>
+                <a asp-action="AddUser" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-person-plus"></i>
+                    <span>Add User</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sol Tərəf: Profil Kartı -->
+            <div class="col-12 col-lg-4 col-xl-4">
+                <div class="panel h-100 overflow-hidden">
+                    <!-- Banner / Cover Header -->
+                    <div class="user-cover-banner w-100 position-relative" 
+                         style="height: 110px; background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%);">
+                        <span class="position-absolute top-0 end-0 p-3 opacity-25 text-white fs-1">
+                            <i class="bi bi-shield-shaded"></i>
+                        </span>
+                    </div>
+
+                    <div class="d-flex flex-column align-items-center text-center px-4 pb-4 position-relative">
+                        <!-- Profil Avatarı (Cover-in üstünə çıxan) -->
+                        <div class="user-avatar-circle d-flex align-items-center justify-content-center text-white fw-bold shadow"
+                             style="width: 82px; height: 82px; border-radius: 50%; font-size: 1.85rem; margin-top: -41px; background: linear-gradient(135deg, #2563eb, #10b981); border: 4px solid var(--admin-surface, #ffffff); letter-spacing: 1px;">
+                            @Model.Initials
+                        </div>
+
+                        <h4 class="mt-3 mb-1 text-dark fw-bold">@Model.FullName</h4>
+                        <p class="text-secondary mb-2 small fw-medium">@Model.Position</p>
+
+                        <!-- Status Badge -->
+                        <div class="mb-3">
+                            @switch (Model.Status?.ToLower())
+                            {
+                                case "active":
+                                    <span class="badge text-bg-success px-3 py-2 rounded-pill">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Active
+                                    </span>
+                                    break;
+                                case "pending":
+                                    <span class="badge text-bg-warning px-3 py-2 rounded-pill">
+                                        <i class="bi bi-hourglass-split me-1"></i>Pending
+                                    </span>
+                                    break;
+                                case "suspended":
+                                    <span class="badge text-bg-danger px-3 py-2 rounded-pill">
+                                        <i class="bi bi-slash-circle me-1"></i>Suspended
+                                    </span>
+                                    break;
+                                default:
+                                    <span class="badge text-bg-secondary px-3 py-2 rounded-pill">@Model.Status</span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Məlumat Cədvəli -->
+                    <div class="border-top px-4 py-3">
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-secondary small"><i class="bi bi-envelope me-2 text-primary"></i>Email</span>
+                            <span class="text-dark fw-semibold small text-break">@Model.Email</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-secondary small"><i class="bi bi-telephone me-2 text-primary"></i>Phone</span>
+                            <span class="text-dark fw-semibold small">@Model.PhoneNumber</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-secondary small"><i class="bi bi-diagram-3 me-2 text-primary"></i>Team</span>
+                            <span class="text-dark fw-semibold small">@Model.Team</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2">
+                            <span class="text-secondary small"><i class="bi bi-geo-alt me-2 text-primary"></i>Location</span>
+                            <span class="text-dark fw-semibold small">@Model.Location</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Tərəf: İki Kart (Account Overview & Recent Activity) -->
+            <div class="col-12 col-lg-8 col-xl-8 d-flex flex-column gap-4">
+                
+                <!-- Kart 1: Account Overview -->
+                <div class="panel">
+                    <div class="panel-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="h5 mb-0 section-title">
+                                <i class="bi bi-card-checklist me-2 text-primary"></i>
+                                <span>Account Overview</span>
+                            </h2>
+                        </div>
+                        <a asp-action="AddUser" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-pencil"></i>
+                            <span>Edit User</span>
+                        </a>
+                    </div>
+                    <div class="p-4">
+                        <div class="row g-3">
+                            <!-- Box 1: Role -->
+                            <div class="col-12 col-sm-4">
+                                <div class="p-3 rounded border bg-light h-100">
+                                    <div class="text-secondary small mb-1">Role</div>
+                                    <div class="h5 text-dark fw-bold mb-0">@Model.Role</div>
+                                </div>
+                            </div>
+
+                            <!-- Box 2: Last Login -->
+                            <div class="col-12 col-sm-4">
+                                <div class="p-3 rounded border bg-light h-100">
+                                    <div class="text-secondary small mb-1">Last Login</div>
+                                    <div class="h5 text-dark fw-bold mb-0">@Model.LastLogin</div>
+                                </div>
+                            </div>
+
+                            <!-- Box 3: Projects -->
+                            <div class="col-12 col-sm-4">
+                                <div class="p-3 rounded border bg-light h-100">
+                                    <div class="text-secondary small mb-1">Projects</div>
+                                    <div class="h5 text-dark fw-bold mb-0">@Model.Projects</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kart 2: Recent Activity -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="h5 mb-0 section-title">
+                            <i class="bi bi-clock-history me-2 text-primary"></i>
+                            <span>Recent Activity</span>
+                        </h2>
+                    </div>
+                    <div class="p-4">
+                        @if (Model.Activities != null && Model.Activities.Count > 0)
+                        {
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                                @foreach (var act in Model.Activities)
+                                {
+                                    <li class="d-flex align-items-start gap-3">
+                                        <span class="rounded-circle bg-@act.DotColor shadow-sm flex-shrink-0" 
+                                              style="width: 10px; height: 10px; margin-top: 6px;"></span>
+                                        <div class="flex-grow-1">
+                                            <div class="text-dark fw-semibold small">@act.Title</div>
+                                            <div class="text-muted small">@act.TimeAgo</div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0 small">No recent activity recorded for this user.</p>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</main>

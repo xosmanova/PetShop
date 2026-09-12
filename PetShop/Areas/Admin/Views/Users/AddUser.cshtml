@@ -1,0 +1,105 @@
+﻿@model PetShop.Areas.Admin.Models.CreateUserAdminViewModel
+@{
+    ViewData["Title"] = "Add User | Admin";
+}
+
+<main class="dashboard-content">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+
+        <!-- Səhifə Başlığı -->
+        <div class="page-heading d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="page-heading-copy">
+                <span class="page-icon"><i class="bi bi-person-plus" aria-hidden="true"></i></span>
+                <div>
+                    <h1 class="h3 mb-1">Add User</h1>
+                    <p class="text-muted mb-0">Create and invite a new team member account.</p>
+                </div>
+            </div>
+            <div class="heading-actions">
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Back to Users</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="h5 mb-0 section-title">
+                            <i class="bi bi-person-gear me-2 text-primary"></i>
+                            <span>User Information</span>
+                        </h2>
+                    </div>
+                    <div class="p-4">
+                        <form method="post" asp-action="AddUser">
+                            @Html.AntiForgeryToken()
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="FirstName" class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                                    <input asp-for="FirstName" class="form-control" placeholder="e.g. Orkhan" required />
+                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="LastName" class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                                    <input asp-for="LastName" class="form-control" placeholder="e.g. Mammadov" required />
+                                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="Email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                    <input asp-for="Email" type="email" class="form-control" placeholder="orkhan@petshop.com" required />
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="Password" class="form-label fw-semibold">Temporary Password</label>
+                                    <input asp-for="Password" type="password" class="form-control" placeholder="Default: User123!" />
+                                    <span asp-validation-for="Password" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="Role" class="form-label fw-semibold">Role</label>
+                                    <select asp-for="Role" class="form-select">
+                                        <option value="Admin">Admin</option>
+                                        <option value="Store Manager">Store Manager</option>
+                                        <option value="Content Editor" selected>Content Editor</option>
+                                        <option value="Product Manager">Product Manager</option>
+                                        <option value="Customer Support">Customer Support</option>
+                                        <option value="Viewer">Viewer</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label asp-for="Team" class="form-label fw-semibold">Team / Department</label>
+                                    <select asp-for="Team" class="form-select">
+                                        <option value="Management">Management</option>
+                                        <option value="Operations" selected>Operations</option>
+                                        <option value="Marketing">Marketing</option>
+                                        <option value="E-Commerce">E-Commerce</option>
+                                        <option value="Support">Support</option>
+                                        <option value="Logistics">Logistics</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-3">
+                                <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2">
+                                    <i class="bi bi-check2-circle fs-5"></i>
+                                    <span class="fw-semibold">Create User</span>
+                                </button>
+                                <a asp-action="Index" class="btn btn-light text-muted">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>

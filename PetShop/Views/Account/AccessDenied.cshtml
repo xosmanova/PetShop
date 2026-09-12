@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Giriş Məhdudlaşdırılıb";
+}
+
+<section id="banner" class="py-3" style="background: #F9F3EC;">
+    <div class="container">
+        <div class="hero-content py-5 my-3">
+            <h2 class="display-1 mt-3 mb-0">İcazə Yoxdur</h2>
+            <nav class="breadcrumb">
+                <a class="breadcrumb-item nav-link" asp-controller="Home" asp-action="Index">Ana Səhifə</a>
+                <span class="breadcrumb-item active" aria-current="page">403 Giriş Məhdudiyyəti</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<section class="access-denied-section py-5 my-5">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card border-0 shadow-sm rounded-4 p-5">
+                    <div class="mb-4">
+                        <iconify-icon icon="solar:shield-warning-bold-duotone" class="text-danger" style="font-size: 80px;"></iconify-icon>
+                    </div>
+                    <h2 class="fw-bold mb-3 text-dark">Bu səhifəyə daxil olmaq hüququnuz yoxdur</h2>
+                    <p class="text-muted mb-4 lead fs-6">
+                        Bu bölmə yalnız <strong>Administrator</strong> səlahiyyətinə malik istifadəçilər üçündür. Əgər Admin hesabınız varsa, zəhmət olmasa həmin hesabla daxil olun.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary rounded-3 px-4 py-2">
+                            <iconify-icon icon="mdi:home" class="me-1 align-middle"></iconify-icon> Ana Səhifə
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary rounded-3 px-4 py-2">
+                            <iconify-icon icon="mdi:login" class="me-1 align-middle"></iconify-icon> Digər Hesabla Daxil Ol
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

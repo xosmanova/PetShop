@@ -16,14 +16,14 @@
                     <div class="swiper-slide py-5">
                         <div class="row banner-content align-items-center">
                             <div class="img-wrapper col-md-5">
-                                <img src="@banner.ImageUrl" class="img-fluid">
+                                <img src="@banner.ImageUrl" class="img-fluid" loading="lazy">
                             </div>
                             <div class="content-wrapper col-md-7 p-5 mb-5">
                                 <div class="secondary-font text-primary text-uppercase mb-4">@banner.DiscountText</div>
                                 <h2 class="banner-title display-1 fw-normal">
                                     Best destination for <span class="text-primary">@banner.HighlightedText</span>
                                 </h2>
-                                <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
+                                <a asp-controller="Shop" asp-action="Index" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
                                     shop now
                                     <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
                                         <use xlink:href="#arrow-right"></use>
@@ -48,7 +48,7 @@
             {
 
                 <div class="col text-center">
-                    <a href="/products/@category.Slug" class="categories-item">
+                    <a asp-controller="Shop" asp-action="Index" asp-route-category="@category.Name" class="categories-item">
                         <iconify-icon class="category-icon" icon="@category.IconClass"></iconify-icon>
                         <h5>@category.Name</h5>
                     </a>
@@ -67,7 +67,7 @@
         <div class="section-header d-md-flex justify-content-between align-items-center mb-3">
             <h2 class="display-3 fw-normal">Pet Clothing</h2>
             <div>
-                <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
+                <a asp-controller="Shop" asp-action="Index" asp-route-category="Geyim" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
                     shop now
                     <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
                         <use xlink:href="#arrow-right"></use>
@@ -93,13 +93,13 @@
                             <div class="z-1 position-absolute rounded-3 m-3 px-3 border border-dark-subtle">-@discountPercent%</div>
                         }
 
-                        <div class="card position-relative">
-                            <a href="/product/@product.Id"><img src="@mainImage" class="img-fluid rounded-4" alt="@product.Name"></a>
-                            <div class="card-body p-0">
-                                <a href="/product/@product.Id">
-                                    <h3 class="card-title pt-4 m-0">@product.Name</h3>
+                        <div class="card position-relative h-100 product-card">
+                            <a href="/product/@product.Id" class="product-image-container" style="height: 260px; width: 100%; overflow: hidden; display: block; border-radius: 1rem; background-color: #f8f9fa;"><img src="@mainImage" class="img-fluid rounded-4 product-img" alt="@product.Name" loading="lazy" style="height: 100%; width: 100%; object-fit: cover; object-position: center; display: block;"></a>
+                            <div class="card-body p-0 pt-3 d-flex flex-column justify-content-between">
+                                <a href="/product/@product.Id" class="text-decoration-none text-dark">
+                                    <h3 class="card-title m-0 product-title">@product.Name</h3>
                                 </a>
-                                <div class="card-text">
+                                <div class="card-text mt-auto pt-2">
                                     <span class="rating secondary-font">
                                         @for (int i = 0; i < 5; i++)
                                         {
@@ -143,14 +143,22 @@
             <div class="mb-4 mb-md-0">
                 <p class="m-0">
                     <button class="filter-button me-4 active" data-filter="*">ALL</button>
-                    @foreach (var animal in animalTypes)
+                    @foreach (var animal in animalTypes.Where(a => !a.Name.Contains("Balıq", StringComparison.OrdinalIgnoreCase) && !a.Name.Contains("Baliq", StringComparison.OrdinalIgnoreCase)))
                     {
-                        <button class="filter-button me-4" data-filter=".@animal.Name.ToLower()">@animal.Name.ToUpper()</button>
+                        var filterSlug = animal.Name.ToLower()
+                            .Replace("ə", "e")
+                            .Replace("ı", "i")
+                            .Replace("ş", "s")
+                            .Replace("ç", "c")
+                            .Replace("ğ", "g")
+                            .Replace("ö", "o")
+                            .Replace("ü", "u");
+                        <button class="filter-button me-4" data-filter=".animal-@filterSlug">@animal.Name.ToUpper()</button>
                     }
                 </p>
             </div>
             <div>
-                <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
+                <a asp-controller="Shop" asp-action="Index" asp-route-category="Yem" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
                     shop now
                     <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
                         <use xlink:href="#arrow-right"></use>
@@ -163,10 +171,35 @@
 
             @foreach (var product in products.Where(p => p.ProductCategory.Slug.StartsWith("food")))
             {
-                var animalClasses = string.Join(" ", product.ProductAnimalTypes.Select(pa => pa.AnimalType.Name.ToLower()));
+                var animalSlugs = new List<string>();
+                if (product.ProductAnimalTypes != null)
+                {
+                    foreach (var pat in product.ProductAnimalTypes)
+                    {
+                        if (pat.AnimalType != null && !string.IsNullOrEmpty(pat.AnimalType.Name))
+                        {
+                            var normalized = pat.AnimalType.Name.ToLower()
+                                .Replace("ə", "e")
+                                .Replace("ı", "i")
+                                .Replace("ş", "s")
+                                .Replace("ç", "c")
+                                .Replace("ğ", "g")
+                                .Replace("ö", "o")
+                                .Replace("ü", "u");
+                            animalSlugs.Add("animal-" + normalized);
+                        }
+                    }
+                }
+                var catSlug = product.ProductCategory?.Slug?.ToLower() ?? "";
+                if (catSlug.Contains("dog") && !animalSlugs.Contains("animal-it")) animalSlugs.Add("animal-it");
+                if (catSlug.Contains("cat") && !animalSlugs.Contains("animal-pisik")) animalSlugs.Add("animal-pisik");
+                if (catSlug.Contains("bird") && !animalSlugs.Contains("animal-qus")) animalSlugs.Add("animal-qus");
+                if (catSlug.Contains("fish") && !animalSlugs.Contains("animal-baliq")) animalSlugs.Add("animal-baliq");
+
+                var animalClasses = string.Join(" ", animalSlugs.Distinct());
                 var mainImage = product.Images.FirstOrDefault(i => i.IsMain)?.ImageUrl ?? "/images/no-image.png";
 
-                <div class="item @animalClasses col-md-4 col-lg-3 my-4">
+                <div class="item @animalClasses col-md-4 col-lg-3 my-4 d-flex align-items-stretch">
                     @if (product.StockQuantity == 0)
                     {
                         <div class="z-1 position-absolute rounded-3 m-3 px-3 border border-dark-subtle">Sold</div>
@@ -176,13 +209,13 @@
                         <div class="z-1 position-absolute rounded-3 m-3 px-3 border border-dark-subtle">Sale</div>
                     }
 
-                    <div class="card position-relative">
-                        <a href="/product/@product.Id"><img src="@mainImage" class="img-fluid rounded-4" alt="@product.Name"></a>
-                        <div class="card-body p-0">
-                            <a href="/product/@product.Id">
-                                <h3 class="card-title pt-4 m-0">@product.Name</h3>
+                    <div class="card position-relative h-100 w-100 product-card">
+                        <a href="/product/@product.Id" class="product-image-container" style="height: 260px; width: 100%; overflow: hidden; display: block; border-radius: 1rem; background-color: #f8f9fa;"><img src="@mainImage" class="img-fluid rounded-4 product-img" alt="@product.Name" loading="lazy" style="height: 100%; width: 100%; object-fit: cover; object-position: center; display: block;"></a>
+                        <div class="card-body p-0 pt-3 d-flex flex-column justify-content-between">
+                            <a href="/product/@product.Id" class="text-decoration-none text-dark">
+                                <h3 class="card-title m-0 product-title">@product.Name</h3>
                             </a>
-                            <div class="card-text">
+                            <div class="card-text mt-auto pt-2">
                                 <span class="rating secondary-font">
                                     @for (int i = 0; i < 5; i++)
                                     {
@@ -209,7 +242,9 @@
                 </div>
             }
 
-            
+            <div id="no-foodies-message" class="col-12 text-center py-5 d-none">
+                <p class="text-muted fs-5 mb-0">Bu kateqoriyada hazırda məhsul mövcud deyil.</p>
+            </div>
 
         </div>
 
@@ -221,14 +256,14 @@
     <div class="container">
         <div class="row flex-row-reverse banner-content align-items-center">
             <div class="img-wrapper col-12 col-md-6">
-                <img src="~/images/banner-img2.png" class="img-fluid">
+                <img src="~/images/banner-img2.png" class="img-fluid" loading="lazy">
             </div>
             <div class="content-wrapper col-12 offset-md-1 col-md-5 p-5">
                 <div class="secondary-font text-primary text-uppercase mb-3 fs-4">Upto 40% off</div>
                 <h2 class="banner-title display-1 fw-normal">
                     Clearance sale !!!
                 </h2>
-                <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
+                <a asp-controller="Shop" asp-action="Index" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
                     shop now
                     <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
                         <use xlink:href="#arrow-right"></use>
@@ -278,7 +313,7 @@
         <div class="section-header d-md-flex justify-content-between align-items-center mb-3">
             <h2 class="display-3 fw-normal">Best selling products</h2>
             <div>
-                <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
+                <a asp-controller="Shop" asp-action="Index" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
                     shop now
                     <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
                         <use xlink:href="#arrow-right"></use>
@@ -296,7 +331,7 @@
 
                     <div class="swiper-slide">
                         <div class="card position-relative">
-                            <a href="/product/@product.Id"><img src="@mainImage" class="img-fluid rounded-4" alt="@product.Name"></a>
+                            <a href="/product/@product.Id"><img src="@mainImage" class="img-fluid rounded-4" alt="@product.Name" loading="lazy"></a>
                             <div class="card-body p-0">
                                 <a href="/product/@product.Id">
                                     <h3 class="card-title pt-4 m-0">@product.Name</h3>
@@ -336,3 +371,36 @@
 
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $(document).off('click.petfoodies', '.filter-button').on('click.petfoodies', '.filter-button', function (e) {
+                e.preventDefault();
+                $('.filter-button').removeClass('active');
+                $(this).addClass('active');
+
+                var filterValue = $(this).attr('data-filter');
+                var $items = $('.isotope-container .item');
+                var $emptyMsg = $('#no-foodies-message');
+
+                if (!filterValue || filterValue === '*') {
+                    $items.removeClass('is-hidden d-none').addClass('d-flex').css('display', '');
+                    if ($emptyMsg.length) $emptyMsg.addClass('d-none');
+                } else {
+                    var $matched = $items.filter(filterValue);
+                    $items.not(filterValue).addClass('is-hidden d-none').removeClass('d-flex').css('display', 'none');
+                    $matched.removeClass('is-hidden d-none').addClass('d-flex').css('display', '');
+                    if ($emptyMsg.length) {
+                        if ($matched.length === 0) {
+                            $emptyMsg.removeClass('d-none');
+                        } else {
+                            $emptyMsg.addClass('d-none');
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}
+

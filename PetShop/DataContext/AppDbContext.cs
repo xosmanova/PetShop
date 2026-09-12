@@ -4,7 +4,7 @@ using PetShop.DataContext.Entites;
 
 namespace PetShop.DataContext
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
@@ -22,6 +22,11 @@ namespace PetShop.DataContext
         public DbSet<Basket> Baskets { get; set; }
         public DbSet<BasketItem> BasketItems { get; set; }
         public DbSet<Wishlist> Wishlist { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<BlogPost> BlogPosts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -57,6 +62,39 @@ namespace PetShop.DataContext
                 .WithOne(bi => bi.Basket)
                 .HasForeignKey(bi => bi.BasketId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Basket>()
+                .HasOne(b => b.User)
+                .WithMany()
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Wishlist>()
+                .HasOne(w => w.User)
+                .WithMany()
+                .HasForeignKey(w => w.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Coupon configuration
+            modelBuilder.Entity<Coupon>()
+                .HasIndex(c => c.Code)
+                .IsUnique();
+
+            modelBuilder.Entity<Coupon>()
+                .Property(c => c.DiscountValue)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Coupon>()
+                .Property(c => c.MinOrderAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.DiscountAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.TotalPrice)
+                .HasPrecision(18, 2);
 
             modelBuilder.Entity<BasketItem>()
                 .HasOne(bi => bi.Product)
@@ -119,6 +157,59 @@ namespace PetShop.DataContext
             modelBuilder.Entity<ProductVariant>()
                 .Property(v => v.PriceModifier)
                 .HasColumnType("decimal(18,2)");
+
+            // Order - OrderItem (One-to-Many)
+            modelBuilder.Entity<Order>()
+                .HasMany(o => o.OrderItems)
+                .WithOne(oi => oi.Order)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.OrderNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Product)
+                .WithMany()
+                .HasForeignKey(oi => oi.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.ProductVariant)
+                .WithMany()
+                .HasForeignKey(oi => oi.ProductVariantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.TotalPrice)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.UnitPrice)
+                .HasColumnType("decimal(18,2)");
+
+            // Review configuration
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Product)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => new { r.ProductId, r.UserId })
+                .IsUnique();
+
+            // BlogPost configuration
+            modelBuilder.Entity<BlogPost>()
+                .HasIndex(b => b.Slug)
+                .IsUnique();
 
             // ================= SEED DATA =================
 
@@ -229,6 +320,54 @@ namespace PetShop.DataContext
                 new ProductImage { Id = 2, ProductId = 2, ImageUrl = "/images/products/whiskas-cat.jpg", IsMain = true },
                 new ProductImage { Id = 3, ProductId = 3, ImageUrl = "/images/products/pedigree-puppy.jpg", IsMain = true },
                 new ProductImage { Id = 4, ProductId = 4, ImageUrl = "/images/products/dog-jacket.jpg", IsMain = true }
+            );
+
+            // 8) BlogPost
+            modelBuilder.Entity<BlogPost>().HasData(
+                new BlogPost
+                {
+                    Id = 1,
+                    Title = "10 Reasons to be helpful towards any animals",
+                    Slug = "10-reasons-to-be-helpful-towards-any-animals",
+                    Summary = "At the core of our practice is the idea that cities are the incubators of our greatest achievements, and the best hope for a sustainable future.",
+                    Content = "Heyvanlara qayğı göstərmək və onların ehtiyaclarını qarşılamaq hər bir cəmiyyətin məsuliyyətidir. Bu yazıda dörd pəncəli dostlarımıza necə dəstək ola biləcəyimizi və bu addımların ətraf mühitimizə necə müsbət təsir etdiyini araşdırırıq.\n\n1. Şəfqət və empatiya hissinin formalaşması: Heyvanlarla ünsiyyət insanlarda, xüsusilə uşaqlarda mərhəmət və məsuliyyət hissini inkişaf etdirir.\n2. Təbiət və biomüxtəlifliyin qorunması: Canlıların sağlam həyat mühitinə sahib olması ekosistemin tarazlığını təmin edir.\n3. Küçə heyvanlarına sığınacaq və yemək təminatı: Xüsusilə qış aylarında isti sığınacaq və quru yem onların həyatda qalması üçün həyati vacibdir.\n4. Baytarlıq və peyvəndlərin əhəmiyyəti: Müntəzəm peyvəndlər heyvanları təhlükəli infeksiyalardan qoruyur.\n5. Düzgün sahiblənmə mədəniyyəti: Heyvan almaq əvəzinə sığınacaqlardan sahiblənmək bir canı xilas etmək deməkdir.",
+                    ImageUrl = "/images/blog1.jpg",
+                    AuthorName = "Admin",
+                    CreatedDate = new DateTime(2025, 2, 20, 10, 0, 0, DateTimeKind.Utc)
+                },
+                new BlogPost
+                {
+                    Id = 2,
+                    Title = "How to know your pet is hungry",
+                    Slug = "how-to-know-your-pet-is-hungry",
+                    Summary = "Ev heyvanınızın ac olduğunu necə anlaya bilərsiniz? Qidalanma rejimi, aclıq siqnalları və düzgün porsiya seçimi haqqında əsas məsləhətlər.",
+                    Content = "Ev heyvanları danışa bilməsə də, onların davranışları bizə çox şey deyir. Aclıq siqnalını düzgün anlamaq onların həddindən artıq kökəlməsinin və ya qidasız qalmasının qarşısını alır.\n\n- Qabının yanında gözləmək və ya qabı döyəcləmək: Pişik və itlərin ən yayğın vərdişlərindən biridir.\n- Narahatlıq və diqqət axtarışı: Əgər ev heyvanınız adi vaxtdan daha çox ayaqlarınıza sürtünür və ya səslər çıxarırsa, yemək vaxtı gəlmiş ola bilər.\n- Düzgün yemləmə qrafiki: Heyvanları gün ərzində eyni saatlarda yemləmək onların həzm sistemini tənzimləyir.\n- Porsiyanın çəkiyə uyğunluğu: Yem qablaşdırmasındakı cədvələ uyğun olaraq çəkiyə və yaşa uyğun qrammatura təyin edilməlidir. Təbii və quru yemlərin balansı mütləq qorunmalıdır.",
+                    ImageUrl = "/images/blog2.jpg",
+                    AuthorName = "Dr. Leyla",
+                    CreatedDate = new DateTime(2025, 2, 21, 12, 30, 0, DateTimeKind.Utc)
+                },
+                new BlogPost
+                {
+                    Id = 3,
+                    Title = "Best home for your pets",
+                    Slug = "best-home-for-your-pets",
+                    Summary = "Ev şəraitində heyvanlar üçün rahat, təhlükəsiz və əyləncəli mühitin yaradılması üzrə bələdçi.",
+                    Content = "Evdə heyvan saxlamaq böyük sevinc bəxş etməklə yanaşı, onların təhlükəsizliyi üçün evdə xüsusi şərait qurmağı tələb edir.\n\n- Rahat yataq və istirahət guşəsi: Hər bir heyvanın özünə aid sakit, cərəyan olmayan bir guşəsi olmalıdır.\n- Təhlükəli əşyaların uzaqlaşdırılması: Açıqda qalan elektrik naqilləri, zəhərli otaq bitkiləri və kiçik oyuncaqlar yığışdırılmalıdır.\n- Əyləncə və fiziki aktivlik: Pişiklər üçün cırmaqlama taxtası, itlər üçün diş qaşıyan oyuncaqlar onların enerjisini düzgün istiqamətləndirir.\n- Daimi təmiz su mənbəyi: Su qabları həmişə təmiz və dolu saxlanılmalıdır.",
+                    ImageUrl = "/images/blog3.jpg",
+                    AuthorName = "Murad Əliyev",
+                    CreatedDate = new DateTime(2025, 2, 22, 15, 0, 0, DateTimeKind.Utc)
+                },
+                new BlogPost
+                {
+                    Id = 4,
+                    Title = "Ev heyvanları üçün düzgün qidalanma qaydaları",
+                    Slug = "ev-heyvanlari-ucun-duzgun-qidalanma-qaydalari",
+                    Summary = "İt və pişiklərin yaş və çəkisinə uyğun düzgün rasion seçilməsi və vitamin balansının qorunması haqqında məlumat.",
+                    Content = "Düzgün qidalanma ev heyvanlarının parlaq tük örtüyü, möhkəm dişləri və güclü immuniteti üçün vacibdir.\n\n1. Premium yemlərin üstünlükləri: Yüksək keyfiyyətli quru yemlər təbii ət mənbələri, zəruri minerallar və vitaminlərlə zəngindir.\n2. Yaş həddinə görə ayrılma: Balalar (Puppy/Kitten) üçün yüksək kalorili və kalsiumlu yemlər, yetkin heyvanlar üçün isə balanslı rasion tələb olunur.\n3. İnsan yeməklərinin zərərləri: Şokolad, soğan, sarımsaq, şirniyyat və ədviyyatlı yeməklər heyvanların qaraciyər və mədəsinə ciddi zərər vura bilər.\n4. Mövsümi vitamin əlavələri: Xüsusilə tük tökülməsi dövründə baytar məsləhəti ilə Omega-3 və multivitaminlər qəbul edilməlidir.",
+                    ImageUrl = "/images/blog1.jpg",
+                    AuthorName = "Veterinar Elmir",
+                    CreatedDate = new DateTime(2025, 3, 1, 9, 15, 0, DateTimeKind.Utc)
+                }
             );
         }
     }

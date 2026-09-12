@@ -1,14 +1,44 @@
+@using System.Security.Claims
+@using PetShop.DataContext.Entites
+@using Microsoft.AspNetCore.Identity
 @inject PetShop.DataContext.AppDbContext _context
+@inject UserManager<ApplicationUser> _userManager
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     var sessionId = Context.Session.GetString("BasketSessionId");
-    var wishlistCount = !string.IsNullOrEmpty(sessionId)
-        ? _context.Wishlist.Count(w => w.SessionId == sessionId)
-        : 0;
-    var basketCount = !string.IsNullOrEmpty(sessionId)
-        ? _context.BasketItems
-            .Where(bi => bi.Basket.SessionId == sessionId)
-            .Sum(bi => (int?)bi.Quantity) ?? 0
-        : 0;
+    var userId = User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
+    ApplicationUser? currentUser = null;
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        currentUser = await _userManager.GetUserAsync(User);
+    }
+
+    var wishlistCount = _context.Wishlist.Count(w => (!string.IsNullOrEmpty(userId) && w.UserId == userId) || (!string.IsNullOrEmpty(sessionId) && w.SessionId == sessionId && w.UserId == null));
+    var basketCount = _context.BasketItems
+        .Where(bi => (!string.IsNullOrEmpty(userId) && bi.Basket.UserId == userId) || (!string.IsNullOrEmpty(sessionId) && bi.Basket.SessionId == sessionId && bi.Basket.UserId == null))
+        .Sum(bi => (int?)bi.Quantity) ?? 0;
+
+    var companyPhone = Configuration["CompanyInfo:Phone"] ?? "+994 50 123 45 67";
+    var companyEmail = Configuration["CompanyInfo:Email"] ?? "info@petshop.az";
+    var companyAddress = Configuration["CompanyInfo:Address"] ?? "Bakı, Azərbaycan";
+
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    var isHomeActive = string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase) && 
+                       (string.Equals(currentAction, "Index", StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(currentAction));
+    var isShopActive = string.Equals(currentController, "Shop", StringComparison.OrdinalIgnoreCase) || 
+                       string.Equals(currentController, "Product", StringComparison.OrdinalIgnoreCase);
+    var isBasketActive = string.Equals(currentController, "Basket", StringComparison.OrdinalIgnoreCase) ||
+                         string.Equals(currentController, "Checkout", StringComparison.OrdinalIgnoreCase);
+    var isContactActive = string.Equals(currentController, "Contact", StringComparison.OrdinalIgnoreCase);
+    var isBlogActive = string.Equals(currentController, "Blog", StringComparison.OrdinalIgnoreCase);
+    var isAboutActive = string.Equals(currentController, "AboutUs", StringComparison.OrdinalIgnoreCase);
+    var isOffersActive = string.Equals(currentController, "Offers", StringComparison.OrdinalIgnoreCase);
+    var isFaqsActive = string.Equals(currentController, "Faqs", StringComparison.OrdinalIgnoreCase);
+    var isPaymentActive = string.Equals(currentController, "Payment", StringComparison.OrdinalIgnoreCase);
+    var isReturnsActive = string.Equals(currentController, "Returns", StringComparison.OrdinalIgnoreCase);
+    var isDeliveryActive = string.Equals(currentController, "Delivery", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -31,7 +61,81 @@
     <link rel="stylesheet" href="~/css/bootstrap.min.css">
 
     <link rel="stylesheet" href="~/css/vendor.css">
-    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/style.css?v=@DateTime.Now.Ticks">
+
+    <style>
+        .product-image-container {
+            display: block !important;
+            position: relative !important;
+            width: 100% !important;
+            height: 260px !important;
+            max-height: 260px !important;
+            overflow: hidden !important;
+            border-radius: 1rem !important;
+            background-color: #f8f9fa !important;
+        }
+        .product-image-container img,
+        .product-image-container .product-img {
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 260px !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            display: block !important;
+            transition: transform 0.3s ease !important;
+        }
+        .product-image-container:hover img,
+        .product-image-container:hover .product-img {
+            transform: scale(1.05) !important;
+        }
+        .product-card {
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+        }
+        .product-title {
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            min-height: 2.8em !important;
+            line-height: 1.4 !important;
+        }
+        .text-secondary {
+            color: #5a6268 !important;
+        }
+        .text-muted {
+            color: #6c757d !important;
+        }
+        .text-success {
+            color: #198754 !important;
+        }
+        .text-warning {
+            color: #d97706 !important;
+        }
+        .text-danger {
+            color: #dc3545 !important;
+        }
+        .text-info {
+            color: #087990 !important;
+        }
+        .isotope-container {
+            position: static !important;
+            height: auto !important;
+        }
+        .isotope-container .item {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            transform: none !important;
+        }
+        .isotope-container .item.is-hidden,
+        .isotope-container .item.d-none {
+            display: none !important;
+        }
+    </style>
 
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
@@ -146,7 +250,7 @@
                 <div class="col-sm-4 col-lg-3 text-center text-sm-start">
                     <div class="main-logo">
                         <a asp-controller="Home" asp-action="Index">
-                            <img src="~/images/logo.png" alt="logo" class="img-fluid">
+                            <img src="~/images/logo.png" alt="logo" class="img-fluid" loading="lazy">
                         </a>
                     </div>
                 </div>
@@ -167,12 +271,12 @@
 
                 <div class="col-sm-8 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
                     <div class="support-box text-end d-none d-xl-block">
-                        <span class="fs-6 secondary-font text-muted">Phone</span>
-                        <h5 class="mb-0">+980-34984089</h5>
+                        <span class="fs-6 secondary-font text-secondary fw-medium">Phone</span>
+                        <h5 class="mb-0">@Html.Raw(companyPhone)</h5>
                     </div>
                     <div class="support-box text-end d-none d-xl-block">
-                        <span class="fs-6 secondary-font text-muted">Email</span>
-                        <h5 class="mb-0">waggy@gmail.com</h5>
+                        <span class="fs-6 secondary-font text-secondary fw-medium">Email</span>
+                        <h5 class="mb-0">@Html.Raw(companyEmail)</h5>
                     </div>
 
 
@@ -190,10 +294,48 @@
 
                 <div class="d-flex d-lg-none align-items-end mt-3">
                     <ul class="d-flex justify-content-end list-unstyled m-0">
-                        <li>
-                            <a href="account.html" class="mx-3">
+                        <li class="dropdown">
+                            <a href="#" class="mx-2 text-dark dropdown-toggle text-decoration-none d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false" title="Hesabım">
                                 <iconify-icon icon="healthicons:person" class="fs-4"></iconify-icon>
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <span class="ms-1 small fw-bold text-truncate" style="max-width: 80px;">@(currentUser?.FirstName ?? User.Identity.Name)</span>
+                                }
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 p-2" style="min-width: 200px;">
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <li class="px-3 py-2 text-muted small">
+                                        Daxil olub: <strong>@(currentUser?.FirstName ?? User.Identity.Name)</strong>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><a class="dropdown-item py-2 text-danger fw-semibold" asp-area="Admin" asp-controller="Dashboard" asp-action="Index"><iconify-icon icon="mdi:shield-account" class="me-2"></iconify-icon> Admin Panel</a></li>
+                                        <li><a class="dropdown-item py-2" asp-area="Admin" asp-controller="Profile" asp-action="Index"><iconify-icon icon="mdi:account" class="me-2"></iconify-icon> Profil</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    }
+                                    else
+                                    {
+                                        <li><a class="dropdown-item py-2" asp-area="" asp-controller="Account" asp-action="Profile"><iconify-icon icon="mdi:account" class="me-2"></iconify-icon> Profil</a></li>
+                                    }
+                                    <li><a class="dropdown-item py-2" asp-area="" asp-controller="Orders" asp-action="Index"><iconify-icon icon="mdi:package-variant-closed" class="me-2"></iconify-icon> Sifarişlərim</a></li>
+                                    <li><a class="dropdown-item py-2" asp-area="" asp-controller="Basket" asp-action="Index"><iconify-icon icon="mdi:cart" class="me-2"></iconify-icon> Səbətim</a></li>
+                                    <li><a class="dropdown-item py-2" asp-area="" asp-controller="Wishlist" asp-action="Index"><iconify-icon icon="mdi:heart" class="me-2"></iconify-icon> İstək Siyahısı</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item py-2 text-danger border-0 bg-transparent text-start w-100"><iconify-icon icon="mdi:logout" class="me-2"></iconify-icon> Çıxış</button>
+                                        </form>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li><a class="dropdown-item py-2" asp-area="" asp-controller="Account" asp-action="Login"><iconify-icon icon="mdi:login" class="me-2"></iconify-icon> Daxil Ol</a></li>
+                                    <li><a class="dropdown-item py-2" asp-area="" asp-controller="Account" asp-action="Register"><iconify-icon icon="mdi:account-plus" class="me-2"></iconify-icon> Qeydiyyat</a></li>
+                                }
+                            </ul>
                         </li>
                         <li>
                             <a asp-controller="Wishlist" asp-action="Index" class="mx-3 position-relative text-dark" title="Wishlist">
@@ -208,7 +350,7 @@
                             <a href="#" class="mx-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
                                aria-controls="offcanvasCart">
                                 <iconify-icon icon="mdi:cart" class="fs-4 position-relative"></iconify-icon>
-                                <span class="position-absolute translate-middle badge rounded-circle bg-primary pt-2">
+                                <span class="position-absolute translate-middle badge rounded-circle bg-primary pt-2 cart-count">
                                     @basketCount
                                 </span>
                             </a>
@@ -237,17 +379,9 @@
                     </div>
 
                     <div class="offcanvas-body justify-content-between">
-                        <select class="filter-categories border-0 mb-0 me-5">
-                            <option>Shop by Category</option>
-                            <option>Clothes</option>
-                            <option>Food</option>
-                            
-                            <option>Toy</option>
-                        </select>
-
                         <ul class="navbar-nav menu-list list-unstyled d-flex gap-md-3 mb-0">
                             <li class="nav-item">
-                                <a asp-controller="Home" asp-action="Index" class="nav-link active">Home</a>
+                                <a asp-controller="Home" asp-action="Index" class="nav-link @(isHomeActive ? "active" : "")">Home</a>
                             </li>
                             @* <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown"
@@ -326,28 +460,101 @@
                                 </ul>
                             </li> *@
                             <li class="nav-item">
-                                <a asp-controller="Shop" asp-action="Index" class="nav-link">Shop</a>
+                                <a asp-controller="Shop" asp-action="Index" class="nav-link @(isShopActive ? "active" : "")">Shop</a>
                             </li>
                             <li class="nav-item">
-                                <a asp-controller="Basket" asp-action="Index" class="nav-link">Basket</a>
+                                <a asp-controller="Basket" asp-action="Index" class="nav-link @(isBasketActive ? "active" : "")">Basket</a>
                             </li>
                             <li class="nav-item">
-                                <a href="blog.html" class="nav-link">Blog</a>
+                                <a asp-controller="Blog" asp-action="Index" class="nav-link @(isBlogActive ? "active" : "")">Blog</a>
                             </li>
                             <li class="nav-item">
-                                <a href="contact.html" class="nav-link">Contact</a>
+                                <a asp-controller="Contact" asp-action="Index" class="nav-link @(isContactActive ? "active" : "")">Contact</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link">Others</a>
+                                <a asp-controller="AboutUs" asp-action="Index" class="nav-link @(isAboutActive ? "active" : "")">About Us</a>
                             </li>
+                           
                         </ul>
 
                         <div class="d-none d-lg-flex align-items-end">
                             <ul class="d-flex justify-content-end list-unstyled m-0">
-                                <li>
-                                    <a href="account.html" class="mx-3">
+                                <li class="dropdown">
+                                    <a href="#" class="mx-3 text-dark dropdown-toggle text-decoration-none d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false" title="Hesabım">
                                         <iconify-icon icon="healthicons:person" class="fs-4"></iconify-icon>
+                                        @if (User.Identity?.IsAuthenticated == true)
+                                        {
+                                            <span class="ms-1 small fw-bold">@(currentUser?.FirstName ?? User.Identity.Name)</span>
+                                        }
                                     </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 p-2" style="min-width: 210px;">
+                                        @if (User.Identity?.IsAuthenticated == true)
+                                        {
+                                            <li class="px-3 py-2 text-muted small">
+                                                Xoş gəlmisiniz,<br /><strong class="text-dark">@(currentUser?.FirstName ?? User.Identity.Name)</strong>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item py-2 text-danger fw-semibold" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                                        <iconify-icon icon="mdi:shield-account" class="me-2 align-middle"></iconify-icon> Admin Panel
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item py-2" asp-area="Admin" asp-controller="Profile" asp-action="Index">
+                                                        <iconify-icon icon="mdi:account" class="me-2 align-middle"></iconify-icon> Profil
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                            }
+                                            else
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item py-2" asp-area="" asp-controller="Account" asp-action="Profile">
+                                                        <iconify-icon icon="mdi:account" class="me-2 align-middle"></iconify-icon> Profil
+                                                    </a>
+                                                </li>
+                                            }
+                                            <li>
+                                                <a class="dropdown-item py-2" asp-area="" asp-controller="Orders" asp-action="Index">
+                                                    <iconify-icon icon="mdi:package-variant-closed" class="me-2 align-middle"></iconify-icon> Sifarişlərim
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item py-2" asp-area="" asp-controller="Basket" asp-action="Index">
+                                                    <iconify-icon icon="mdi:cart" class="me-2 align-middle"></iconify-icon> Səbətim
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item py-2" asp-area="" asp-controller="Wishlist" asp-action="Index">
+                                                    <iconify-icon icon="mdi:heart" class="me-2 align-middle"></iconify-icon> İstək Siyahısı
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="dropdown-item py-2 text-danger border-0 bg-transparent text-start w-100">
+                                                        <iconify-icon icon="mdi:logout" class="me-2 align-middle"></iconify-icon> Çıxış
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li>
+                                                <a class="dropdown-item py-2" asp-area="" asp-controller="Account" asp-action="Login">
+                                                    <iconify-icon icon="mdi:login" class="me-2 align-middle"></iconify-icon> Daxil Ol
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item py-2" asp-area="" asp-controller="Account" asp-action="Register">
+                                                    <iconify-icon icon="mdi:account-plus" class="me-2 align-middle"></iconify-icon> Qeydiyyat
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
                                 </li>
                                 <li>
                                     <a asp-controller="Wishlist" asp-action="Index" class="mx-3 position-relative text-dark" title="Wishlist">
@@ -382,43 +589,14 @@
         </div>
     </header>
             @RenderBody()
-    <section id="register" style="background: url('images/background-img.png') no-repeat;">
-        <div class="container ">
-            <div class="row my-5 py-5">
-                <div class="offset-md-3 col-md-6 my-5 ">
-                    <h2 class="display-3 fw-normal text-center">
-                        Get 20% Off on <span class="text-primary">first Purchase</span>
-                    </h2>
-                    <form>
-                        <div class="mb-3">
-                            <input type="email" class="form-control form-control-lg" name="email" id="email"
-                                   placeholder="Enter Your Email Address">
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" class="form-control form-control-lg" name="email" id="password1"
-                                   placeholder="Create Password">
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" class="form-control form-control-lg" name="email" id="password2"
-                                   placeholder="Repeat Password">
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-dark btn-lg rounded-1">Register it now</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
+    
     <section id="latest-blog" class="my-5">
         <div class="container py-5 my-5">
             <div class="row mt-5">
                 <div class="section-header d-md-flex justify-content-between align-items-center mb-3">
                     <h2 class="display-3 fw-normal">Latest Blog Post</h2>
                     <div>
-                        <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
+                        <a asp-controller="Blog" asp-action="Index" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
                             Read all
                             <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
                                 <use xlink:href="#arrow-right"></use>
@@ -435,9 +613,9 @@
 
                     </div>
                     <div class="card position-relative">
-                        <a href="single-post.html"><img src="~/images/blog1.jpg" class="img-fluid rounded-4" alt="image"></a>
+                        <a asp-controller="Blog" asp-action="Details" asp-route-slug="10-reasons-to-be-helpful-towards-any-animals"><img src="~/images/blog1.jpg" class="img-fluid rounded-4" alt="image" loading="lazy"></a>
                         <div class="card-body p-0">
-                            <a href="single-post.html">
+                            <a asp-controller="Blog" asp-action="Details" asp-route-slug="10-reasons-to-be-helpful-towards-any-animals">
                                 <h3 class="card-title pt-4 pb-3 m-0">10 Reasons to be helpful towards any animals</h3>
                             </a>
 
@@ -447,7 +625,7 @@
                                     our greatest
                                     achievements, and the best hope for a sustainable future.
                                 </p>
-                                <a href="single-post.html" class="blog-read">read more</a>
+                                <a asp-controller="Blog" asp-action="Details" asp-route-slug="10-reasons-to-be-helpful-towards-any-animals" class="blog-read">read more</a>
                             </div>
 
                         </div>
@@ -460,9 +638,9 @@
 
                     </div>
                     <div class="card position-relative">
-                        <a href="single-post.html"><img src="~/images/blog2.jpg" class="img-fluid rounded-4" alt="image"></a>
+                        <a asp-controller="Blog" asp-action="Details" asp-route-slug="how-to-know-your-pet-is-hungry"><img src="~/images/blog2.jpg" class="img-fluid rounded-4" alt="image" loading="lazy"></a>
                         <div class="card-body p-0">
-                            <a href="single-post.html">
+                            <a asp-controller="Blog" asp-action="Details" asp-route-slug="how-to-know-your-pet-is-hungry">
                                 <h3 class="card-title pt-4 pb-3 m-0">How to know your pet is hungry</h3>
                             </a>
 
@@ -472,7 +650,7 @@
                                     our greatest
                                     achievements, and the best hope for a sustainable future.
                                 </p>
-                                <a href="single-post.html" class="blog-read">read more</a>
+                                <a asp-controller="Blog" asp-action="Details" asp-route-slug="how-to-know-your-pet-is-hungry" class="blog-read">read more</a>
                             </div>
 
                         </div>
@@ -485,9 +663,9 @@
 
                     </div>
                     <div class="card position-relative">
-                        <a href="single-post.html"><img src="~/images/blog3.jpg" class="img-fluid rounded-4" alt="image"></a>
+                        <a asp-controller="Blog" asp-action="Details" asp-route-slug="best-home-for-your-pets"><img src="~/images/blog3.jpg" class="img-fluid rounded-4" alt="image" loading="lazy"></a>
                         <div class="card-body p-0">
-                            <a href="single-post.html">
+                            <a asp-controller="Blog" asp-action="Details" asp-route-slug="best-home-for-your-pets">
                                 <h3 class="card-title pt-4 pb-3 m-0">Best home for your pets</h3>
                             </a>
 
@@ -497,7 +675,7 @@
                                     our greatest
                                     achievements, and the best hope for a sustainable future.
                                 </p>
-                                <a href="single-post.html" class="blog-read">read more</a>
+                                <a asp-controller="Blog" asp-action="Details" asp-route-slug="best-home-for-your-pets" class="blog-read">read more</a>
                             </div>
 
                         </div>
@@ -517,7 +695,7 @@
                         </div>
                         <h3 class="card-title py-2 m-0">Free Delivery</h3>
                         <div class="card-text">
-                            <p class="blog-paragraph fs-6">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                            <p class="blog-paragraph fs-6">50 AZN-dən yuxarı bütün sifarişlərə Bakı daxilində pulsuz çatdırılma.</p>
                         </div>
                     </div>
                 </div>
@@ -528,7 +706,7 @@
                         </div>
                         <h3 class="card-title py-2 m-0">100% secure payment</h3>
                         <div class="card-text">
-                            <p class="blog-paragraph fs-6">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                            <p class="blog-paragraph fs-6">Stripe vasitəsilə bank kartı ilə tam təhlükəsiz ödəniş imkanı.</p>
                         </div>
                     </div>
                 </div>
@@ -537,9 +715,9 @@
                         <div>
                             <iconify-icon class="service-icon text-primary" icon="la:tag"></iconify-icon>
                         </div>
-                        <h3 class="card-title py-2 m-0">Daily Offer</h3>
+                        <h3 class="card-title py-2 m-0"><a asp-controller="Offers" asp-action="Index" class="text-decoration-none text-dark">Daily Offer</a></h3>
                         <div class="card-text">
-                            <p class="blog-paragraph fs-6">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                            <p class="blog-paragraph fs-6">Hər gün yeni endirimli məhsullar və xüsusi kampaniyalar.</p>
                         </div>
                     </div>
                 </div>
@@ -550,7 +728,7 @@
                         </div>
                         <h3 class="card-title py-2 m-0">Quality guarantee</h3>
                         <div class="card-text">
-                            <p class="blog-paragraph fs-6">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                            <p class="blog-paragraph fs-6">Yalnız etibarlı brendlərin orijinal məhsulları.</p>
                         </div>
                     </div>
                 </div>
@@ -561,52 +739,52 @@
 
     <section id="insta" class="my-5">
         <div class="row g-0 py-5">
-            <div class="col instagram-item  text-center position-relative">
+            <div class="col instagram-item text-center position-relative">
                 <div class="icon-overlay d-flex justify-content-center position-absolute">
                     <iconify-icon class="text-white" icon="la:instagram"></iconify-icon>
                 </div>
-                <a href="#">
-                    <img src="~/images/insta1.jpg" alt="insta-img" class="img-fluid rounded-3">
+                <a href="#" class="d-block overflow-hidden rounded-3" style="aspect-ratio: 1 / 1; width: 100%;">
+                    <img src="~/images/insta1.jpg?v=@DateTime.Now.Ticks" alt="insta-img" class="img-fluid rounded-3 w-100 h-100" style="aspect-ratio: 1 / 1; object-fit: cover; object-position: center; display: block;" loading="lazy">
                 </a>
             </div>
-            <div class="col instagram-item  text-center position-relative">
+            <div class="col instagram-item text-center position-relative">
                 <div class="icon-overlay d-flex justify-content-center position-absolute">
                     <iconify-icon class="text-white" icon="la:instagram"></iconify-icon>
                 </div>
-                <a href="#">
-                    <img src="~/images/insta2.jpg" alt="insta-img" class="img-fluid rounded-3">
+                <a href="#" class="d-block overflow-hidden rounded-3" style="aspect-ratio: 1 / 1; width: 100%;">
+                    <img src="~/images/insta2.jpg?v=@DateTime.Now.Ticks" alt="insta-img" class="img-fluid rounded-3 w-100 h-100" style="aspect-ratio: 1 / 1; object-fit: cover; object-position: center; display: block;" loading="lazy">
                 </a>
             </div>
-            <div class="col instagram-item  text-center position-relative">
+            <div class="col instagram-item text-center position-relative">
                 <div class="icon-overlay d-flex justify-content-center position-absolute">
                     <iconify-icon class="text-white" icon="la:instagram"></iconify-icon>
                 </div>
-                <a href="#">
-                    <img src="~/images/insta3.jpg" alt="insta-img" class="img-fluid rounded-3">
+                <a href="#" class="d-block overflow-hidden rounded-3" style="aspect-ratio: 1 / 1; width: 100%;">
+                    <img src="~/images/insta3.jpg?v=@DateTime.Now.Ticks" alt="insta-img" class="img-fluid rounded-3 w-100 h-100" style="aspect-ratio: 1 / 1; object-fit: cover; object-position: center; display: block;" loading="lazy">
                 </a>
             </div>
-            <div class="col instagram-item  text-center position-relative">
+            <div class="col instagram-item text-center position-relative">
                 <div class="icon-overlay d-flex justify-content-center position-absolute">
                     <iconify-icon class="text-white" icon="la:instagram"></iconify-icon>
                 </div>
-                <a href="#">
-                    <img src="~/images/insta4.jpg" alt="insta-img" class="img-fluid rounded-3">
+                <a href="#" class="d-block overflow-hidden rounded-3" style="aspect-ratio: 1 / 1; width: 100%;">
+                    <img src="~/images/insta4.jpg?v=@DateTime.Now.Ticks" alt="insta-img" class="img-fluid rounded-3 w-100 h-100" style="aspect-ratio: 1 / 1; object-fit: cover; object-position: center; display: block;" loading="lazy">
                 </a>
             </div>
-            <div class="col instagram-item  text-center position-relative">
+            <div class="col instagram-item text-center position-relative">
                 <div class="icon-overlay d-flex justify-content-center position-absolute">
                     <iconify-icon class="text-white" icon="la:instagram"></iconify-icon>
                 </div>
-                <a href="#">
-                    <img src="~/images/insta5.jpg" alt="insta-img" class="img-fluid rounded-3">
+                <a href="#" class="d-block overflow-hidden rounded-3" style="aspect-ratio: 1 / 1; width: 100%;">
+                    <img src="~/images/insta5.jpg?v=@DateTime.Now.Ticks" alt="insta-img" class="img-fluid rounded-3 w-100 h-100" style="aspect-ratio: 1 / 1; object-fit: cover; object-position: center; display: block;" loading="lazy">
                 </a>
             </div>
-            <div class="col instagram-item  text-center position-relative">
+            <div class="col instagram-item text-center position-relative">
                 <div class="icon-overlay d-flex justify-content-center position-absolute">
                     <iconify-icon class="text-white" icon="la:instagram"></iconify-icon>
                 </div>
-                <a href="#">
-                    <img src="~/images/insta6.jpg" alt="insta-img" class="img-fluid rounded-3">
+                <a href="#" class="d-block overflow-hidden rounded-3" style="aspect-ratio: 1 / 1; width: 100%;">
+                    <img src="~/images/insta6.jpg?v=@DateTime.Now.Ticks" alt="insta-img" class="img-fluid rounded-3 w-100 h-100" style="aspect-ratio: 1 / 1; object-fit: cover; object-position: center; display: block;" loading="lazy">
                 </a>
             </div>
         </div>
@@ -616,34 +794,34 @@
         <div class="container py-5 my-5">
             <div class="row">
 
-                <div class="col-md-3">
-                    <div class="footer-menu">
-                        <img src="~/images/logo.png" alt="logo">
-                        <p class="blog-paragraph fs-6 mt-3">Subscribe to our newsletter to get updates about our grand offers.</p>
+                <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
+                    <div class="footer-menu pe-lg-4">
+                        <img src="~/images/logo.png" alt="logo" loading="lazy">
+                        <p class="blog-paragraph fs-6 mt-3">Ev heyvanlarınız üçün ən keyfiyyətli qidalar, ləvazimatlar və sərfəli xüsusi təkliflər.</p>
                         <div class="social-links">
                             <ul class="d-flex list-unstyled gap-2">
                                 <li class="social">
-                                    <a href="#">
+                                    <a href="https://www.facebook.com/login" target="_blank" rel="noopener noreferrer" title="Facebook">
                                         <iconify-icon class="social-icon" icon="ri:facebook-fill"></iconify-icon>
                                     </a>
                                 </li>
                                 <li class="social">
-                                    <a href="#">
+                                    <a href="https://twitter.com/login" target="_blank" rel="noopener noreferrer" title="Twitter">
                                         <iconify-icon class="social-icon" icon="ri:twitter-fill"></iconify-icon>
                                     </a>
                                 </li>
                                 <li class="social">
-                                    <a href="#">
+                                    <a href="https://www.pinterest.com/login" target="_blank" rel="noopener noreferrer" title="Pinterest">
                                         <iconify-icon class="social-icon" icon="ri:pinterest-fill"></iconify-icon>
                                     </a>
                                 </li>
                                 <li class="social">
-                                    <a href="#">
+                                    <a href="https://www.instagram.com/accounts/login" target="_blank" rel="noopener noreferrer" title="Instagram">
                                         <iconify-icon class="social-icon" icon="ri:instagram-fill"></iconify-icon>
                                     </a>
                                 </li>
                                 <li class="social">
-                                    <a href="#">
+                                    <a href="https://accounts.google.com/ServiceLogin?service=youtube" target="_blank" rel="noopener noreferrer" title="YouTube">
                                         <iconify-icon class="social-icon" icon="ri:youtube-fill"></iconify-icon>
                                     </a>
                                 </li>
@@ -652,61 +830,42 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-3 col-md-3 col-sm-6 mb-4 mb-md-0">
                     <div class="footer-menu">
                         <h3>Quick Links</h3>
                         <ul class="menu-list list-unstyled">
                             <li class="menu-item">
-                                <a asp-controller="Home" asp-action="Index" class="nav-link active">Home</a>
+                                <a asp-controller="Home" asp-action="Index" class="nav-link @(isHomeActive ? "active" : "")">Home</a>
                             </li>
                             <li class="menu-item">
-                                <a href="#" class="nav-link">About us</a>
+                                <a asp-controller="AboutUs" asp-action="Index" class="nav-link">About us</a>
                             </li>
                             <li class="menu-item">
-                                <a href="#" class="nav-link">Offer </a>
+                                <a asp-controller="Offers" asp-action="Index" class="nav-link @(isOffersActive ? "active" : "")">Offer</a>
                             </li>
                             <li class="menu-item">
-                                <a href="#" class="nav-link">Services</a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="#" class="nav-link">Conatct Us</a>
+                                <a asp-controller="Contact" asp-action="Index" class="nav-link">Contact Us</a>
                             </li>
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-4 col-md-3 col-sm-6">
                     <div class="footer-menu">
-                        <h3>
-                            Help Center</h5>
-                            <ul class="menu-list list-unstyled">
-                                <li class="menu-item">
-                                    <a href="#" class="nav-link">FAQs</a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#" class="nav-link">Payment</a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#" class="nav-link">Returns & Refunds</a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#" class="nav-link">Checkout</a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#" class="nav-link">Delivery Information</a>
-                                </li>
-                            </ul>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div>
-                        <h3>Our Newsletter</h3>
-                        <p class="blog-paragraph fs-6">Subscribe to our newsletter to get updates about our grand offers.</p>
-                        <div class="search-bar border rounded-pill border-dark-subtle px-2">
-                            <form class="text-center d-flex align-items-center" action="#" method="">
-                                <input type="text" class="form-control border-0 bg-transparent" placeholder="Enter your email here" />
-                                <iconify-icon class="send-icon" icon="tabler:location-filled"></iconify-icon>
-                            </form>
-                        </div>
+                        <h3>Help Center</h3>
+                        <ul class="menu-list list-unstyled">
+                            <li class="menu-item">
+                                <a asp-controller="Faqs" asp-action="Index" class="nav-link @(isFaqsActive ? "active" : "")">FAQs</a>
+                            </li>
+                            <li class="menu-item">
+                                <a asp-controller="Payment" asp-action="Index" class="nav-link @(isPaymentActive ? "active" : "")">Payment</a>
+                            </li>
+                            <li class="menu-item">
+                                <a asp-controller="Returns" asp-action="Index" class="nav-link @(isReturnsActive ? "active" : "")">Returns & Refunds</a>
+                            </li>
+                            <li class="menu-item">
+                                <a asp-controller="Delivery" asp-action="Index" class="nav-link @(isDeliveryActive ? "active" : "")">Delivery Information</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
@@ -735,10 +894,24 @@
     <script src="~/js/swiper-bundle.min.js"></script>
     <script src="~/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/plugins.js"></script>
-    <script src="~/js/script.js"></script>
+    <script src="~/js/script.js?v=@DateTime.Now.Ticks"></script>
     <script src="~/js/iconify-icon.min.js"></script>
 
+    <form id="__antiforgeryTokenForm" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
     <script>
+        $(function () {
+            var token = $('input[name="__RequestVerificationToken"]').first().val();
+            if (token) {
+                $.ajaxSetup({
+                    headers: {
+                        'RequestVerificationToken': token
+                    }
+                });
+            }
+        });
+
         function updateWishlistBadge(count) {
             $('.wishlist-count').each(function () {
                 $(this).text(count);
@@ -780,6 +953,7 @@
             });
         });
     </script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 
 </html>
