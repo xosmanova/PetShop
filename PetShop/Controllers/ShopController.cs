@@ -52,45 +52,22 @@ namespace PetShop.Controllers
             // 1. Category Filter
             if (!string.IsNullOrEmpty(category) && !category.Equals("All", StringComparison.OrdinalIgnoreCase))
             {
-                var lowerCat = category.ToLower();
-                if (lowerCat == "dogs")
+                var lowerCat = category.Trim().ToLower();
+                if (lowerCat == "dogs" || lowerCat == "it")
                 {
                     query = query.Where(p =>
                         p.ProductAnimalTypes.Any(pa => pa.AnimalType.Name.ToLower().Contains("it") || pa.AnimalType.Name.ToLower().Contains("dog")) ||
                         p.ProductCategory.Slug.Contains("dog") ||
                         p.Name.ToLower().Contains("dog"));
                 }
-                else if (lowerCat == "food" || lowerCat == "yem")
-                {
-                    query = query.Where(p =>
-                        p.ProductCategoryId == 1 ||
-                        p.ProductCategory.ParentCategoryId == 1 ||
-                        p.ProductCategory.Slug.StartsWith("food") ||
-                        p.ProductCategory.Name.ToLower().Contains("yem") ||
-                        p.Name.ToLower().Contains("food"));
-                }
-                else if (lowerCat == "geyim" || lowerCat == "clothes" || lowerCat == "cloth" || lowerCat == "clothing")
-                {
-                    query = query.Where(p =>
-                        p.ProductCategoryId == 2 ||
-                        p.ProductCategory.ParentCategoryId == 2 ||
-                        p.ProductCategory.Slug.StartsWith("cloth") ||
-                        p.ProductCategory.Name.ToLower().Contains("geyim") ||
-                        p.Name.ToLower().Contains("cloth") ||
-                        p.Name.ToLower().Contains("jacket") ||
-                        p.Name.ToLower().Contains("hoodie") ||
-                        p.Name.ToLower().Contains("sweater") ||
-                        p.Name.ToLower().Contains("coat") ||
-                        p.Name.ToLower().Contains("shirt"));
-                }
-                else if (lowerCat == "cats")
+                else if (lowerCat == "cats" || lowerCat == "pisik")
                 {
                     query = query.Where(p =>
                         p.ProductAnimalTypes.Any(pa => pa.AnimalType.Name.ToLower().Contains("pisik") || pa.AnimalType.Name.ToLower().Contains("cat")) ||
                         p.ProductCategory.Slug.Contains("cat") ||
                         p.Name.ToLower().Contains("cat"));
                 }
-                else if (lowerCat == "birds")
+                else if (lowerCat == "birds" || lowerCat == "qus")
                 {
                     query = query.Where(p =>
                         p.ProductAnimalTypes.Any(pa => pa.AnimalType.Name.ToLower().Contains("qus") || pa.AnimalType.Name.ToLower().Contains("bird")) ||
@@ -100,57 +77,22 @@ namespace PetShop.Controllers
                 else
                 {
                     query = query.Where(p =>
-                        p.ProductCategory.Name.ToLower() == lowerCat ||
-                        p.ProductCategory.Slug == lowerCat ||
-                        (p.ProductCategory.ParentCategory != null && (p.ProductCategory.ParentCategory.Name.ToLower() == lowerCat || p.ProductCategory.ParentCategory.Slug == lowerCat)));
+                        (p.ProductCategory != null && (p.ProductCategory.Slug.ToLower() == lowerCat || p.ProductCategory.Name.ToLower() == lowerCat)) ||
+                        (p.ProductCategory != null && p.ProductCategory.ParentCategory != null && 
+                            (p.ProductCategory.ParentCategory.Slug.ToLower() == lowerCat || p.ProductCategory.ParentCategory.Name.ToLower() == lowerCat)));
                 }
             }
             else if (categoryId.HasValue)
             {
                 query = query.Where(p =>
                     p.ProductCategoryId == categoryId.Value ||
-                    p.ProductCategory.ParentCategoryId == categoryId.Value);
+                    (p.ProductCategory != null && p.ProductCategory.ParentCategoryId == categoryId.Value));
             }
 
-            // 2. Tag Filter
-            if (!string.IsNullOrEmpty(tag))
+            // 2. Brand Filter
+            if (!string.IsNullOrEmpty(brand) && !brand.Equals("All", StringComparison.OrdinalIgnoreCase))
             {
-                var lowerTag = tag.ToLower();
-                if (lowerTag == "clothes")
-                {
-                    query = query.Where(p =>
-                        p.ProductCategory.Slug.StartsWith("cloth") ||
-                        p.ProductCategory.Name.ToLower().Contains("geyim") ||
-                        p.Name.ToLower().Contains("jacket") ||
-                        p.Name.ToLower().Contains("hoodie") ||
-                        p.Name.ToLower().Contains("cloth"));
-                }
-                else if (lowerTag == "foods")
-                {
-                    query = query.Where(p =>
-                        p.ProductCategory.Slug.StartsWith("food") ||
-                        p.ProductCategory.Name.ToLower().Contains("yem") ||
-                        p.Name.ToLower().Contains("food"));
-                }
-                else if (lowerTag == "toys")
-                {
-                    query = query.Where(p =>
-                        p.ProductCategory.Slug.Contains("toy") ||
-                        p.ProductCategory.Name.ToLower().Contains("oyuncaq") ||
-                        p.Name.ToLower().Contains("toy"));
-                }
-                else if (lowerTag == "pets")
-                {
-                    // Pets represents general pet supplies
-                    query = query.Where(p => p.ProductAnimalTypes.Any() || p.ProductCategory != null);
-                }
-            }
-
-
-            // 3. Brand Filter
-            if (!string.IsNullOrEmpty(brand))
-            {
-                var lowerBrand = brand.ToLower();
+                var lowerBrand = brand.Trim().ToLower();
                 query = query.Where(p => p.Brand != null && p.Brand.Name.ToLower() == lowerBrand);
             }
             else if (brandId.HasValue)
@@ -158,7 +100,7 @@ namespace PetShop.Controllers
                 query = query.Where(p => p.BrandId == brandId.Value);
             }
 
-            // 4. Price Filter
+            // 3. Price Filter
             if (minPrice.HasValue)
             {
                 query = query.Where(p => (p.DiscountPrice ?? p.Price) >= minPrice.Value);
@@ -169,7 +111,7 @@ namespace PetShop.Controllers
                 query = query.Where(p => (p.DiscountPrice ?? p.Price) <= maxPrice.Value);
             }
 
-            // 5. Sorting
+            // 4. Sorting
             query = sort switch
             {
                 "name_asc" => query.OrderBy(p => p.Name),
@@ -200,23 +142,26 @@ namespace PetShop.Controllers
             var (cachedProducts, cachedTotalCount) = cachedResult;
             var finalTotalPages = Math.Max(1, (int)Math.Ceiling(cachedTotalCount / (double)PageSize));
 
-            // Kateqoriya və Brend siyahılarını 15 dəqiqəlik keşləyirik (Sidebar filtrləri üçün)
-            var categories = await _cache.GetOrCreateAsync("Shop_Categories", async entry =>
+            // Kateqoriya və Brend siyahılarını keşləyirik (Sidebar filtrləri üçün)
+            var categories = await _cache.GetOrCreateAsync("Shop_Categories_Hierarchy", async entry =>
             {
                 entry.SlidingExpiration = TimeSpan.FromMinutes(15);
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
                 return await _context.ProductCategories
                     .AsNoTracking()
-                    .Where(c => c.ParentCategoryId == null)
+                    .Include(c => c.SubCategories)
+                    .OrderBy(c => c.Id)
                     .ToListAsync();
             }) ?? new List<ProductCategory>();
 
-            var brands = await _cache.GetOrCreateAsync("Shop_Brands", async entry =>
+            var brands = await _cache.GetOrCreateAsync("Shop_Real_Brands", async entry =>
             {
                 entry.SlidingExpiration = TimeSpan.FromMinutes(15);
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
                 return await _context.Brands
                     .AsNoTracking()
+                    .Where(b => b.Name != "Denim" && b.Name != "Puma" && b.Name != "Klaws" && b.Name != "Bio" && b.Name != "Arr")
+                    .OrderBy(b => b.Name)
                     .ToListAsync();
             }) ?? new List<Brand>();
 

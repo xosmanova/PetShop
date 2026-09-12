@@ -851,3 +851,79 @@ button.btn-cart:hover h5 {
   left: auto !important;
   transform: none !important;
 }
+
+/* ==========================================================================
+   Shop Sidebar & Filters Styling (High Contrast & Active State)
+   ========================================================================== */
+.sidebar .widget-title {
+  color: #212529 !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid #ede8e1;
+}
+
+.sidebar .sidebar-list {
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.sidebar .sidebar-filter-link {
+  color: #2b2b2b !important;
+  font-weight: 500 !important;
+  font-size: 0.95rem;
+  padding: 6px 12px !important;
+  border-radius: 6px;
+  display: block;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.sidebar .sidebar-filter-link:hover {
+  color: #111111 !important;
+  background-color: #f3efe9;
+  padding-left: 16px !important;
+}
+
+.sidebar .sidebar-filter-link.active-filter {
+  color: #b36e15 !important;
+  font-weight: 700 !important;
+  background-color: #fdf5ea !important;
+  border-left: 4px solid #DEAD6F !important;
+  border-radius: 0 6px 6px 0;
+  padding-left: 14px !important;
+}
+
+.sidebar .sub-categories .sidebar-filter-link {
+  font-size: 0.9rem;
+  color: #4a4a4a !important;
+  padding: 4px 10px !important;
+}
+
+.sidebar .sub-categories .sidebar-filter-link:hover {
+  color: #111111 !important;
+  background-color: #f3efe9;
+  padding-left: 14px !important;
+}
+
+.sidebar .sub-categories .sidebar-filter-link.active-filter {
+  color: #b36e15 !important;
+  font-weight: 700 !important;
+  background-color: #fdf5ea !important;
+  border-left: 3px solid #DEAD6F !important;
+  padding-left: 12px !important;
+}
+
+.active-filters-widget .badge {
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.active-filters-widget .badge:hover {
+  background-color: #dc3545 !important;
+  color: #fff !important;
+}

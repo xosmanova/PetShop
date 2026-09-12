@@ -97,6 +97,14 @@ namespace PetShop.DataContext
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<BasketItem>()
+                .Property(bi => bi.UnitPrice)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.UnitPrice)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<BasketItem>()
                 .HasOne(bi => bi.Product)
                 .WithMany(p => p.BasketItems)
                 .HasForeignKey(bi => bi.ProductId)
@@ -236,10 +244,7 @@ namespace PetShop.DataContext
             modelBuilder.Entity<Brand>().HasData(
                 new Brand { Id = 1, Name = "Royal Canin" },
                 new Brand { Id = 2, Name = "Whiskas" },
-                new Brand { Id = 3, Name = "Pedigree" },
-                new Brand { Id = 4, Name = "Denim" },
-                new Brand { Id = 5, Name = "Puma" },
-                new Brand { Id = 6, Name = "Klaws" }
+                new Brand { Id = 3, Name = "Pedigree" }
             );
 
             // 4) Product
@@ -261,10 +266,10 @@ namespace PetShop.DataContext
                 {
                     Id = 2,
                     Name = "Whiskas Cat Food 1.5kg",
-                    Description = "Yetişkin pişiklər üçün balıqlı yem",
-                    Price = 18.50m,
+                    Description = "Böyük yaşlı pişiklər üçün quru yem",
+                    Price = 22.50m,
                     StockQuantity = 150,
-                    Sku = "WHI-CAT-1.5KG",
+                    Sku = "WH-CAT-1.5KG",
                     IsActive = true,
                     CreatedAt = new DateTime(2025, 1, 1),
                     ProductCategoryId = 4,
@@ -274,10 +279,10 @@ namespace PetShop.DataContext
                 {
                     Id = 3,
                     Name = "Pedigree Puppy Food 2kg",
-                    Description = "Kiçik cinslər üçün balaca it yemi",
-                    Price = 22.00m,
+                    Description = "Küçüklər üçün qidalı yem",
+                    Price = 18.00m,
                     StockQuantity = 80,
-                    Sku = "PED-PUP-2KG",
+                    Sku = "PD-PUP-2KG",
                     IsActive = true,
                     CreatedAt = new DateTime(2025, 1, 1),
                     ProductCategoryId = 3,
@@ -294,7 +299,7 @@ namespace PetShop.DataContext
                     IsActive = true,
                     CreatedAt = new DateTime(2025, 1, 1),
                     ProductCategoryId = 6,
-                    BrandId = 4
+                    BrandId = 1
                 }
             );
 

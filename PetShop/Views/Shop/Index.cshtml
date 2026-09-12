@@ -29,8 +29,8 @@
                         <form method="get" asp-controller="Shop" asp-action="Index" id="sortForm">
                             <input type="hidden" name="category" value="@Model.SelectedCategory" />
                             <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" />
-                            <input type="hidden" name="tag" value="@Model.SelectedTag" />
                             <input type="hidden" name="brand" value="@Model.SelectedBrand" />
+                            <input type="hidden" name="brandId" value="@Model.SelectedBrandId" />
                             <input type="hidden" name="minPrice" value="@Model.MinPrice" />
                             <input type="hidden" name="maxPrice" value="@Model.MaxPrice" />
                             <select name="sort" class="filter-categories border-0 m-0" onchange="this.form.submit()">
@@ -106,8 +106,8 @@
                                    asp-route-page="@(Model.CurrentPage - 1)"
                                    asp-route-category="@Model.SelectedCategory"
                                    asp-route-categoryId="@Model.SelectedCategoryId"
-                                   asp-route-tag="@Model.SelectedTag"
                                    asp-route-brand="@Model.SelectedBrand"
+                                   asp-route-brandId="@Model.SelectedBrandId"
                                    asp-route-minPrice="@Model.MinPrice"
                                    asp-route-maxPrice="@Model.MaxPrice"
                                    asp-route-sort="@Model.Sort"
@@ -129,8 +129,8 @@
                                        asp-route-page="@i"
                                        asp-route-category="@Model.SelectedCategory"
                                        asp-route-categoryId="@Model.SelectedCategoryId"
-                                       asp-route-tag="@Model.SelectedTag"
                                        asp-route-brand="@Model.SelectedBrand"
+                                       asp-route-brandId="@Model.SelectedBrandId"
                                        asp-route-minPrice="@Model.MinPrice"
                                        asp-route-maxPrice="@Model.MaxPrice"
                                        asp-route-sort="@Model.Sort">@i</a>
@@ -143,8 +143,8 @@
                                    asp-route-page="@(Model.CurrentPage + 1)"
                                    asp-route-category="@Model.SelectedCategory"
                                    asp-route-categoryId="@Model.SelectedCategoryId"
-                                   asp-route-tag="@Model.SelectedTag"
                                    asp-route-brand="@Model.SelectedBrand"
+                                   asp-route-brandId="@Model.SelectedBrandId"
                                    asp-route-minPrice="@Model.MinPrice"
                                    asp-route-maxPrice="@Model.MaxPrice"
                                    asp-route-sort="@Model.Sort"
@@ -176,81 +176,172 @@
                         </div>
                     </div>
 
-                    <!-- Categories Widget -->
-                    <div class="widget-product-categories pt-5">
-                        <h4 class="widget-title">Categories</h4>
-                        <ul class="product-categories sidebar-list list-unstyled">
-                            <li class="cat-item">
-                                <a asp-controller="Shop" asp-action="Index"
-                                   class="nav-link @(string.IsNullOrEmpty(Model.SelectedCategory) && !Model.SelectedCategoryId.HasValue ? "fw-bold text-primary" : "")">All</a>
-                            </li>
-                            <li class="cat-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-category="Dogs"
-                                   class="nav-link @(Model.SelectedCategory == "Dogs" ? "fw-bold text-primary" : "")">Dogs</a>
-                            </li>
-                            <li class="cat-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-category="Food"
-                                   class="nav-link @(Model.SelectedCategory?.Equals("Food", StringComparison.OrdinalIgnoreCase) == true || Model.SelectedCategory?.Equals("Yem", StringComparison.OrdinalIgnoreCase) == true ? "fw-bold text-primary" : "")">Food</a>
-                            </li>
-                            <li class="cat-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-category="Cats"
-                                   class="nav-link @(Model.SelectedCategory?.Equals("Cats", StringComparison.OrdinalIgnoreCase) == true ? "fw-bold text-primary" : "")">Cats</a>
-                            </li>
-                            <li class="cat-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-category="Birds"
-                                   class="nav-link @(Model.SelectedCategory?.Equals("Birds", StringComparison.OrdinalIgnoreCase) == true ? "fw-bold text-primary" : "")">Birds</a>
-                            </li>
-                            <li class="cat-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-category="Geyim"
-                                   class="nav-link @(Model.SelectedCategory?.Equals("Geyim", StringComparison.OrdinalIgnoreCase) == true || Model.SelectedCategory?.Equals("Clothes", StringComparison.OrdinalIgnoreCase) == true || Model.SelectedCategory?.Equals("Clothing", StringComparison.OrdinalIgnoreCase) == true ? "fw-bold text-primary" : "")">Clothing</a>
-                            </li>
-                        </ul>
-                    </div>
+                    @if (!string.IsNullOrEmpty(Model.SelectedCategory) || Model.SelectedCategoryId.HasValue || !string.IsNullOrEmpty(Model.SelectedBrand) || Model.SelectedBrandId.HasValue || Model.MinPrice.HasValue || Model.MaxPrice.HasValue)
+                    {
+                        <div class="active-filters-widget p-3 mb-4 rounded-3" style="background-color: #fcf8f2; border: 1px solid #e8d7be;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold text-dark" style="font-size: 0.95rem;">Aktiv Filtrlər:</span>
+                                <a asp-controller="Shop" asp-action="Index" asp-route-sort="@Model.Sort" class="text-danger small text-decoration-none fw-semibold">Sıfırla ✕</a>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                @if (!string.IsNullOrEmpty(Model.SelectedCategory) || Model.SelectedCategoryId.HasValue)
+                                {
+                                    var catName = Model.Categories.FirstOrDefault(c => c.Slug == Model.SelectedCategory || c.Id == Model.SelectedCategoryId)?.Name 
+                                        ?? (Model.SelectedCategory?.ToLower() switch { "food" => "Yem", "cloth" => "Geyim", "food-dog" => "İt Yemi", "food-cat" => "Pişik Yemi", "food-bird" => "Quş Yemi", "cloth-dog" => "İt Geyimi", "pisik-geyimi" => "Pişik Geyimi", "dogs" => "İt", "cats" => "Pişik", "birds" => "Quş", _ => Model.SelectedCategory });
+                                    <a asp-controller="Shop" asp-action="Index" 
+                                       asp-route-brand="@Model.SelectedBrand" 
+                                       asp-route-brandId="@Model.SelectedBrandId"
+                                       asp-route-minPrice="@Model.MinPrice" 
+                                       asp-route-maxPrice="@Model.MaxPrice" 
+                                       asp-route-sort="@Model.Sort" 
+                                       class="badge bg-dark text-white text-decoration-none py-2 px-3 rounded-pill d-inline-flex align-items-center gap-1"
+                                       title="Kateqoriya filtrini sil">
+                                        <span>Kateqoriya: @catName</span>
+                                        <iconify-icon icon="ic:round-close" class="ms-1 fs-6"></iconify-icon>
+                                    </a>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.SelectedBrand) || Model.SelectedBrandId.HasValue)
+                                {
+                                    var brandName = Model.SelectedBrand ?? Model.Brands.FirstOrDefault(b => b.Id == Model.SelectedBrandId)?.Name;
+                                    <a asp-controller="Shop" asp-action="Index" 
+                                       asp-route-category="@Model.SelectedCategory" 
+                                       asp-route-categoryId="@Model.SelectedCategoryId"
+                                       asp-route-minPrice="@Model.MinPrice" 
+                                       asp-route-maxPrice="@Model.MaxPrice" 
+                                       asp-route-sort="@Model.Sort" 
+                                       class="badge bg-dark text-white text-decoration-none py-2 px-3 rounded-pill d-inline-flex align-items-center gap-1"
+                                       title="Brend filtrini sil">
+                                        <span>Brend: @brandName</span>
+                                        <iconify-icon icon="ic:round-close" class="ms-1 fs-6"></iconify-icon>
+                                    </a>
+                                }
+                                @if (Model.MinPrice.HasValue || Model.MaxPrice.HasValue)
+                                {
+                                    string priceLabel;
+                                    if (!Model.MinPrice.HasValue && Model.MaxPrice.HasValue)
+                                    {
+                                        priceLabel = $"< {Model.MaxPrice} ₼";
+                                    }
+                                    else if (Model.MinPrice.HasValue && !Model.MaxPrice.HasValue)
+                                    {
+                                        priceLabel = $">= {Model.MinPrice} ₼";
+                                    }
+                                    else
+                                    {
+                                        priceLabel = $"{Model.MinPrice} - {Model.MaxPrice} ₼";
+                                    }
+                                    <a asp-controller="Shop" asp-action="Index" 
+                                       asp-route-category="@Model.SelectedCategory" 
+                                       asp-route-categoryId="@Model.SelectedCategoryId"
+                                       asp-route-brand="@Model.SelectedBrand" 
+                                       asp-route-brandId="@Model.SelectedBrandId"
+                                       asp-route-sort="@Model.Sort" 
+                                       class="badge bg-dark text-white text-decoration-none py-2 px-3 rounded-pill d-inline-flex align-items-center gap-1"
+                                       title="Qiymət filtrini sil">
+                                        <span>Qiymət: @priceLabel</span>
+                                        <iconify-icon icon="ic:round-close" class="ms-1 fs-6"></iconify-icon>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
 
-                    <!-- Tags Widget -->
-                    <div class="widget-product-tags pt-4">
-                        <h4 class="widget-title">Tags</h4>
-                        <ul class="product-tags sidebar-list list-unstyled">
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-tag="Pets"
-                                   class="nav-link @(Model.SelectedTag == "Pets" ? "fw-bold text-primary" : "")">Pets</a>
+                    <!-- Categories Widget -->
+                    <div class="widget-product-categories pt-3">
+                        <h4 class="widget-title">Categories</h4>
+                        <ul class="product-categories sidebar-list list-unstyled mb-0">
+                            @{
+                                var isAllCatActive = string.IsNullOrEmpty(Model.SelectedCategory) && !Model.SelectedCategoryId.HasValue;
+                            }
+                            <li class="cat-item mb-1">
+                                <a asp-controller="Shop" asp-action="Index"
+                                   asp-route-category=""
+                                   asp-route-categoryId=""
+                                   asp-route-brand="@Model.SelectedBrand"
+                                   asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-minPrice="@Model.MinPrice"
+                                   asp-route-maxPrice="@Model.MaxPrice"
+                                   asp-route-sort="@Model.Sort"
+                                   class="nav-link sidebar-filter-link @(isAllCatActive ? "active-filter" : "")">All</a>
                             </li>
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-tag="Clothes"
-                                   class="nav-link @(Model.SelectedTag == "Clothes" ? "fw-bold text-primary" : "")">Clothes</a>
-                            </li>
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-tag="Foods"
-                                   class="nav-link @(Model.SelectedTag == "Foods" ? "fw-bold text-primary" : "")">Foods</a>
-                            </li>
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-tag="Toys"
-                                   class="nav-link @(Model.SelectedTag == "Toys" ? "fw-bold text-primary" : "")">Toys</a>
-                            </li>
+                            @foreach (var parentCat in Model.Categories.Where(c => c.ParentCategoryId == null))
+                            {
+                                var isParentActive = (!string.IsNullOrEmpty(Model.SelectedCategory) && 
+                                    (Model.SelectedCategory.Equals(parentCat.Slug, StringComparison.OrdinalIgnoreCase) || 
+                                     Model.SelectedCategory.Equals(parentCat.Name, StringComparison.OrdinalIgnoreCase))) ||
+                                    (Model.SelectedCategoryId.HasValue && Model.SelectedCategoryId.Value == parentCat.Id);
+
+                                <li class="cat-item mb-1">
+                                    <a asp-controller="Shop" asp-action="Index"
+                                       asp-route-category="@parentCat.Slug"
+                                       asp-route-brand="@Model.SelectedBrand"
+                                       asp-route-brandId="@Model.SelectedBrandId"
+                                       asp-route-minPrice="@Model.MinPrice"
+                                       asp-route-maxPrice="@Model.MaxPrice"
+                                       asp-route-sort="@Model.Sort"
+                                       class="nav-link sidebar-filter-link @(isParentActive ? "active-filter" : "")">@parentCat.Name</a>
+
+                                    @if (parentCat.SubCategories != null && parentCat.SubCategories.Any())
+                                    {
+                                        <ul class="sub-categories list-unstyled ms-3 mt-1 ps-2 border-start border-2 border-secondary-subtle">
+                                            @foreach (var subCat in parentCat.SubCategories)
+                                            {
+                                                var isSubActive = (!string.IsNullOrEmpty(Model.SelectedCategory) && 
+                                                    (Model.SelectedCategory.Equals(subCat.Slug, StringComparison.OrdinalIgnoreCase) || 
+                                                     Model.SelectedCategory.Equals(subCat.Name, StringComparison.OrdinalIgnoreCase))) ||
+                                                    (Model.SelectedCategoryId.HasValue && Model.SelectedCategoryId.Value == subCat.Id);
+
+                                                <li class="cat-item mb-1">
+                                                    <a asp-controller="Shop" asp-action="Index"
+                                                       asp-route-category="@subCat.Slug"
+                                                       asp-route-brand="@Model.SelectedBrand"
+                                                       asp-route-brandId="@Model.SelectedBrandId"
+                                                       asp-route-minPrice="@Model.MinPrice"
+                                                       asp-route-maxPrice="@Model.MaxPrice"
+                                                       asp-route-sort="@Model.Sort"
+                                                       class="nav-link sidebar-filter-link @(isSubActive ? "active-filter" : "")">@subCat.Name</a>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </li>
+                            }
                         </ul>
                     </div>
 
                     <!-- Brands Widget -->
                     <div class="widget-product-brands pt-4">
                         <h4 class="widget-title">Brands</h4>
-                        <ul class="product-tags sidebar-list list-unstyled">
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-brand="Denim"
-                                   class="nav-link @(Model.SelectedBrand == "Denim" ? "fw-bold text-primary" : "")">Denim</a>
+                        <ul class="product-brands sidebar-list list-unstyled mb-0">
+                            @{
+                                var isAllBrandsActive = string.IsNullOrEmpty(Model.SelectedBrand) && !Model.SelectedBrandId.HasValue;
+                            }
+                            <li class="brand-item mb-1">
+                                <a asp-controller="Shop" asp-action="Index"
+                                   asp-route-category="@Model.SelectedCategory"
+                                   asp-route-categoryId="@Model.SelectedCategoryId"
+                                   asp-route-brand=""
+                                   asp-route-brandId=""
+                                   asp-route-minPrice="@Model.MinPrice"
+                                   asp-route-maxPrice="@Model.MaxPrice"
+                                   asp-route-sort="@Model.Sort"
+                                   class="nav-link sidebar-filter-link @(isAllBrandsActive ? "active-filter" : "")">All Brands</a>
                             </li>
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-brand="Puma"
-                                   class="nav-link @(Model.SelectedBrand == "Puma" ? "fw-bold text-primary" : "")">Puma</a>
-                            </li>
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-brand="Klaws"
-                                   class="nav-link @(Model.SelectedBrand == "Klaws" ? "fw-bold text-primary" : "")">Klaws</a>
-                            </li>
-                            @foreach (var br in Model.Brands.Where(b => b.Name != "Denim" && b.Name != "Puma" && b.Name != "Klaws"))
+                            @foreach (var br in Model.Brands)
                             {
-                                <li class="tags-item">
-                                    <a asp-controller="Shop" asp-action="Index" asp-route-brand="@br.Name"
-                                       class="nav-link @(Model.SelectedBrand == br.Name ? "fw-bold text-primary" : "")">@br.Name</a>
+                                var isBrActive = (!string.IsNullOrEmpty(Model.SelectedBrand) && 
+                                    Model.SelectedBrand.Equals(br.Name, StringComparison.OrdinalIgnoreCase)) ||
+                                    (Model.SelectedBrandId.HasValue && Model.SelectedBrandId.Value == br.Id);
+
+                                <li class="brand-item mb-1">
+                                    <a asp-controller="Shop" asp-action="Index"
+                                       asp-route-category="@Model.SelectedCategory"
+                                       asp-route-categoryId="@Model.SelectedCategoryId"
+                                       asp-route-brand="@br.Name"
+                                       asp-route-minPrice="@Model.MinPrice"
+                                       asp-route-maxPrice="@Model.MaxPrice"
+                                       asp-route-sort="@Model.Sort"
+                                       class="nav-link sidebar-filter-link @(isBrActive ? "active-filter" : "")">@br.Name</a>
                                 </li>
                             }
                         </ul>
@@ -259,21 +350,92 @@
                     <!-- Filter By Price Widget -->
                     <div class="widget-price-filter pt-4">
                         <h4 class="widget-title">Filter By Price</h4>
-                        <ul class="product-tags sidebar-list list-unstyled">
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-category="@Model.SelectedCategory" asp-route-tag="@Model.SelectedTag" asp-route-brand="@Model.SelectedBrand" asp-route-maxPrice="10" class="nav-link @(Model.MaxPrice == 10 && !Model.MinPrice.HasValue ? "fw-bold text-primary" : "")">Less than 10 ₼</a>
+                        <ul class="price-filter sidebar-list list-unstyled mb-0">
+                            @{
+                                var isAllPricesActive = !Model.MinPrice.HasValue && !Model.MaxPrice.HasValue;
+                                var isUnder10Active = !Model.MinPrice.HasValue && Model.MaxPrice == 10;
+                                var is10To20Active = Model.MinPrice == 10 && Model.MaxPrice == 20;
+                                var is20To30Active = Model.MinPrice == 20 && Model.MaxPrice == 30;
+                                var is30To40Active = Model.MinPrice == 30 && Model.MaxPrice == 40;
+                                var is40To50Active = Model.MinPrice == 40 && Model.MaxPrice == 50;
+                                var isAbove50Active = Model.MinPrice == 50 && !Model.MaxPrice.HasValue;
+                            }
+                            <li class="price-item mb-1">
+                                <a asp-controller="Shop" asp-action="Index"
+                                   asp-route-category="@Model.SelectedCategory"
+                                   asp-route-categoryId="@Model.SelectedCategoryId"
+                                   asp-route-brand="@Model.SelectedBrand"
+                                   asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-minPrice=""
+                                   asp-route-maxPrice=""
+                                   asp-route-sort="@Model.Sort"
+                                   class="nav-link sidebar-filter-link @(isAllPricesActive ? "active-filter" : "")">All Prices</a>
                             </li>
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-category="@Model.SelectedCategory" asp-route-tag="@Model.SelectedTag" asp-route-brand="@Model.SelectedBrand" asp-route-minPrice="10" asp-route-maxPrice="20" class="nav-link @(Model.MinPrice == 10 && Model.MaxPrice == 20 ? "fw-bold text-primary" : "")">10 - 20 ₼</a>
+                            <li class="price-item mb-1">
+                                <a asp-controller="Shop" asp-action="Index"
+                                   asp-route-category="@Model.SelectedCategory"
+                                   asp-route-categoryId="@Model.SelectedCategoryId"
+                                   asp-route-brand="@Model.SelectedBrand"
+                                   asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-minPrice=""
+                                   asp-route-maxPrice="10"
+                                   asp-route-sort="@Model.Sort"
+                                   class="nav-link sidebar-filter-link @(isUnder10Active ? "active-filter" : "")">Less than 10 ₼</a>
                             </li>
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-category="@Model.SelectedCategory" asp-route-tag="@Model.SelectedTag" asp-route-brand="@Model.SelectedBrand" asp-route-minPrice="20" asp-route-maxPrice="30" class="nav-link @(Model.MinPrice == 20 && Model.MaxPrice == 30 ? "fw-bold text-primary" : "")">20 - 30 ₼</a>
+                            <li class="price-item mb-1">
+                                <a asp-controller="Shop" asp-action="Index"
+                                   asp-route-category="@Model.SelectedCategory"
+                                   asp-route-categoryId="@Model.SelectedCategoryId"
+                                   asp-route-brand="@Model.SelectedBrand"
+                                   asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-minPrice="10"
+                                   asp-route-maxPrice="20"
+                                   asp-route-sort="@Model.Sort"
+                                   class="nav-link sidebar-filter-link @(is10To20Active ? "active-filter" : "")">10 - 20 ₼</a>
                             </li>
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-category="@Model.SelectedCategory" asp-route-tag="@Model.SelectedTag" asp-route-brand="@Model.SelectedBrand" asp-route-minPrice="30" asp-route-maxPrice="40" class="nav-link @(Model.MinPrice == 30 && Model.MaxPrice == 40 ? "fw-bold text-primary" : "")">30 - 40 ₼</a>
+                            <li class="price-item mb-1">
+                                <a asp-controller="Shop" asp-action="Index"
+                                   asp-route-category="@Model.SelectedCategory"
+                                   asp-route-categoryId="@Model.SelectedCategoryId"
+                                   asp-route-brand="@Model.SelectedBrand"
+                                   asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-minPrice="20"
+                                   asp-route-maxPrice="30"
+                                   asp-route-sort="@Model.Sort"
+                                   class="nav-link sidebar-filter-link @(is20To30Active ? "active-filter" : "")">20 - 30 ₼</a>
                             </li>
-                            <li class="tags-item">
-                                <a asp-controller="Shop" asp-action="Index" asp-route-category="@Model.SelectedCategory" asp-route-tag="@Model.SelectedTag" asp-route-brand="@Model.SelectedBrand" asp-route-minPrice="40" asp-route-maxPrice="50" class="nav-link @(Model.MinPrice == 40 && Model.MaxPrice == 50 ? "fw-bold text-primary" : "")">40 - 50 ₼</a>
+                            <li class="price-item mb-1">
+                                <a asp-controller="Shop" asp-action="Index"
+                                   asp-route-category="@Model.SelectedCategory"
+                                   asp-route-categoryId="@Model.SelectedCategoryId"
+                                   asp-route-brand="@Model.SelectedBrand"
+                                   asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-minPrice="30"
+                                   asp-route-maxPrice="40"
+                                   asp-route-sort="@Model.Sort"
+                                   class="nav-link sidebar-filter-link @(is30To40Active ? "active-filter" : "")">30 - 40 ₼</a>
+                            </li>
+                            <li class="price-item mb-1">
+                                <a asp-controller="Shop" asp-action="Index"
+                                   asp-route-category="@Model.SelectedCategory"
+                                   asp-route-categoryId="@Model.SelectedCategoryId"
+                                   asp-route-brand="@Model.SelectedBrand"
+                                   asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-minPrice="40"
+                                   asp-route-maxPrice="50"
+                                   asp-route-sort="@Model.Sort"
+                                   class="nav-link sidebar-filter-link @(is40To50Active ? "active-filter" : "")">40 - 50 ₼</a>
+                            </li>
+                            <li class="price-item mb-1">
+                                <a asp-controller="Shop" asp-action="Index"
+                                   asp-route-category="@Model.SelectedCategory"
+                                   asp-route-categoryId="@Model.SelectedCategoryId"
+                                   asp-route-brand="@Model.SelectedBrand"
+                                   asp-route-brandId="@Model.SelectedBrandId"
+                                   asp-route-minPrice="50"
+                                   asp-route-maxPrice=""
+                                   asp-route-sort="@Model.Sort"
+                                   class="nav-link sidebar-filter-link @(isAbove50Active ? "active-filter" : "")">50 ₼ and more</a>
                             </li>
                         </ul>
                     </div>
