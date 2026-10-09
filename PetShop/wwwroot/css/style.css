@@ -113,6 +113,10 @@ CSS STRUCTURE:
   --light-grey-color: #fafafa;
   --primary-color: #6995B1;
   --light-primary-color: #eef1f3;
+  --banner-bg: #E8F5EE;
+  --banner-bg-soft: #F0F8F3;
+  --nature-green: #2D6A4F;
+  --nature-green-light: #e4f5ea;
 }
 
 /* Fonts */
@@ -415,6 +419,14 @@ a.categories-item:hover iconify-icon.category-icon {
 
 
 /* banner style */
+#banner,
+#banner-2,
+.banner-section,
+.promo-widget {
+  background-color: var(--banner-bg, #E8F5EE) !important;
+  background: var(--banner-bg, #E8F5EE) !important;
+}
+
 .swiper-pagination-bullet {
   border: 1px solid var(--bs-body-color);
   background-color: transparent;
@@ -883,15 +895,15 @@ button.btn-cart:hover h5 {
 
 .sidebar .sidebar-filter-link:hover {
   color: #111111 !important;
-  background-color: #f3efe9;
+  background-color: #eaf4ed;
   padding-left: 16px !important;
 }
 
 .sidebar .sidebar-filter-link.active-filter {
-  color: #b36e15 !important;
+  color: #1b633e !important;
   font-weight: 700 !important;
-  background-color: #fdf5ea !important;
-  border-left: 4px solid #DEAD6F !important;
+  background-color: #e4f5ea !important;
+  border-left: 4px solid #2D6A4F !important;
   border-radius: 0 6px 6px 0;
   padding-left: 14px !important;
 }
@@ -904,15 +916,15 @@ button.btn-cart:hover h5 {
 
 .sidebar .sub-categories .sidebar-filter-link:hover {
   color: #111111 !important;
-  background-color: #f3efe9;
+  background-color: #eaf4ed;
   padding-left: 14px !important;
 }
 
 .sidebar .sub-categories .sidebar-filter-link.active-filter {
-  color: #b36e15 !important;
+  color: #1b633e !important;
   font-weight: 700 !important;
-  background-color: #fdf5ea !important;
-  border-left: 3px solid #DEAD6F !important;
+  background-color: #e4f5ea !important;
+  border-left: 3px solid #2D6A4F !important;
   padding-left: 12px !important;
 }
 
